@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
 $db   = 'qickmed'; // Đổi tên DB nếu khác
-$user = 'root';   // Đổi user nếu khác
-$pass = '';
+$user = 'root';
+$pass = ''; // XAMPP mặc định không có password
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
