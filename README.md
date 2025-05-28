@@ -148,4 +148,4 @@ This project is open source. Feel free to modify and distribute.
 
 ---
 
-**Liên hệ hỗ trợ**: Tạo issue trên GitHub hoặc liên hệ developer.
+**Liên hệ hỗ trợ**: Tạo issue trên GitHub hoặc liên hệ developer qua email ( dvtdang1101@gmail.com ).
