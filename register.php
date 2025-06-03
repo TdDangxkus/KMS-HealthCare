@@ -14,7 +14,6 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name = trim($_POST['full_name']);
     $gender = $_POST['gender'];
-    $date_of_birth = $_POST['date_of_birth'];
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
@@ -23,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $terms = isset($_POST['terms']);
     
     // Validation
-    if (!$full_name || !$gender || !$date_of_birth || !$username || !$email || !$phone || !$password || !$confirm_password) {
+    if (!$full_name || !$gender || !$username || !$email || !$phone || !$password || !$confirm_password) {
         $err = 'Vui lòng điền đầy đủ thông tin!';
     } elseif ($password !== $confirm_password) {
         $err = 'Mật khẩu xác nhận không khớp!';
@@ -34,68 +33,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$terms) {
         $err = 'Vui lòng đồng ý với điều khoản sử dụng!';
     } else {
-        // Kiểm tra tuổi (ít nhất 13 tuổi)
-        $today = new DateTime();
-        $birthDate = new DateTime($date_of_birth);
-        $age = $today->diff($birthDate)->y;
-        
-        if ($age < 13) {
-            $err = 'Bạn phải ít nhất 13 tuổi để đăng ký!';
-        } else {
-            // Kiểm tra username và email đã tồn tại chưa
-            $stmt = $conn->prepare("SELECT user_id FROM users WHERE username = ? OR email = ?");
-            if ($stmt) {
-                $stmt->bind_param('ss', $username, $email);
-                $stmt->execute();
-                $result = $stmt->get_result();
+        // Kiểm tra username và email đã tồn tại chưa
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE username = ? OR email = ?");
+        if ($stmt) {
+            $stmt->bind_param('ss', $username, $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $err = 'Tên đăng nhập hoặc email đã tồn tại!';
+            } else {
+                // Bắt đầu transaction
+                $conn->begin_transaction();
                 
-                if ($result->num_rows > 0) {
-                    $err = 'Tên đăng nhập hoặc email đã tồn tại!';
-                } else {
-                    // Bắt đầu transaction
-                    $conn->begin_transaction();
-                    
-                    try {
-                        // Hash password
-                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        
-                        // Thêm user mới (role_id = 2 cho patient)
-                        $stmt = $conn->prepare("INSERT INTO users (username, email, password, role_id, status, created_at) VALUES (?, ?, ?, 2, 'active', NOW())");
-                        if ($stmt) {
-                            $stmt->bind_param('sss', $username, $email, $hashed_password);
-                            $stmt->execute();
-                            
+                try {
+                    // Thêm user mới (role_id = 2 cho patient)
+                    $stmt = $conn->prepare("INSERT INTO users (username, email, password, role_id, status, created_at) VALUES (?, ?, ?, 2, 'active', NOW())");
+                    if ($stmt) {
+                        $stmt->bind_param('sss', $username, $email, $password);
+                        if ($stmt->execute()) {
                             $user_id = $conn->insert_id;
                             
-                            // Thêm thông tin chi tiết
-                            $stmt2 = $conn->prepare("INSERT INTO users_info (user_id, full_name, gender, date_of_birth, phone, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+                            // Thêm thông tin chi tiết (không có date_of_birth)
+                            $stmt2 = $conn->prepare("INSERT INTO users_info (user_id, full_name, gender, phone, created_at) VALUES (?, ?, ?, ?, NOW())");
                             if ($stmt2) {
-                                $stmt2->bind_param('issss', $user_id, $full_name, $gender, $date_of_birth, $phone);
-                                $stmt2->execute();
-                                
-                                $conn->commit();
-                                
-                                // Set success message
-                                $success = 'Đăng ký tài khoản thành công! Bạn sẽ được chuyển đến trang đăng nhập sau 5 giây...';
-                                
-                                // Clear form data
-                                $_POST = array();
-                                
+                                $stmt2->bind_param('isss', $user_id, $full_name, $gender, $phone);
+                                if ($stmt2->execute()) {
+                                    $conn->commit();
+                                    
+                                    // Set success message
+                                    $success = 'Đăng ký tài khoản thành công! Bạn sẽ được chuyển đến trang đăng nhập sau 5 giây...';
+                                    
+                                    // Clear form data
+                                    $_POST = array();
+                                } else {
+                                    throw new Exception('Lỗi tạo thông tin người dùng: ' . $stmt2->error);
+                                }
                             } else {
-                                throw new Exception('Lỗi tạo thông tin người dùng');
+                                throw new Exception('Lỗi chuẩn bị câu lệnh thông tin người dùng: ' . $conn->error);
                             }
                         } else {
-                            throw new Exception('Lỗi tạo tài khoản');
+                            throw new Exception('Lỗi thực thi câu lệnh tạo user: ' . $stmt->error);
                         }
-                        
-                    } catch (Exception $e) {
-                        $conn->rollback();
-                        $err = 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại! Chi tiết: ' . $e->getMessage();
+                    } else {
+                        throw new Exception('Lỗi chuẩn bị câu lệnh tạo user: ' . $conn->error);
                     }
+                    
+                } catch (Exception $e) {
+                    $conn->rollback();
+                    $err = 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại! Chi tiết: ' . $e->getMessage();
                 }
-            } else {
-                $err = 'Lỗi kết nối cơ sở dữ liệu!';
             }
+        } else {
+            $err = 'Lỗi kết nối cơ sở dữ liệu!';
         }
     }
 }
@@ -306,6 +296,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-group {
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .row.g-3 {
+            margin-bottom: 0;
+        }
+
+        .row.g-3 .form-group {
             margin-bottom: 24px;
         }
 
@@ -730,6 +746,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         * {
             transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
         }
+
+        /* Improved spacing for better visual hierarchy */
+        .register-header {
+            margin-bottom: 35px;
+        }
+
+        .btn-register {
+            margin-top: 35px;
+            margin-bottom: 25px;
+        }
+
+        .form-check {
+            margin: 32px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Enhanced visual separation between sections */
+        .form-group:nth-child(2)::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+            margin: 30px 0 10px 0;
+        }
+
+        .form-group:nth-child(5)::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+            margin: 30px 0 10px 0;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 14px 45px 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            background: #f9fafb url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") no-repeat right 12px center/16px;
+            transition: all 0.3s ease;
+            color: #1f2937;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") no-repeat right 12px center/16px;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select option {
+            padding: 10px;
+            color: #1f2937;
+        }
+
+        /* Add gender icon styling */
+        .form-group:has(select[name="gender"]) .form-label::before {
+            content: '👤';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        /* Add icons to other form labels */
+        .form-group:has(input[name="full_name"]) .form-label::before {
+            content: '📝';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group:has(input[name="username"]) .form-label::before {
+            content: '🏷️';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group:has(input[name="phone"]) .form-label::before {
+            content: '📱';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group:has(input[name="email"]) .form-label::before {
+            content: '📧';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group:has(input[name="password"]) .form-label::before {
+            content: '🔒';
+            margin-right: 8px;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -824,26 +941,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        required>
                             </div>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Giới tính</label>
-                                        <select name="gender" class="form-select" required>
-                                            <option value="">Chọn giới tính</option>
-                                            <option value="Nam" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Nam') ? 'selected' : '' ?>>Nam</option>
-                                            <option value="Nữ" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Nữ') ? 'selected' : '' ?>>Nữ</option>
-                                            <option value="Khác" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Khác') ? 'selected' : '' ?>>Khác</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Ngày sinh</label>
-                                        <input type="date" name="date_of_birth" class="form-control" 
-                                               value="<?= isset($_POST['date_of_birth']) ? htmlspecialchars($_POST['date_of_birth']) : '' ?>" 
-                                               required>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label class="form-label">Giới tính</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="">Chọn giới tính</option>
+                                    <option value="Nam" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Nam') ? 'selected' : '' ?>>Nam</option>
+                                    <option value="Nữ" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Nữ') ? 'selected' : '' ?>>Nữ</option>
+                                    <option value="Khác" <?= (isset($_POST['gender']) && $_POST['gender'] === 'Khác') ? 'selected' : '' ?>>Khác</option>
+                                </select>
                             </div>
 
                             <!-- Account Information -->
@@ -1081,24 +1186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.querySelector('input[name="username"]').addEventListener('input', function() {
             const username = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
             this.value = username;
-        });
-
-        // Date validation (must be at least 13 years old)
-        document.querySelector('input[name="date_of_birth"]').addEventListener('change', function() {
-            const today = new Date();
-            const birthDate = new Date(this.value);
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            
-            if (age < 13) {
-                this.setCustomValidity('Bạn phải ít nhất 13 tuổi để đăng ký');
-            } else {
-                this.setCustomValidity('');
-            }
         });
 
         // Auto focus first input

@@ -19,18 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$username || !$password) {
         $err = 'Vui lòng nhập đầy đủ thông tin!';
     } else {
-        // Lấy thông tin user từ database
-        $stmt = $conn->prepare("SELECT u.user_id, u.username, u.email, u.password, u.role_id, ui.full_name 
-                               FROM users u 
-                               LEFT JOIN users_info ui ON u.user_id = ui.user_id 
-                               WHERE u.username = ? OR u.email = ?");
-        $stmt->bind_param('ss', $username, $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+                $stmt = $conn->prepare("SELECT u.user_id, u.username, u.email, u.password, u.role_id, ui.full_name 
+                                    FROM users u 
+                                    LEFT JOIN users_info ui ON u.user_id = ui.user_id 
+                                    WHERE u.username = ? OR u.email = ? OR ui.phone = ?");
+                $stmt->bind_param('sss', $username, $username, $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
         
         if ($row = $result->fetch_assoc()) {
-            // Use password_verify for hashed passwords
-            if (password_verify($password, $row['password'])) {
+            // So sánh password trực tiếp (không sử dụng hash)
+            if ($password === $row['password']) {
                 // Đăng nhập thành công
                 $_SESSION['user_id'] = $row['user_id'];
                 $_SESSION['username'] = $row['username'];
@@ -606,13 +606,17 @@ if (isset($_GET['logout'])) {
                         <i class="fas fa-exclamation-triangle"></i><?= htmlspecialchars($err) ?>
                     </div>
                 <?php endif; ?>
-<!-- s -->
+
+                <div class="demo-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Thông tin đăng nhập</h6>
+                    <p>Bạn có thể đăng nhập bằng: <strong>Tên đăng nhập</strong>, <strong>Email</strong> hoặc <strong>Số điện thoại</strong></p>
+                </div>
 
                 <form method="post" class="needs-validation" novalidate>
                     <div class="form-group">
-                        <label class="form-label">Tên đăng nhập hoặc Email</label>
+                        <label class="form-label">Tên đăng nhập, Email hoặc Số điện thoại</label>
                         <input type="text" name="username" class="form-control" 
-                               placeholder="Nhập tên đăng nhập hoặc email"
+                               placeholder="Nhập tên đăng nhập, email hoặc số điện thoại"
                                value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>" 
                                required>
                     </div>

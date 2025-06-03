@@ -74,9 +74,13 @@
             </div>
           </div>
           <div class="col-lg-6">
-            <div class="section-badge animate__animated animate__fadeInDown">Về Chúng Tôi</div>
-            <h2 class="section-title animate__animated animate__fadeInUp">Chăm Sóc Sức Khỏe Tốt Nhất<br>Cho Bạn Từ Năm 2002</h2>
-            <div class="section-desc animate__animated animate__fadeInUp">Với hơn 20 năm kinh nghiệm trong lĩnh vực y tế, chúng tôi tự hào mang đến những dịch vụ chăm sóc sức khỏe chất lượng cao, cùng đội ngũ y bác sĩ giàu kinh nghiệm và trang thiết bị hiện đại.</div>
+            <div class="text-center mb-5">
+              <div class="section-badge-wrapper">
+                <span class="section-badge">Về Chúng Tôi</span>
+              </div>
+              <h2 class="section-title display-5 fw-bold mb-3">Chăm Sóc Sức Khỏe Tốt Nhất</h2>
+              <p class="section-desc">Với hơn 20 năm kinh nghiệm trong lĩnh vực y tế, chúng tôi tự hào mang đến những dịch vụ chăm sóc sức khỏe chất lượng cao.</p>
+            </div>
             <div class="row mb-4 g-3">
               <div class="col-6 col-md-4">
                 <div class="stat-box text-center text-md-start animate__animated animate__fadeInLeft">
@@ -113,11 +117,11 @@
       <div class="services-bg"></div>
       <div class="container position-relative">
         <div class="text-center mb-5">
-          <div class="section-header">
-            <div class="section-badge animate__animated animate__fadeInDown">Dịch Vụ</div>
-            <h2 class="section-title animate__animated animate__fadeInUp">Dịch Vụ Của Chúng Tôi</h2>
-            <p class="section-desc animate__animated animate__fadeInUp">Cung cấp các dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn giàu kinh nghiệm</p>
+          <div class="section-badge-wrapper">
+            <span class="section-badge">Dịch Vụ</span>
           </div>
+          <h2 class="section-title display-5 fw-bold mb-3">Dịch Vụ Của Chúng Tôi</h2>
+          <p class="section-desc">Cung cấp các dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn giàu kinh nghiệm</p>
         </div>
         <div class="row g-4">
           <div class="col-md-4">
@@ -193,11 +197,11 @@
       <div class="products-bg"></div>
       <div class="container position-relative">
         <div class="text-center mb-5">
-          <div class="section-header">
-            <div class="section-badge animate__animated animate__fadeInDown">Sản Phẩm</div>
-            <h2 class="section-title animate__animated animate__fadeInUp">Sản Phẩm Của Chúng Tôi</h2>
-            <p class="section-desc animate__animated animate__fadeInUp">Cung cấp các sản phẩm chất lượng cao, an toàn và hiệu quả cho sức khỏe của bạn</p>
+          <div class="section-badge-wrapper">
+            <span class="section-badge">Sản Phẩm</span>
           </div>
+          <h2 class="section-title display-5 fw-bold mb-3">Sản Phẩm Của Chúng Tôi</h2>
+          <p class="section-desc">Cung cấp các sản phẩm chất lượng cao, an toàn và hiệu quả cho sức khỏe của bạn</p>
         </div>
         <div class="row g-4">
           <div class="col-md-4">
@@ -273,26 +277,37 @@
       </div>
     </section>
     <!-- Health Blog Section -->
-    <section id="blog" class="py-5 bg-light">
+    <section id="blog" class="py-5">
       <div class="container">
+        <div class="blog-header text-center mb-5">
+          <div class="section-badge-wrapper">
+            <span class="section-badge">
+              <i class="fas fa-stethoscope me-2"></i>Blog Y Tế
+            </span>
+          </div>
+          <h2 class="section-title display-4 fw-bold mb-3">Góc Sức Khỏe</h2>
+          <div class="section-line mb-4"></div>
+          <p class="section-desc mx-auto">
+            Cập nhật những thông tin y tế mới nhất, kiến thức chăm sóc sức khỏe hữu ích từ đội ngũ chuyên gia
+          </p>
+        </div>
+
+        <div class="blog-categories mb-4">
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a href="#" class="blog-category-badge active">Tất cả</a>
+            <a href="#" class="blog-category-badge">Dinh dưỡng</a>
+            <a href="#" class="blog-category-badge">Phòng chữa bệnh</a>
+            <a href="#" class="blog-category-badge">Người cao tuổi</a>
+            <a href="#" class="blog-category-badge">Khỏe đẹp</a>
+            <a href="#" class="blog-category-badge">Mẹ và bé</a>
+            <a href="#" class="blog-category-badge">Giới tính</a>
+            <a href="#" class="blog-category-badge">Tin tức khuyến mại</a>
+            <a href="#" class="blog-category-badge">Tin tức sức khỏe</a>
+          </div>
+        </div>
+
         <div class="row g-4">
-          <!-- Left Column: Banner, Tags, Featured -->
           <div class="col-lg-8">
-            <div class="d-flex align-items-center mb-3">
-              <i class="fas fa-book-medical fa-lg text-primary me-2"></i>
-              <h2 class="section-title mb-0" style="font-size:2rem;">Góc sức khỏe</h2>
-              <a href="/blog" class="ms-3 text-primary" style="font-weight:500;">Xem tất cả <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <div class="mb-3">
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Dinh dưỡng</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Phòng chữa bệnh</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Người cao tuổi</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Khỏe đẹp</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Mẹ và bé</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Giới tính</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Tin tức khuyến mại</span>
-              <span class="badge bg-secondary-subtle text-dark me-2 mb-2">Tin tức sức khỏe</span>
-            </div>
             <div class="row g-3">
               <div class="col-12">
                 <div class="blog-banner position-relative rounded-4 overflow-hidden mb-3">
@@ -357,138 +372,435 @@
       </div>
     </section>
     <!-- Why Choose Us -->
-    <section id="whychoose" class="section-bg py-5">
-      <div class="container section-content">
-        <h2 class="section-title text-center mb-5">Vì Sao Chọn Chúng Tôi</h2>
-        <div class="row g-4 justify-content-center">
-          <div class="col-md-3 col-6">
-            <div class="choose-box choose-card text-center p-4 h-100">
-              <div class="choose-icon mb-3 bg-gradient-primary">
+    <section id="whychoose" class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <div class="section-badge-wrapper">
+            <span class="section-badge">
+              <i class="fas fa-check-circle me-2"></i>Lý Do
+            </span>
+          </div>
+          <h2 class="section-title display-4 fw-bold mb-3">Vì Sao Chọn Chúng Tôi</h2>
+          <div class="section-line mb-4"></div>
+          <p class="section-desc mx-auto">
+            Chúng tôi cam kết mang đến dịch vụ y tế chất lượng cao nhất cho bạn và gia đình
+          </p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-3 col-md-6">
+            <div class="why-choose-card">
+              <div class="card-icon blue">
                 <i class="fas fa-user-md"></i>
               </div>
-              <h6 class="fw-bold mb-2">Bác sĩ giỏi</h6>
-              <p class="text-muted mb-0">Đội ngũ chuyên gia đầu ngành</p>
+              <h3 class="card-title">Bác sĩ giỏi</h3>
+              <p class="card-desc">Đội ngũ chuyên gia đầu ngành với nhiều năm kinh nghiệm</p>
+              <div class="card-stats">
+                <div class="stats-number">50+</div>
+                <div class="stats-text">Bác sĩ chuyên khoa</div>
+              </div>
             </div>
           </div>
-          <div class="col-md-3 col-6">
-            <div class="choose-box choose-card text-center p-4 h-100">
-              <div class="choose-icon mb-3 bg-gradient-success">
+
+          <div class="col-lg-3 col-md-6">
+            <div class="why-choose-card">
+              <div class="card-icon green">
                 <i class="fas fa-stethoscope"></i>
               </div>
-              <h6 class="fw-bold mb-2">Thiết bị hiện đại</h6>
-              <p class="text-muted mb-0">Công nghệ tiên tiến, an toàn</p>
+              <h3 class="card-title">Thiết bị hiện đại</h3>
+              <p class="card-desc">Công nghệ tiên tiến, đảm bảo an toàn tuyệt đối</p>
+              <div class="card-stats">
+                <div class="stats-number">100%</div>
+                <div class="stats-text">Thiết bị nhập khẩu</div>
+              </div>
             </div>
           </div>
-          <div class="col-md-3 col-6">
-            <div class="choose-box choose-card text-center p-4 h-100">
-              <div class="choose-icon mb-3 bg-gradient-warning">
+
+          <div class="col-lg-3 col-md-6">
+            <div class="why-choose-card">
+              <div class="card-icon orange">
                 <i class="fas fa-calendar-check"></i>
               </div>
-              <h6 class="fw-bold mb-2">Đặt lịch dễ dàng</h6>
-              <p class="text-muted mb-0">Đặt lịch online 24/7</p>
+              <h3 class="card-title">Đặt lịch dễ dàng</h3>
+              <p class="card-desc">Đặt lịch online 24/7, tiết kiệm thời gian chờ đợi</p>
+              <div class="card-stats">
+                <div class="stats-number">24/7</div>
+                <div class="stats-text">Hỗ trợ đặt lịch</div>
+              </div>
             </div>
           </div>
-          <div class="col-md-3 col-6">
-            <div class="choose-box choose-card text-center p-4 h-100">
-              <div class="choose-icon mb-3 bg-gradient-danger">
+
+          <div class="col-lg-3 col-md-6">
+            <div class="why-choose-card">
+              <div class="card-icon pink">
                 <i class="fas fa-headset"></i>
               </div>
-              <h6 class="fw-bold mb-2">Hỗ trợ tận tâm</h6>
-              <p class="text-muted mb-0">Tư vấn miễn phí, nhiệt tình</p>
+              <h3 class="card-title">Hỗ trợ tận tâm</h3>
+              <p class="card-desc">Tư vấn miễn phí, chăm sóc khách hàng nhiệt tình</p>
+              <div class="card-stats">
+                <div class="stats-number">98%</div>
+                <div class="stats-text">Khách hàng hài lòng</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
     <!-- Book An Appointment -->
-    <section id="book" class="py-5 book-section position-relative">
-      <div class="container section-content text-center">
-        <h2 class="section-title mb-4">Đặt Lịch Khám Ngay</h2>
-        <p class="mb-4 text-muted" style="font-size:1.1rem;">Nhanh chóng, tiện lợi và hoàn toàn miễn phí. Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!</p>
-        <a href="/booking.php" class="btn btn-primary btn-lg px-5 py-3 mt-2 shadow">Đặt lịch ngay <i class="fas fa-calendar-plus ms-2"></i></a>
-        <div class="mt-4 d-flex justify-content-center align-items-center gap-2">
-          <span class="text-primary" style="font-size:1.5rem;"><i class="fas fa-phone-volume"></i></span>
-          <span class="fw-bold text-primary" style="font-size:1.2rem;">Hotline: <a href="tel:0123456789" class="fw-bold text-primary">0123 456 789</a></span>
+    <section id="book" class="py-5 position-relative overflow-hidden">
+      <div class="booking-bg"></div>
+      <div class="container position-relative">
+        <div class="booking-wrapper text-center">
+          <div class="section-badge-wrapper">
+            <span class="section-badge">
+              <i class="fas fa-calendar-alt me-2"></i>Đặt Lịch
+            </span>
+          </div>
+          
+          <h2 class="section-title display-4 fw-bold mb-4">Đặt Lịch Khám Ngay</h2>
+          
+          <p class="section-desc mx-auto mb-5">
+            Nhanh chóng, tiện lợi và hoàn toàn miễn phí. <br>
+            Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!
+          </p>
+
+          <div class="booking-button-group">
+            <a href="/booking.php" class="btn btn-primary btn-booking">
+              <span class="btn-icon">
+                <i class="fas fa-calendar-plus"></i>
+              </span>
+              <span class="btn-text">
+                <strong>Đặt Lịch Ngay</strong>
+                <small>Chỉ mất 2 phút của bạn</small>
+              </span>
+            </a>
+
+            <div class="divider">
+              <span>hoặc</span>
+            </div>
+
+            <a href="tel:0123456789" class="btn btn-outline-primary btn-hotline">
+              <span class="btn-icon">
+                <i class="fas fa-phone-alt"></i>
+              </span>
+              <span class="btn-text">
+                <strong>Gọi Hotline 24/7</strong>
+                <small>0123 456 789</small>
+              </span>
+            </a>
+          </div>
+
+          <div class="booking-note mt-4">
+            <i class="fas fa-clock text-primary me-2"></i>
+            Thời gian làm việc: <strong>7:30 - 20:00</strong> (Thứ 2 - Chủ nhật)
+          </div>
         </div>
       </div>
     </section>
     <!-- We Are Skillful Health Care -->
-    <section id="skillful" class="section-bg py-5">
-      <div class="container section-content">
-        <div class="row align-items-center g-5">
-          <div class="col-lg-6">
-            <div class="position-relative skillful-img-box rounded-4 overflow-hidden shadow-lg" style="transform: perspective(1000px) rotateY(-5deg);">
-              <img src="/assets/images/anh_ngau_nhien.jpg" alt="Skillful Health Care" class="img-fluid w-100" style="object-fit:cover;min-height:450px;filter:brightness(0.95);">
-              <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="background:linear-gradient(135deg, rgba(25,118,210,0.4) 0%, rgba(30,192,247,0.4) 100%);">
-                <div class="bg-white bg-opacity-95 rounded-circle d-flex align-items-center justify-content-center mb-4" style="width:90px;height:90px;box-shadow:0 8px 32px rgba(33,150,243,0.3);transform: rotate(-5deg);">
-                  <i class="fas fa-heartbeat text-danger" style="font-size:2.5rem;"></i>
+    <section id="skillful">
+      <div class="container">
+        <div class="skillful-grid">
+          <div class="skillful-content">
+            <div class="skillful-badge">Chuyên Môn Y Tế</div>
+            <h2 class="skillful-title">
+              Chăm Sóc Sức Khỏe
+              <span>Chuyên Nghiệp</span>
+            </h2>
+            <p class="skillful-desc">
+              Với đội ngũ y bác sĩ giàu kinh nghiệm và trang thiết bị hiện đại, chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe tốt nhất cho bạn và gia đình.
+            </p>
+            <div class="skillful-features">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-user-md"></i>
                 </div>
-                <div class="text-white fw-bold text-center" style="font-size:1.3rem;letter-spacing:2px;text-shadow: 0 2px 4px rgba(0,0,0,0.2);transform: rotate(-5deg);">Tận tâm - Chuyên nghiệp</div>
+                <div class="feature-text">
+                  Đội ngũ bác sĩ chuyên môn cao
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-hospital"></i>
+                </div>
+                <div class="feature-text">
+                  Cơ sở vật chất hiện đại
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="feature-text">
+                  Phục vụ 24/7
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <div class="feature-text">
+                  Chăm sóc tận tâm
+                </div>
               </div>
             </div>
+            <a href="#" class="skillful-cta">
+              Đặt Lịch Ngay
+              <i class="fas fa-arrow-right"></i>
+            </a>
           </div>
-          <div class="col-lg-6">
-            <h2 class="section-title mb-4" style="font-size:2.8rem;background:linear-gradient(135deg,#1976d2,#1ec0f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Chăm Sóc Sức Khỏe Tận Tâm</h2>
-            <p class="mb-5 text-muted" style="font-size:1.2rem;line-height:1.8;max-width:550px;">Qickmed tự hào sở hữu đội ngũ y bác sĩ giàu kinh nghiệm, tận tâm và luôn cập nhật các phương pháp điều trị tiên tiến nhất. Chúng tôi cam kết mang lại dịch vụ y tế chất lượng cao, an toàn và hiệu quả cho mọi khách hàng.</p>
-            <div class="row g-4">
-              <div class="col-6">
-                <div class="stat-card bg-gradient-primary text-white rounded-4 shadow-lg p-4 text-center h-100" style="transition: all 0.4s ease;transform-style:preserve-3d;">
-                  <div class="mb-3" style="transform: translateZ(20px);"><i class="fas fa-award fa-2x"></i></div>
-                  <div class="fw-bold" style="font-size:2.8rem;transform: translateZ(30px);">25+</div>
-                  <div style="font-size:1.1rem;opacity:0.9;transform: translateZ(20px);">Năm kinh nghiệm</div>
+          <div class="skillful-stats">
+            <div class="stat-card">
+              <i class="fas fa-award stat-icon"></i>
+              <div class="stat-number">25+</div>
+              <div class="stat-text">Năm Kinh Nghiệm</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-users stat-icon"></i>
+              <div class="stat-number">10K+</div>
+              <div class="stat-text">Khách Hàng Hài Lòng</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-user-md stat-icon"></i>
+              <div class="stat-number">50+</div>
+              <div class="stat-text">Bác Sĩ Chuyên Khoa</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-clinic-medical stat-icon"></i>
+              <div class="stat-number">15+</div>
+              <div class="stat-text">Chuyên Khoa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- FAQ Section -->
+    <section id="faqs" class="py-5 position-relative overflow-hidden">
+      <div class="faq-bg-pattern"></div>
+      
+      <div class="container section-content position-relative">
+        <div class="text-center mb-5">
+          <div class="section-badge-wrapper">
+            <span class="section-badge">FAQs</span>
+          </div>
+          <h2 class="section-title display-5 fw-bold mb-3">Câu Hỏi Thường Gặp</h2>
+          <p class="section-desc">Những thắc mắc phổ biến của khách hàng về dịch vụ của chúng tôi</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="faq-wrapper">
+              <!-- FAQ Item 1 -->
+              <div class="faq-item active">
+                <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq1">
+                  <div class="faq-icon">
+                    <i class="fas fa-calendar-check"></i>
+                  </div>
+                  <div class="faq-question">
+                    Làm sao để đặt lịch khám?
+                  </div>
+                  <div class="faq-toggle">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <div id="faq1" class="faq-body collapse show">
+                  <div class="faq-answer">
+                    <p>Bạn có thể đặt lịch khám bằng một trong các cách sau:</p>
+                    <div class="faq-features">
+                      <div class="faq-feature">
+                        <div class="feature-icon">
+                          <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="feature-content">
+                          <h4>Đặt lịch online</h4>
+                          <p>Truy cập website và đặt lịch trực tuyến 24/7</p>
+                        </div>
+                      </div>
+                      <div class="faq-feature">
+                        <div class="feature-icon">
+                          <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                          <h4>Gọi hotline</h4>
+                          <p>Liên hệ <a href="tel:0123456789" class="text-primary">0123 456 789</a> để được hỗ trợ</p>
+                        </div>
+                      </div>
+                      <div class="faq-feature">
+                        <div class="feature-icon">
+                          <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-content">
+                          <h4>Ứng dụng di động</h4>
+                          <p>Tải app Qickmed để đặt lịch dễ dàng</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="col-6">
-                <div class="stat-card bg-gradient-success text-white rounded-4 shadow-lg p-4 text-center h-100" style="transition: all 0.4s ease;transform-style:preserve-3d;">
-                  <div class="mb-3" style="transform: translateZ(20px);"><i class="fas fa-users fa-2x"></i></div>
-                  <div class="fw-bold" style="font-size:2.8rem;transform: translateZ(30px);">10.000+</div>
-                  <div style="font-size:1.1rem;opacity:0.9;transform: translateZ(20px);">Khách hàng hài lòng</div>
+
+              <!-- FAQ Item 2 -->
+              <div class="faq-item">
+                <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq2">
+                  <div class="faq-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div class="faq-question">
+                    Qickmed có làm việc cuối tuần không?
+                  </div>
+                  <div class="faq-toggle">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <div id="faq2" class="faq-body collapse">
+                  <div class="faq-answer">
+                    <div class="working-hours">
+                      <div class="hours-item">
+                        <div class="day">Thứ 2 - Thứ 6</div>
+                        <div class="time">
+                          <i class="far fa-clock me-2"></i>
+                          7:30 - 20:00
+                        </div>
+                      </div>
+                      <div class="hours-item">
+                        <div class="day">Thứ 7</div>
+                        <div class="time">
+                          <i class="far fa-clock me-2"></i>
+                          8:00 - 17:00
+                        </div>
+                      </div>
+                      <div class="hours-item">
+                        <div class="day">Chủ nhật</div>
+                        <div class="time">
+                          <i class="far fa-clock me-2"></i>
+                          8:00 - 12:00
+                        </div>
+                      </div>
+                    </div>
+                    <div class="emergency-note">
+                      <i class="fas fa-exclamation-circle text-warning me-2"></i>
+                      Dịch vụ cấp cứu hoạt động 24/7
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FAQ Item 3 -->
+              <div class="faq-item">
+                <div class="faq-header" data-bs-toggle="collapse" data-bs-target="#faq3">
+                  <div class="faq-icon">
+                    <i class="fas fa-credit-card"></i>
+                  </div>
+                  <div class="faq-question">
+                    Các phương thức thanh toán được chấp nhận?
+                  </div>
+                  <div class="faq-toggle">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <div id="faq3" class="faq-body collapse">
+                  <div class="faq-answer">
+                    <div class="payment-methods">
+                      <div class="payment-row">
+                        <div class="payment-method">
+                          <i class="fas fa-money-bill-wave"></i>
+                          <span>Tiền mặt</span>
+                        </div>
+                        <div class="payment-method">
+                          <i class="fas fa-credit-card"></i>
+                          <span>Thẻ tín dụng</span>
+                        </div>
+                        <div class="payment-method">
+                          <i class="fas fa-mobile-alt"></i>
+                          <span>Ví điện tử</span>
+                        </div>
+                        <div class="payment-method">
+                          <i class="fas fa-university"></i>
+                          <span>Chuyển khoản</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="payment-note">
+                      <i class="fas fa-shield-alt text-success me-2"></i>
+                      Thanh toán an toàn & bảo mật
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Chat Section -->
+        <div class="ai-chat-section text-center mt-5">
+          <div class="chat-bubble">
+            <i class="fas fa-robot"></i>
+            <span>Bạn cần hỗ trợ thêm?</span>
+          </div>
+          <button class="btn btn-primary btn-lg rounded-pill shadow-lg px-5 py-3 ai-chat-btn" id="open-ai-chat">
+            <i class="fas fa-comments me-2"></i>
+            Tư vấn với AI
+          </button>
+        </div>
+
+        <!-- Service Commitments -->
+        <div class="service-commitments mt-5">
+          <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+              <div class="commitment-item">
+                <div class="commitment-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="commitment-content">
+                  <h4>Thuốc chính hãng</h4>
+                  <p>đã đăng và chuyên sâu</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="commitment-item">
+                <div class="commitment-icon">
+                  <i class="fas fa-box-open"></i>
+                </div>
+                <div class="commitment-content">
+                  <h4>Đổi trả trong 30 ngày</h4>
+                  <p>kể từ ngày mua hàng</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="commitment-item">
+                <div class="commitment-icon">
+                  <i class="fas fa-thumbs-up"></i>
+                </div>
+                <div class="commitment-content">
+                  <h4>Cam kết 100%</h4>
+                  <p>chất lượng sản phẩm</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div class="commitment-item">
+                <div class="commitment-icon">
+                  <i class="fas fa-truck"></i>
+                </div>
+                <div class="commitment-content">
+                  <h4>Miễn phí vận chuyển</h4>
+                  <p>theo chính sách giao hàng</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
-    <!-- Our Expert Team 
-     sau lam thêm
-    -->
-    
-    <!-- FAQ'S -->
-    <section id="faqs" class="py-5 bg-light">
-      <div class="container section-content">
-        <h2 class="section-title text-center mb-5" style="font-size:2.8rem;background:linear-gradient(135deg,#1976d2,#1ec0f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Câu Hỏi Thường Gặp</h2>
-        <div class="accordion modern-accordion" id="faqAccordion">
-          <div class="accordion-item rounded-4 mb-4 shadow-lg border-0" style="transition: all 0.3s ease;">
-            <h2 class="accordion-header" id="faq1">
-              <button class="accordion-button rounded-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1" style="font-size:1.2rem;padding:1.5rem;background:linear-gradient(135deg,#f8f9fa,#fff);">
-                <i class="fas fa-question-circle text-primary me-3"></i> Làm sao để đặt lịch khám?
-              </button>
-            </h2>
-            <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
-              <div class="accordion-body" style="font-size:1.1rem;line-height:1.8;padding:1.8rem;background:linear-gradient(135deg,#fff,#f8f9fa);">
-                Bạn có thể đặt lịch trực tuyến trên website hoặc gọi hotline 0123 456 789.
-              </div>
-            </div>
-          </div>
-          <div class="accordion-item rounded-4 mb-4 shadow-lg border-0" style="transition: all 0.3s ease;">
-            <h2 class="accordion-header" id="faq2">
-              <button class="accordion-button collapsed rounded-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2" style="font-size:1.2rem;padding:1.5rem;background:linear-gradient(135deg,#f8f9fa,#fff);">
-                <i class="fas fa-question-circle text-primary me-3"></i> Qickmed có làm việc cuối tuần không?
-              </button>
-            </h2>
-            <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
-              <div class="accordion-body" style="font-size:1.1rem;line-height:1.8;padding:1.8rem;background:linear-gradient(135deg,#fff,#f8f9fa);">
-                Qickmed làm việc tất cả các ngày trong tuần, kể cả thứ 7 và Chủ nhật.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="text-center mt-5">
-          <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-lg" id="open-ai-chat" style="font-size:1.2rem;background:linear-gradient(135deg,#1976d2,#1ec0f7);border:none;transition:all 0.3s ease;">
-            <i class="fas fa-robot me-2"></i>Tư vấn với AI
-          </button>
-        </div>
+
+      <!-- Floating AI Chat Button -->
+      <div class="ai-chat-float">
+        <div class="chat-pulse"></div>
+        <button class="ai-chat-float-btn" id="floating-ai-chat">
+          <i class="fas fa-robot"></i>
+        </button>
       </div>
     </section>
   </main>
@@ -501,7 +813,36 @@
   
   <?php include 'includes/floating_chat.php'; ?>
   <script src="assets/js/team.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.skillful-slide');
+    const dots = document.querySelectorAll('.skillful-dot');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      dots.forEach(dot => dot.classList.remove('active'));
+      slides[index].classList.add('active');
+      dots[index].classList.add('active');
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    // Auto change slide every 10 seconds
+    setInterval(nextSlide, 10000);
+
+    // Click on dots to change slide
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        currentSlide = index;
+        showSlide(currentSlide);
+      });
+    });
+  });
+  </script>
 </body>
 </html>
-
 

@@ -1,3 +1,18 @@
+* sử dụng sql của xammpp
+-- b1 mở xampp và chọn phần mysql
+-- b2 start server - start mysql
+-- b3 mở phpmyadmin
+-- b4 tạo database với tên qickmed
+-- xét đặc quyền cho sql 
+-- copy sql từ dòng 15 đến dòng 143
+-- paste vào query để tạo bảng
+-- chạy lệnh show tables để kiểm tra xem có bảng nào được tạo không
+-- sau đó vào lại project để sử dụng
+-- vào include/config/db.php
+-- sửa lại các thông số sao cho đúng với cơ sở dữ liệu mà bạn vừa tạo
+-- vào file index.php
+-- sửa lại các thông số sao cho đúng với cơ sở dữ liệu mà bạn vừa tạo
+
 -- Tạo database
 CREATE DATABASE IF NOT EXISTS qickmed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE qickmed;
@@ -23,6 +38,7 @@ CREATE TABLE users (
     phone_number VARCHAR(15) UNIQUE,
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL DEFAULT 2,
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
@@ -35,6 +51,7 @@ CREATE TABLE users_info (
     full_name VARCHAR(100),
     gender ENUM('Nam', 'Nữ', 'Khác'),
     date_of_birth DATE,
+    phone VARCHAR(15),
     profile_picture VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -85,3 +102,10 @@ INSERT INTO users (username, email, password, role_id) VALUES
 
 INSERT INTO users_info (user_id, full_name, gender) VALUES 
 (1, 'Quản trị viên', 'Khác'); 
+
+
+-- sau khi tạo xong các bảng, cần thêm các dữ liệu mẫu cho các bảng đó
+ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive', 'suspended') DEFAULT 'active';
+ALTER TABLE users_info ADD COLUMN phone VARCHAR(15);
+
+-- update them cai nay vao
