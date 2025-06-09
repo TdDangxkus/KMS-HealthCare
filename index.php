@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +8,17 @@
   <!-- Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Animate.css CDN for animation -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <!-- Font Awesome 6 CDN for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- SwiperJS CSS for slider -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/team.css">
+  <!-- <link rel="stylesheet" href="assets/css/team.css"> -->
   <link rel="stylesheet" href="assets/css/index.css">
 </head>
+
 <body>
 
   <!-- Hero Section -->
@@ -456,16 +458,16 @@
               <i class="fas fa-calendar-alt me-2"></i>Đặt Lịch
             </span>
           </div>
-          
+
           <h2 class="section-title display-4 fw-bold mb-4">Đặt Lịch Khám Ngay</h2>
-          
+
           <p class="section-desc mx-auto mb-5">
             Nhanh chóng, tiện lợi và hoàn toàn miễn phí. <br>
             Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!
           </p>
 
           <div class="booking-button-group">
-            <a href="/booking.php" class="btn btn-primary btn-booking">
+            <a href="#" class="btn btn-primary btn-booking" data-bs-toggle="modal" data-bs-target="#bookingModal">
               <span class="btn-icon">
                 <i class="fas fa-calendar-plus"></i>
               </span>
@@ -577,7 +579,7 @@
     <!-- FAQ Section -->
     <section id="faqs" class="py-5 position-relative overflow-hidden">
       <div class="faq-bg-pattern"></div>
-      
+
       <div class="container section-content position-relative">
         <div class="text-center mb-5">
           <div class="section-badge-wrapper">
@@ -795,6 +797,7 @@
         </div>
       </div>
 
+
       <!-- Floating AI Chat Button -->
       <div class="ai-chat-float">
         <div class="chat-pulse"></div>
@@ -805,44 +808,47 @@
     </section>
   </main>
 
+  <!-- Chèn modal -->
+  <?php include 'booking.php'; ?>
+
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
-  
+
+
   <?php include 'includes/floating_chat.php'; ?>
   <script src="assets/js/team.js"></script>
   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const slides = document.querySelectorAll('.skillful-slide');
-    const dots = document.querySelectorAll('.skillful-dot');
-    let currentSlide = 0;
+    document.addEventListener('DOMContentLoaded', function() {
+      const slides = document.querySelectorAll('.skillful-slide');
+      const dots = document.querySelectorAll('.skillful-dot');
+      let currentSlide = 0;
 
-    function showSlide(index) {
-      slides.forEach(slide => slide.classList.remove('active'));
-      dots.forEach(dot => dot.classList.remove('active'));
-      slides[index].classList.add('active');
-      dots[index].classList.add('active');
-    }
+      function showSlide(index) {
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+      }
 
-    function nextSlide() {
-      currentSlide = (currentSlide + 1) % slides.length;
-      showSlide(currentSlide);
-    }
-
-    // Auto change slide every 10 seconds
-    setInterval(nextSlide, 10000);
-
-    // Click on dots to change slide
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        currentSlide = index;
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
         showSlide(currentSlide);
+      }
+
+      // Auto change slide every 10 seconds
+      setInterval(nextSlide, 10000);
+
+      // Click on dots to change slide
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentSlide = index;
+          showSlide(currentSlide);
+        });
       });
     });
-  });
   </script>
 </body>
-</html>
 
+</html>

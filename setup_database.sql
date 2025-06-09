@@ -1,5 +1,4 @@
-* sử dụng sql của xammpp
--- b1 mở xampp và chọn phần mysql
+* sử dụng sql của xammpp -- b1 mở xampp và chọn phần mysql
 -- b2 start server - start mysql
 -- b3 mở phpmyadmin
 -- b4 tạo database với tên qickmed
@@ -12,24 +11,20 @@
 -- sửa lại các thông số sao cho đúng với cơ sở dữ liệu mà bạn vừa tạo
 -- vào file index.php
 -- sửa lại các thông số sao cho đúng với cơ sở dữ liệu mà bạn vừa tạo
-
 -- Tạo database
 CREATE DATABASE IF NOT EXISTS qickmed CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE qickmed;
-
 -- Tạo bảng roles trước (vì users có foreign key tới roles)
 CREATE TABLE roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(50) UNIQUE NOT NULL,
     description TEXT
 );
-
 -- Thêm dữ liệu mẫu cho roles
-INSERT INTO roles (role_name, description) VALUES 
-('admin', 'Quản trị viên hệ thống'),
-('patient', 'Bệnh nhân'),
-('doctor', 'Bác sĩ');
-
+INSERT INTO roles (role_name, description)
+VALUES ('admin', 'Quản trị viên hệ thống'),
+    ('patient', 'Bệnh nhân'),
+    ('doctor', 'Bác sĩ');
 -- Bảng lưu thông tin tài khoản
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,7 +38,6 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
-
 -- Bảng lưu thông tin người dùng
 CREATE TABLE users_info (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +51,6 @@ CREATE TABLE users_info (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-
 -- Bảng guest users
 CREATE TABLE guest_users (
     guest_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,7 +60,6 @@ CREATE TABLE guest_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- Bảng lưu địa chỉ người dùng 
 CREATE TABLE user_addresses (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,7 +75,6 @@ CREATE TABLE user_addresses (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
-
 -- Bảng lưu token "Remember me"
 CREATE TABLE remember_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,18 +85,28 @@ CREATE TABLE remember_tokens (
     UNIQUE KEY unique_user_token (user_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-
+-- Bảng lịch hẹn
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'canceled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+);
 -- Tạo tài khoản admin mặc định
 -- Mật khẩu: admin123 (plain text)
-INSERT INTO users (username, email, password, role_id) VALUES 
-('admin', 'admin@qickmed.com', 'admin123', 1);
-
-INSERT INTO users_info (user_id, full_name, gender) VALUES 
-(1, 'Quản trị viên', 'Khác'); 
-
-
+INSERT INTO users (username, email, password, role_id)
+VALUES ('admin', 'admin@qickmed.com', 'admin123', 1);
+INSERT INTO users_info (user_id, full_name, gender)
+VALUES (1, 'Quản trị viên', 'Khác');
 -- sau khi tạo xong các bảng, cần thêm các dữ liệu mẫu cho các bảng đó
-ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive', 'suspended') DEFAULT 'active';
-ALTER TABLE users_info ADD COLUMN phone VARCHAR(15);
-
+ALTER TABLE users
+ADD COLUMN status ENUM('active', 'inactive', 'suspended') DEFAULT 'active';
+ALTER TABLE users_info
+ADD COLUMN phone VARCHAR(15);
 -- update them cai nay vao

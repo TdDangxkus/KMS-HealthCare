@@ -1035,7 +1035,8 @@ body {
                 <?php endif; ?>
                 
                 <!-- Appointment Button -->
-                <a href="/booking.php" class="auth-btn appointment-btn d-none d-lg-flex">
+                <a href="#" class="auth-btn appointment-btn d-none d-lg-flex"
+                data-bs-toggle="modal" data-bs-target="#bookingModal">
                     <i class="fas fa-calendar-plus me-2"></i>Đặt lịch khám
                 </a>
       </div>

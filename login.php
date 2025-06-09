@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         
         if ($row = $result->fetch_assoc()) {
-            // So sánh password trực tiếp (không sử dụng hash)
+
             if ($password === $row['password']) {
                 // Đăng nhập thành công
                 $_SESSION['user_id'] = $row['user_id'];
