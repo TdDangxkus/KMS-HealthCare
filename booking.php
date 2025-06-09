@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 include 'includes/db.php';
 require 'doctors.php';
 
@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $patient_name = $appointment_date = $appointment_time = $specialty = $doctor_name = $note = '';
     } catch (Exception $e) {
       $err = "❌ Lỗi khi lưu dữ liệu: " . $e->getMessage();
+      exit;
     }
   }
 }  //    else {

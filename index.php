@@ -546,10 +546,11 @@
                 </div>
               </div>
             </div>
-            <a href="#" class="skillful-cta">
+            <a href="#" class="skillful-cta" data-bs-toggle="modal" data-bs-target="#bookingModal" onclick="event.preventDefault();">
               Đặt Lịch Ngay
               <i class="fas fa-arrow-right"></i>
             </a>
+
           </div>
           <div class="skillful-stats">
             <div class="stat-card">
