@@ -1,21 +1,20 @@
 <?php
-
+session_start();
 include 'includes/db.php';
+require 'doctors.php';
 
 $err = '';
 $success = '';
 $is_logged_in = isset($_SESSION['user_id']);
 $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
-require 'doctors.php';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $patient_name = trim($_POST['patient_name'] ?? '');
   $appointment_date = trim($_POST['appointment_date'] ?? '');
   $appointment_time = trim($_POST['appointment_time'] ?? '');
   $specialty = trim($_POST['specialty'] ?? '');
   $doctor_name = trim($_POST['doctor'] ?? '');
   $note = trim($_POST['note'] ?? '');
-
 
   if ($is_logged_in && isset($_SESSION['full_name'])) {
     $patient_name = $_SESSION['full_name'];
@@ -33,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $err = "❗ Tên bệnh nhân chỉ được chứa chữ cái và khoảng trắng.";
   } elseif (strtotime($appointment_date) < strtotime($today)) {
     $err = "❗ Ngày hẹn không được nhỏ hơn ngày hiện tại.";
+  } elseif (strtotime($appointment_date) == strtotime($today) && $appointment_time < date('H:i')) {
+    $err = "❗ Giờ hẹn không được nhỏ hơn giờ hiện tại.";
   } elseif (!preg_match($time_pattern, $appointment_time)) {
     $err = "❗ Giờ hẹn không đúng định dạng (HH:mm).";
   } elseif ($appointment_time < '07:00' || $appointment_time > '18:00') {
@@ -41,21 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $err = "❗ Chuyên khoa không hợp lệ.";
   } elseif ($doctor_name && !in_array($doctor_name, $valid_doctors)) {
     $err = "❗ Bác sĩ không hợp lệ.";
-  }
-  //    else {
-  //   // Kiểm tra trùng lịch hẹn nếu bác sĩ được chọn
-  //   if ($doctor_name) {
-  //     $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE appointment_date = ? AND appointment_time = ? AND doctor_name = ?");
-  //     $stmtCheck->execute([$appointment_date, $appointment_time, $doctor_name]);
-  //     if ($stmtCheck->fetchColumn() > 0) {
-  //       $err = "❗ Bác sĩ đã có lịch khám vào thời gian này. Vui lòng chọn giờ khác.";
-  //     }
-  //   }
-  // }
-  else {
+  } else {
     try {
       $stmt = $pdo->prepare("INSERT INTO bookings (user_id, patient_name, appointment_date, appointment_time, specialty, doctor_name, note) 
-                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+                             VALUES (?, ?, ?, ?, ?, ?, ?)");
       $stmt->execute([
         $user_id, // null nếu chưa login
         $patient_name,
@@ -65,19 +55,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $doctor_name ?: null,
         $note ?: null
       ]);
-
       $success = "✅ Đặt lịch thành công!";
+      header('Location: index.php');
       // Reset lại form
       $patient_name = $appointment_date = $appointment_time = $specialty = $doctor_name = $note = '';
     } catch (Exception $e) {
       $err = "❌ Lỗi khi lưu dữ liệu: " . $e->getMessage();
     }
   }
-}
-
+}  //    else {
+//   // Kiểm tra trùng lịch hẹn nếu bác sĩ được chọn
+//   if ($doctor_name) {
+//     $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE appointment_date = ? AND appointment_time = ? AND doctor_name = ?");
+//     $stmtCheck->execute([$appointment_date, $appointment_time, $doctor_name]);
+//     if ($stmtCheck->fetchColumn() > 0) {
+//       $err = "❗ Bác sĩ đã có lịch khám vào thời gian này. Vui lòng chọn giờ khác.";
+//     }
+//   }
+// }
 ?>
 
-<div class="modal fade " id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <form method="POST">
@@ -93,9 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="alert alert-danger"><?= htmlspecialchars($err) ?></div>
           <?php elseif ($success): ?>
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-          <?php elseif (isset($error_message)): ?>
-            <div class="alert alert-warning"><?= htmlspecialchars($error_message) ?></div>
           <?php endif; ?>
+
           <div class="row g-3">
             <!-- Tên bệnh nhân -->
             <div class="col-md-6">
@@ -104,11 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </label>
 
               <?php if (!$is_logged_in): ?>
-                <!-- Nếu chưa đăng nhập, cho phép nhập -->
                 <input type="text" class="form-control" id="patientName" name="patient_name" required
                   value="<?= isset($patient_name) ? htmlspecialchars($patient_name) : '' ?>">
               <?php else: ?>
-                <!-- Nếu đã đăng nhập, hiển thị readonly và gửi bằng hidden -->
                 <input type="text" class="form-control" id="patientName_display" value="<?= htmlspecialchars($_SESSION['full_name']) ?>" readonly>
                 <input type="hidden" name="patient_name" value="<?= htmlspecialchars($_SESSION['full_name']) ?>">
               <?php endif; ?>
@@ -119,8 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="appointmentDate" class="form-label fw-semibold">
                 <i class="fas fa-calendar-day me-1"></i>Ngày hẹn
               </label>
-              <input type="date" class="form-control" id="appointmentDate" name="appointment_date"
-                min="<?= date('Y-m-d') ?>" required
+              <input type="date" class="form-control" id="appointmentDate" name="appointment_date" required
                 value="<?= isset($appointment_date) ? htmlspecialchars($appointment_date) : date('Y-m-d') ?>">
             </div>
 
@@ -130,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i class="fas fa-clock me-1"></i>Giờ hẹn
               </label>
               <input type="time" class="form-control" id="appointmentTime" name="appointment_time" required
+                min="07:00" max="18:00"
                 value="<?= isset($appointment_time) ? htmlspecialchars($appointment_time) : '' ?>">
             </div>
 
@@ -150,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </select>
             </div>
 
-            <!-- Bác sĩ -->
             <!-- Bác sĩ -->
             <div class="col-md-6">
               <label for="doctor" class="form-label fw-semibold">
@@ -177,7 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 placeholder="Triệu chứng, yêu cầu đặc biệt..."><?= isset($note) ? htmlspecialchars($note) : '' ?></textarea>
             </div>
           </div>
-
         </div>
 
         <div class="modal-footer">
@@ -192,6 +185,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+  // Đặt min ngày cho input date dựa trên thời gian máy client để tránh chọn ngày quá khứ
+  const timeInput = document.getElementById('appointmentTime');
+  const dateInput = document.getElementById('appointmentDate');
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const minDate = `${yyyy}-${mm}-${dd}`;
+  dateInput.min = minDate;
+  // Nếu không có giá trị hoặc giá trị nhỏ hơn min, đặt lại giá trị ngày hiện tại
+  if (!dateInput.value || dateInput.value < minDate) {
+    dateInput.value = minDate;
+  }
+
+  timeInput.addEventListener('change', () => {
+    if (timeInput.value < '07:00' || timeInput.value > '18:00') {
+      alert('Giờ hẹn chỉ được trong khoảng từ 07:00 đến 18:00.');
+      timeInput.value = '';
+    }
+  });
+
   // Lọc bác sĩ theo chuyên khoa
   document.getElementById('specialty').addEventListener('change', function() {
     const selectedDept = this.value;
@@ -212,12 +226,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     });
   });
+
+  // Kích hoạt lọc bác sĩ khi tải trang nếu đã chọn chuyên khoa
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('specialty').dispatchEvent(new Event('change'));
+  });
+
+  // Hiển thị spinner khi submit form
   document.querySelector('form').addEventListener('submit', function() {
     const spinner = this.querySelector('.spinner-border');
     if (spinner) spinner.classList.remove('d-none');
-  });
-  // Trigger sự kiện change để lọc bác sĩ khi tải trang (nếu đã chọn chuyên khoa)
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('specialty').dispatchEvent(new Event('change'));
   });
 </script>
