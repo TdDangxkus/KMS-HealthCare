@@ -4,10 +4,11 @@ include 'includes/db.php';
 
 $err = '';
 $success = '';
-
+$is_logged_in = isset($_SESSION['user_id']);
+$user_id = $is_logged_in ? $_SESSION['user_id'] : null;
 require 'doctors.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // Lấy dữ liệu POST, trim để tránh khoảng trắng
+
   $patient_name = trim($_POST['patient_name'] ?? '');
   $appointment_date = trim($_POST['appointment_date'] ?? '');
   $appointment_time = trim($_POST['appointment_time'] ?? '');
@@ -16,30 +17,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $note = trim($_POST['note'] ?? '');
 
 
+  if ($is_logged_in && isset($_SESSION['full_name'])) {
+    $patient_name = $_SESSION['full_name'];
+  }
+
   $valid_specialties = ['Tiêu hóa', 'Hô hấp', 'Tim mạch', 'Thần kinh', 'Da liễu'];
   $valid_doctors = array_column($doctors, 'name');
-  // Validate đơn giản
-  if (!$patient_name || !$appointment_date || !$appointment_time || !$specialty) {
-    $error_message = "Vui lòng điền đầy đủ các trường bắt buộc.";
-  } elseif (!preg_match('/^[\p{L}\s]+$/u', $patient_name)) {
-    $error_message = "Tên bệnh nhân chỉ được chứa chữ cái và khoảng trắng.";
-  } elseif (strtotime($appointment_date) < strtotime(date('Y-m-d'))) {
-    $error_message = "Ngày hẹn không được nhỏ hơn ngày hiện tại.";
-  } elseif (!preg_match('/^\d{2}:\d{2}$/', $appointment_time)) {
-    $error_message = "Giờ hẹn không hợp lệ.";
+  $today = date('Y-m-d');
+  $time_pattern = '/^\d{2}:\d{2}$/';
+  $name_pattern = '/^[\p{L}\s]+$/u';
+
+  if (empty($patient_name) || empty($appointment_date) || empty($appointment_time) || empty($specialty)) {
+    $err = "❗ Vui lòng điền đầy đủ các trường bắt buộc.";
+  } elseif (!preg_match($name_pattern, $patient_name)) {
+    $err = "❗ Tên bệnh nhân chỉ được chứa chữ cái và khoảng trắng.";
+  } elseif (strtotime($appointment_date) < strtotime($today)) {
+    $err = "❗ Ngày hẹn không được nhỏ hơn ngày hiện tại.";
+  } elseif (!preg_match($time_pattern, $appointment_time)) {
+    $err = "❗ Giờ hẹn không đúng định dạng (HH:mm).";
+  } elseif ($appointment_time < '07:00' || $appointment_time > '18:00') {
+    $err = "❗ Giờ hẹn chỉ được trong khoảng từ 07:00 đến 18:00.";
   } elseif (!in_array($specialty, $valid_specialties)) {
-    $error_message = "Chuyên khoa không hợp lệ.";
+    $err = "❗ Chuyên khoa không hợp lệ.";
   } elseif ($doctor_name && !in_array($doctor_name, $valid_doctors)) {
-    $error_message = "Bác sĩ không hợp lệ.";
-  } else {
+    $err = "❗ Bác sĩ không hợp lệ.";
+  }
+  //    else {
+  //   // Kiểm tra trùng lịch hẹn nếu bác sĩ được chọn
+  //   if ($doctor_name) {
+  //     $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE appointment_date = ? AND appointment_time = ? AND doctor_name = ?");
+  //     $stmtCheck->execute([$appointment_date, $appointment_time, $doctor_name]);
+  //     if ($stmtCheck->fetchColumn() > 0) {
+  //       $err = "❗ Bác sĩ đã có lịch khám vào thời gian này. Vui lòng chọn giờ khác.";
+  //     }
+  //   }
+  // }
+  else {
     try {
-      $stmt = $pdo->prepare("INSERT INTO bookings (patient_name, appointment_date, appointment_time, specialty, doctor_name, note) VALUES (?, ?, ?, ?, ?, ?)");
-      $stmt->execute([$patient_name, $appointment_date, $appointment_time, $specialty, $doctor_name ?: null, $note ?: null]);
-      $success_message = "✅ Đặt lịch thành công!";
-      // Clear fields
+      $stmt = $pdo->prepare("INSERT INTO bookings (user_id, patient_name, appointment_date, appointment_time, specialty, doctor_name, note) 
+                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+      $stmt->execute([
+        $user_id, // null nếu chưa login
+        $patient_name,
+        $appointment_date,
+        $appointment_time,
+        $specialty,
+        $doctor_name ?: null,
+        $note ?: null
+      ]);
+
+      $success = "✅ Đặt lịch thành công!";
+      // Reset lại form
       $patient_name = $appointment_date = $appointment_time = $specialty = $doctor_name = $note = '';
     } catch (Exception $e) {
-      $error_message = "❌ Lỗi khi lưu dữ liệu: " . $e->getMessage();
+      $err = "❌ Lỗi khi lưu dữ liệu: " . $e->getMessage();
     }
   }
 }
@@ -71,8 +102,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="patientName" class="form-label fw-semibold">
                 <i class="fas fa-user me-1"></i>Tên bệnh nhân
               </label>
-              <input type="text" class="form-control" id="patientName" name="patient_name" required
-                value="<?= isset($patient_name) ? htmlspecialchars($patient_name) : '' ?>">
+
+              <?php if (!$is_logged_in): ?>
+                <!-- Nếu chưa đăng nhập, cho phép nhập -->
+                <input type="text" class="form-control" id="patientName" name="patient_name" required
+                  value="<?= isset($patient_name) ? htmlspecialchars($patient_name) : '' ?>">
+              <?php else: ?>
+                <!-- Nếu đã đăng nhập, hiển thị readonly và gửi bằng hidden -->
+                <input type="text" class="form-control" id="patientName_display" value="<?= htmlspecialchars($_SESSION['full_name']) ?>" readonly>
+                <input type="hidden" name="patient_name" value="<?= htmlspecialchars($_SESSION['full_name']) ?>">
+              <?php endif; ?>
             </div>
 
             <!-- Ngày hẹn -->
