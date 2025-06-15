@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- SwiperJS CSS for slider -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <!-- Tempus Dominus CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.10.4/dist/css/tempus-dominus.min.css" />
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/assets/css/style.css">
   <!-- <link rel="stylesheet" href="assets/css/team.css"> -->
@@ -848,6 +850,7 @@
           showSlide(currentSlide);
         });
       });
+
     });
   </script>
 </body>
