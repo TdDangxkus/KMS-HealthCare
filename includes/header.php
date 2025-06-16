@@ -1,4 +1,5 @@
 <?php
+ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -19,10 +20,11 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 999990;
     width: 100%;
     box-shadow: 0 4px 20px rgba(25, 118, 210, 0.1);
     background: white;
+    transition: top 0.3s ease-in-out; /*  hiệu ứng scolll */
 }
 
 /* Enhanced scrolled state */
@@ -314,12 +316,12 @@ body {
 /* User Account */
 .user-account {
     position: relative;
-    z-index: 9999;
+    z-index: 999999;
 }
 
 .user-btn {
     position: relative;
-    z-index: 9999;
+    z-index: 999999;
     display: flex;
     align-items: center;
     padding: 0.6rem 1rem;
@@ -518,7 +520,7 @@ body {
 
 .dropdown-item {
     position: relative;
-    z-index: 10000;
+    z-index: 100003;
     padding: 0.7rem 1rem;
     border-radius: 6px;
     font-weight: 500;
@@ -560,48 +562,6 @@ body {
 
 /* Mobile responsive */
 @media (max-width: 991.98px) {
-    .dropdown-menu {
-        position: static !important;
-        box-shadow: none;
-        border: none;
-        background: #f8faff !important;
-        animation: none;
-        width: 100%;
-        margin-top: 0.5rem !important;
-        border-radius: 8px;
-    }
-}
-
-/* Mobile Toggle */
-.mobile-toggle {
-    display: none;
-    border: none;
-    background: #f8faff;
-    border: 2px solid #e3f2fd;
-    border-radius: 8px;
-    padding: 0.5rem;
-    color: #1976d2;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.mobile-toggle:hover {
-    background: #e3f2fd;
-    border-color: #bbdefb;
-}
-
-.mobile-toggle span {
-    display: block;
-    width: 24px;
-    height: 3px;
-    background: #1976d2;
-    margin: 4px 0;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-}
-
-/* Responsive Design */
-@media (max-width: 991.98px) {
     body {
         padding-top: 120px; /* Smaller padding for mobile */
     }
@@ -624,22 +584,27 @@ body {
     }
     
     .mobile-toggle {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .nav-bar {
+        display: none; /* Hide by default on mobile */
         position: absolute;
         top: 100%;
         left: 0;
         right: 0;
-        z-index: 1999; /* Just below dropdowns */
+        z-index: 1999;
         background: white;
         border-top: 1px solid #e3f2fd;
         box-shadow: 0 4px 15px rgba(25, 118, 210, 0.1);
     }
     
     .nav-bar.show {
-        display: block;
+        display: block; /* Only show when toggled */
+        animation: slideDown 0.3s ease;
     }
     
     .main-nav {
@@ -678,6 +643,18 @@ body {
         margin-top: 0.5rem;
         padding: 0.5rem;
         width: 100%;
+    }
+
+    /* Add slide down animation for mobile menu */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 }
 
@@ -802,70 +779,114 @@ body {
 }
 
 .custom-dropdown-menu {
+    position: absolute !important;
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+    width: 280px;
+    background: #ffffff !important;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    padding: 12px;
+    display: none !important;
+    z-index: 999999 !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-15px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-dropdown-menu::before {
+    content: '';
     position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 250px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border: 1px solid #e3f2fd;
-    padding: 8px;
-    display: none;
-    z-index: 99999;
+    top: -8px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #ffffff;
+    filter: drop-shadow(0 -2px 4px rgba(102, 126, 234, 0.1));
 }
 
 .custom-dropdown-menu.active {
-    display: block;
-    animation: menuFadeIn 0.2s ease;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
 }
 
 .menu-item {
-    margin: 4px 0;
+    margin: 2px 0;
+    position: relative;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .menu-item a {
-    display: flex;
+    display: flex !important;
     align-items: center;
-    padding: 12px 16px;
-    color: #37474f;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    padding: 14px 18px;
+    color: #2c3e50 !important;
+    text-decoration: none !important;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 500;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
 }
 
 .menu-item a:hover {
-    background: #f8faff;
-    color: #1976d2;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.menu-item a:hover i {
+    color: white !important;
+    transform: scale(1.1);
 }
 
 .menu-item i {
     width: 20px;
-    margin-right: 12px;
-    color: #64b5f6;
-    transition: color 0.2s ease;
-}
-
-.menu-item:hover i {
-    color: #1976d2;
+    margin-right: 14px;
+    color: #667eea;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-divider {
     height: 1px;
-    background: #e3f2fd;
-    margin: 8px 0;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+    margin: 12px 16px;
+    border: none;
 }
 
 .menu-item.logout a {
-    color: #dc3545;
+    color: #e74c3c !important;
 }
 
 .menu-item.logout a:hover {
-    background: rgba(220, 53, 69, 0.1);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+    color: white !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .menu-item.logout i {
-    color: #dc3545;
+    color: #e74c3c !important;
+}
+
+.menu-item.logout a:hover i {
+    color: white !important;
 }
 
 @keyframes menuFadeIn {
@@ -877,6 +898,38 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Force visibility for all menu items */
+.custom-dropdown-menu .menu-item,
+.custom-dropdown-menu .menu-item a,
+.custom-dropdown-menu .menu-item span,
+.custom-dropdown-menu .menu-item i {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Override any conflicting styles */
+.custom-dropdown {
+    position: static !important;
+    z-index: 999999 !important;
+}
+
+.custom-dropdown .custom-dropdown-menu {
+    position: absolute !important;
+    z-index: 999999 !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    pointer-events: auto !important;
+}
+
+.custom-dropdown .custom-dropdown-menu.active {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
 }
 
 @media (max-width: 768px) {
@@ -894,6 +947,62 @@ body {
 
     .menu-item a {
         padding: 16px;
+    }
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2000;
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.mobile-toggle:hover {
+    background: rgba(25, 118, 210, 0.08);
+}
+
+.mobile-toggle .toggle-line {
+    width: 24px;
+    height: 2px;
+    background: #1976d2;
+    display: block;
+    margin: 5px auto;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    border-radius: 2px;
+}
+
+.mobile-toggle.active {
+    background: rgba(25, 118, 210, 0.12);
+}
+
+.mobile-toggle.active .toggle-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-toggle.active .toggle-line:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.mobile-toggle.active .toggle-line:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+@media (max-width: 991.98px) {
+    .mobile-toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 }
 </style>
@@ -930,19 +1039,19 @@ body {
             <a href="/index.php" class="logo-section">
                 <img src="/assets/images/default-avatar.png" alt="Qickmed" class="logo-image">
                 <div class="logo-text">
-                    <h1 class="logo-name">Qickmed</h1>
+                    <h1 class="logo-name">MediSync</h1>
                     <p class="logo-subtitle">Medical & Healthcare</p>
             </div>
             </a>
 
             <!-- Search Bar -->
             <div class="search-bar">
-                <div class="search-input-group">
-                    <input type="text" class="search-input" placeholder="Tìm thuốc, thực phẩm chức năng, thiết bị y tế...">
-                    <button class="search-btn">
+                <form action="/search.php" method="GET" class="search-input-group">
+                    <input type="text" name="q" class="search-input" placeholder="Tìm thuốc, thực phẩm chức năng, thiết bị y tế..." value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
+                    <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
-          </button>
-                </div>
+                    </button>
+                </form>
                 <!-- <div class="search-suggestions">
                     <span class="suggestion-tag">Omega 3</span>
                     <span class="suggestion-tag">Canxi</span>
@@ -952,10 +1061,10 @@ body {
             </div>
 
             <!-- Mobile Toggle -->
-            <button class="mobile-toggle" id="mobileToggle">
-                <span></span>
-                <span></span>
-                <span></span>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                <span class="toggle-line"></span>
+                <span class="toggle-line"></span>
+                <span class="toggle-line"></span>
             </button>
 
             <!-- Action Area -->
@@ -963,7 +1072,23 @@ body {
                 <!-- Cart -->
                 <a href="/cart.php" class="action-icon cart-icon" title="Giỏ hàng">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">3</span>
+                    <?php
+                    $cart_count = 0;
+                    if (isset($_SESSION['user_id'])) {
+                        $cart_sql = "
+                            SELECT SUM(oi.quantity) as total_quantity
+                            FROM order_items oi
+                            JOIN orders o ON oi.order_id = o.order_id
+                            WHERE o.user_id = ? AND o.status = 'cart'
+                        ";
+                        $cart_stmt = $conn->prepare($cart_sql);
+                        $cart_stmt->bind_param('i', $_SESSION['user_id']);
+                        $cart_stmt->execute();
+                        $cart_result = $cart_stmt->get_result()->fetch_assoc();
+                        $cart_count = $cart_result['total_quantity'] ?? 0;
+                    }
+                    ?>
+                    <span class="cart-count"><?php echo $cart_count; ?></span>
                 </a>
 
                 <!-- User Account -->
@@ -1035,10 +1160,9 @@ body {
                 <?php endif; ?>
                 
                 <!-- Appointment Button -->
-                <a href="#" class="auth-btn appointment-btn d-none d-lg-flex"
-                data-bs-toggle="modal" data-bs-target="#bookingModal">
+                <button type="button" class="auth-btn appointment-btn d-none d-lg-flex" onclick="openAppointmentModal()">
                     <i class="fas fa-calendar-plus me-2"></i>Đặt lịch khám
-                </a>
+                </button>
       </div>
     </div>
   </div>
@@ -1073,7 +1197,7 @@ body {
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/doctors.php"><i class="fas fa-users"></i>Tất cả bác sĩ</a></li>
-                        <li><a class="dropdown-item" href="/booking.php"><i class="fas fa-calendar-plus"></i>Đặt lịch khám</a></li>
+                        <li><a class="dropdown-item" href="/appointments.php"><i class="fas fa-calendar-plus"></i>Đặt lịch khám</a></li>
                     </ul>
             </div>
 
@@ -1119,45 +1243,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle
     const mobileToggle = document.getElementById('mobileToggle');
     const navBar = document.getElementById('navBar');
+    let isMenuOpen = false;
     
     if (mobileToggle) {
         mobileToggle.addEventListener('click', function() {
+            isMenuOpen = !isMenuOpen;
             navBar.classList.toggle('show');
-            
-            // Animate hamburger
-            const spans = this.querySelectorAll('span');
-            if (navBar.classList.contains('show')) {
-                spans[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
-                spans[1].style.opacity = '0';
-                spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
-            } else {
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
+            this.classList.toggle('active');
         });
     }
 
     // Search functionality
+    const searchForm = document.querySelector('.search-bar form');
     const searchInput = document.querySelector('.search-input');
     const searchBtn = document.querySelector('.search-btn');
     
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function() {
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
             const query = searchInput.value.trim();
-            if (query) {
-                window.location.href = `/shop.php?search=${encodeURIComponent(query)}`;
-            }
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    window.location.href = `/shop.php?search=${encodeURIComponent(query)}`;
-                }
+            if (!query) {
+                e.preventDefault();
+                searchInput.focus();
             }
         });
     }
@@ -1166,78 +1272,29 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.suggestion-tag').forEach(tag => {
         tag.addEventListener('click', function() {
             const query = this.textContent.trim();
-            window.location.href = `/shop.php?search=${encodeURIComponent(query)}`;
+            searchInput.value = query;
+            searchForm.submit();
         });
     });
 
     // Close mobile menu when clicking outside
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.mobile-toggle') && !e.target.closest('.nav-bar')) {
+        if (isMenuOpen && !e.target.closest('.mobile-toggle') && !e.target.closest('.nav-bar')) {
             navBar.classList.remove('show');
-            
-            // Reset hamburger
-            if (mobileToggle) {
-                const spans = mobileToggle.querySelectorAll('span');
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
+            mobileToggle.classList.remove('active');
+            isMenuOpen = false;
         }
     });
 
-    // Enhanced header scroll effect for fixed position
-    let lastScrollTop = 0;
-    let ticking = false;
-    const header = document.querySelector('.medical-header');
-    
-    function updateHeader() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        if (scrollTop > 50) {
-            header.classList.add('scrolled');
-            header.style.boxShadow = '0 8px 30px rgba(25, 118, 210, 0.15)';
-        } else {
-            header.classList.remove('scrolled');
-            header.style.boxShadow = '0 4px 20px rgba(25, 118, 210, 0.1)';
-        }
-        
-        // Show/hide header on scroll (optional enhancement)
-        if (scrollTop > lastScrollTop && scrollTop > 200) {
-            // Scrolling down - hide header
-            header.style.transform = 'translateY(-100%)';
-        } else {
-            // Scrolling up - show header
-            header.style.transform = 'translateY(0)';
-        }
-        
-        lastScrollTop = scrollTop;
-        ticking = false;
-    }
-    
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(updateHeader);
-            ticking = true;
-        }
-    }
-    
-    window.addEventListener('scroll', requestTick);
-    
-    // Ensure header is visible when page loads
-    setTimeout(() => {
-        header.style.transform = 'translateY(0)';
-    }, 100);
-    
-    // Handle window resize for responsive header height
+    // Handle window resize
     window.addEventListener('resize', function() {
-        // Reset mobile menu on resize
         if (window.innerWidth > 991) {
-            navBar.classList.remove('show');
-            if (mobileToggle) {
-                const spans = mobileToggle.querySelectorAll('span');
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
+            navBar.style.display = 'block'; // Show menu on desktop
+            mobileToggle.classList.remove('active');
+            isMenuOpen = false;
+        } else {
+            if (!isMenuOpen) {
+                navBar.classList.remove('show');
             }
         }
     });
@@ -1245,8 +1302,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleUserMenu(event) {
     event.stopPropagation();
+    event.preventDefault();
+    
     const menu = document.getElementById('userMenu');
-    menu.classList.toggle('active');
+    const isActive = menu.classList.contains('active');
+    
+    // Close all other dropdowns first
+    document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+        m.classList.remove('active');
+    });
+    
+    // Toggle current menu
+    if (!isActive) {
+        menu.classList.add('active');
+    }
     
     // Close when clicking outside
     document.addEventListener('click', function closeMenu(e) {
@@ -1256,6 +1325,47 @@ function toggleUserMenu(event) {
         }
     });
 }
+
+let lastScrollTop = 0;
+  const header = document.querySelector(".medical-header");
+
+  window.addEventListener("scroll", function () {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (currentScroll > lastScrollTop && currentScroll > 100) {
+      // Cuộn xuống
+      header.style.top = "-140px"; // Ẩn đi
+    } else {
+      // Cuộn lên
+      header.style.top = "0"; // Hiện lại
+    }
+
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative
+  });
+
+
+
+  document.getElementById("logout").addEventListener("click", async () => {
+  try {
+    // Gọi logout.php để server logout
+    const response = await fetch("logout.php", {
+      method: "POST",
+      credentials: "include" // giữ cookie/session
+    });
+
+    if (!response.ok) throw new Error("Logout không thành công");
+
+    // Xóa localStorage
+    localStorage.removeItem("userInfo");
+
+    // Redirect về trang login
+    window.location.href = "login.php";
+  } catch (err) {
+    alert("Có lỗi khi logout: " + err.message);
+  }
+});
+
+
 </script>
 
 

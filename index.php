@@ -1,3 +1,12 @@
+<?php
+require_once 'includes/db.php';
+require_once 'includes/blog_functions.php';
+
+// Get blog data for homepage
+$featured_post = get_featured_post();
+$recent_posts = get_recent_posts(4); // Get 4 recent posts for homepage
+$categories = get_blog_categories();
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -68,7 +77,11 @@
         <div class="row align-items-center g-5">
           <div class="col-lg-6">
             <div class="position-relative">
-              <img src="/assets/images/about-hospital.jpg" alt="Bệnh viện" class="img-fluid rounded-4 shadow-lg" style="object-fit:cover;">
+              <div class="rotating-images position-relative" style="height: 400px; border-radius: 1rem; overflow: hidden;">
+                <img src="/assets/images/h_p_1.jpg" alt="Bệnh viện" class="rotating-image active" style="position: absolute; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s ease;">
+                <img src="/assets/images/h_p_2.jpg" alt="Bệnh viện" class="rotating-image" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease;">
+                <img src="/assets/images/about-hospital.jpg" alt="Bệnh viện" class="rotating-image" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease;">
+              </div>
               <div class="position-absolute bottom-0 start-0 translate-middle-y" style="left:24px;bottom:-32px;">
                 <div class="experience-box">
                   <div class="experience-number">25<span>+</span></div>
@@ -83,7 +96,11 @@
                 <span class="section-badge">Về Chúng Tôi</span>
               </div>
               <h2 class="section-title display-5 fw-bold mb-3">Chăm Sóc Sức Khỏe Tốt Nhất</h2>
-              <p class="section-desc">Với hơn 20 năm kinh nghiệm trong lĩnh vực y tế, chúng tôi tự hào mang đến những dịch vụ chăm sóc sức khỏe chất lượng cao.</p>
+              <div class="rotating-text-wrapper">
+                <p class="section-desc rotating-text active">Với hơn 20 năm kinh nghiệm trong lĩnh vực y tế, chúng tôi tự hào mang đến những dịch vụ chăm sóc sức khỏe chất lượng cao.</p>
+                <p class="section-desc rotating-text" style="display: none;">Đội ngũ y bác sĩ giàu kinh nghiệm cùng trang thiết bị hiện đại, chúng tôi cam kết mang đến dịch vụ y tế tốt nhất cho bạn.</p>
+                <p class="section-desc rotating-text" style="display: none;">Sứ mệnh của chúng tôi là mang đến sự chăm sóc tận tâm và chuyên nghiệp, giúp bạn luôn khỏe mạnh và hạnh phúc.</p>
+              </div>
             </div>
             <div class="row mb-4 g-3">
               <div class="col-6 col-md-4">
@@ -117,87 +134,150 @@
       </div>
     </section>
     <!-- Our Services -->
-    <section id="services" class="py-5 position-relative overflow-hidden">
-      <div class="services-bg"></div>
+    <section id="services" class="py-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e88e5 0%, #64b5f6 100%);">
       <div class="container position-relative">
         <div class="text-center mb-5">
-          <div class="section-badge-wrapper">
-            <span class="section-badge">Dịch Vụ</span>
-          </div>
-          <h2 class="section-title display-5 fw-bold mb-3">Dịch Vụ Của Chúng Tôi</h2>
-          <p class="section-desc">Cung cấp các dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn giàu kinh nghiệm</p>
+          <span class="d-inline-block px-4 py-2 rounded-pill mb-3" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: #fff;">
+            Dịch Vụ
+          </span>
+          <h2 class="display-4 fw-bold mb-4 text-white">Dịch Vụ Của Chúng Tôi</h2>
+          <p class="text-white-50 mx-auto" style="max-width: 600px;">Cung cấp các dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn giàu kinh nghiệm</p>
         </div>
+
         <div class="row g-4">
-          <div class="col-md-4">
-            <div class="service-card animate__animated animate__fadeInLeft">
-              <div class="service-icon">
-                <i class="fa-solid fa-person-pregnant"></i>
-              </div>
-              <div class="service-content">
-                <div class="service-header">
-                  <h5>Sản Phụ Khoa</h5>
-                  <span class="badge">05+ Bác sĩ</span>
+          <div class="col-lg-4">
+            <div class="card h-100 border-0" style="background: rgba(255,255,255,0.95); border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+              <div class="card-body p-4">
+                <div class="service-icon-wrapper mb-4" style="width: 80px; height: 80px; background: #e3f2fd; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-person-pregnant" style="font-size: 32px; color: #1976d2;"></i>
                 </div>
-                <p>Chăm sóc sức khỏe toàn diện cho phụ nữ, đặc biệt là trong thời kỳ mang thai và sinh nở.</p>
-                <ul class="service-features">
-                  <li><i class="fas fa-check"></i> Khám thai định kỳ</li>
-                  <li><i class="fas fa-check"></i> Siêu âm 4D</li>
-                  <li><i class="fas fa-check"></i> Tư vấn dinh dưỡng</li>
-                </ul>
-                <a href="#" class="service-link">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></a>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="fw-bold mb-0" style="color: #1976d2;">Sản Phụ Khoa</h4>
+                  <span class="badge rounded-pill px-3" style="background: #e3f2fd; color: #1976d2;">05+ Bác sĩ</span>
+                </div>
+                <p class="text-muted mb-4" style="font-size: 0.95rem;">Chăm sóc sức khỏe toàn diện cho phụ nữ, đặc biệt là trong thời kỳ mang thai và sinh nở.</p>
+                <div class="service-features mb-4">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Khám thai định kỳ</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Siêu âm 4D</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Tư vấn dinh dưỡng</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 w-100">Tìm hiểu thêm</a>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="service-card animate__animated animate__fadeInUp">
-              <div class="service-icon">
-                <i class="fa-solid fa-bone"></i>
-              </div>
-              <div class="service-content">
-                <div class="service-header">
-                  <h5>Chỉnh Hình</h5>
-                  <span class="badge">15+ Bác sĩ</span>
+
+          <div class="col-lg-4">
+            <div class="card h-100 border-0" style="background: rgba(255,255,255,0.95); border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+              <div class="card-body p-4">
+                <div class="service-icon-wrapper mb-4" style="width: 80px; height: 80px; background: #e3f2fd; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-bone" style="font-size: 32px; color: #1976d2;"></i>
                 </div>
-                <p>Điều trị chuyên sâu về xương khớp, cột sống và các bệnh lý về cơ xương khớp.</p>
-                <ul class="service-features">
-                  <li><i class="fas fa-check"></i> Phẫu thuật nội soi</li>
-                  <li><i class="fas fa-check"></i> Vật lý trị liệu</li>
-                  <li><i class="fas fa-check"></i> Phục hồi chức năng</li>
-                </ul>
-                <a href="#" class="service-link">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></a>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="fw-bold mb-0" style="color: #1976d2;">Chỉnh Hình</h4>
+                  <span class="badge rounded-pill px-3" style="background: #e3f2fd; color: #1976d2;">15+ Bác sĩ</span>
+                </div>
+                <p class="text-muted mb-4" style="font-size: 0.95rem;">Điều trị chuyên sâu về xương khớp, cột sống và các bệnh lý về cơ xương khớp.</p>
+                <div class="service-features mb-4">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Phẫu thuật nội soi</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Vật lý trị liệu</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Phục hồi chức năng</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 w-100">Tìm hiểu thêm</a>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="service-card animate__animated animate__fadeInRight">
-              <div class="service-icon">
-                <i class="fa-solid fa-heart-pulse"></i>
-              </div>
-              <div class="service-content">
-                <div class="service-header">
-                  <h5>Tim Mạch</h5>
-                  <span class="badge">20+ Bác sĩ</span>
+
+          <div class="col-lg-4">
+            <div class="card h-100 border-0" style="background: rgba(255,255,255,0.95); border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+              <div class="card-body p-4">
+                <div class="service-icon-wrapper mb-4" style="width: 80px; height: 80px; background: #e3f2fd; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-heart-pulse" style="font-size: 32px; color: #1976d2;"></i>
                 </div>
-                <p>Chăm sóc toàn diện cho các bệnh lý về tim mạch với trang thiết bị hiện đại.</p>
-                <ul class="service-features">
-                  <li><i class="fas fa-check"></i> Điện tâm đồ</li>
-                  <li><i class="fas fa-check"></i> Siêu âm tim</li>
-                  <li><i class="fas fa-check"></i> Thông tim can thiệp</li>
-                </ul>
-                <a href="#" class="service-link">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></a>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="fw-bold mb-0" style="color: #1976d2;">Tim Mạch</h4>
+                  <span class="badge rounded-pill px-3" style="background: #e3f2fd; color: #1976d2;">20+ Bác sĩ</span>
+                </div>
+                <p class="text-muted mb-4" style="font-size: 0.95rem;">Chăm sóc toàn diện cho các bệnh lý về tim mạch với trang thiết bị hiện đại.</p>
+                <div class="service-features mb-4">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Điện tâm đồ</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Siêu âm tim</span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="feature-icon me-3" style="width: 24px; height: 24px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                      <i class="fas fa-check" style="font-size: 12px; color: #1976d2;"></i>
+                    </div>
+                    <span class="text-muted">Thông tim can thiệp</span>
+                  </div>
+                </div>
+                <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 w-100">Tìm hiểu thêm</a>
               </div>
             </div>
           </div>
         </div>
+
         <div class="text-center mt-5">
-          <a href="#" class="btn btn-light btn-lg px-5 py-3 rounded-pill animate__animated animate__pulse animate__infinite" style="font-weight: 600; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+          <a href="#" class="btn btn-light btn-lg px-5 py-3 rounded-pill" style="font-weight: 600; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(255,255,255,0.2);">
             Xem Thêm Dịch Vụ <i class="fa-solid fa-arrow-right ms-2"></i>
           </a>
         </div>
       </div>
+
+      <style>
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
+        }
+        
+        .service-icon-wrapper {
+          transition: all 0.3s ease;
+        }
+        
+        .card:hover .service-icon-wrapper {
+          transform: scale(1.1);
+        }
+      </style>
     </section>
     <!-- Products -->
-    <section id="products" class="py-5 position-relative overflow-hidden">
+    <!-- <section id="products" class="py-5 position-relative overflow-hidden">
       <div class="products-bg"></div>
       <div class="container position-relative">
         <div class="text-center mb-5">
@@ -279,7 +359,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
     <!-- Health Blog Section -->
     <section id="blog" class="py-5">
       <div class="container">
@@ -298,78 +378,104 @@
 
         <div class="blog-categories mb-4">
           <div class="d-flex flex-wrap justify-content-center gap-2">
-            <a href="#" class="blog-category-badge active">Tất cả</a>
-            <a href="#" class="blog-category-badge">Dinh dưỡng</a>
-            <a href="#" class="blog-category-badge">Phòng chữa bệnh</a>
-            <a href="#" class="blog-category-badge">Người cao tuổi</a>
-            <a href="#" class="blog-category-badge">Khỏe đẹp</a>
-            <a href="#" class="blog-category-badge">Mẹ và bé</a>
-            <a href="#" class="blog-category-badge">Giới tính</a>
-            <a href="#" class="blog-category-badge">Tin tức khuyến mại</a>
-            <a href="#" class="blog-category-badge">Tin tức sức khỏe</a>
+            <a href="/blog.php" class="blog-category-badge active">Tất cả</a>
+            <?php foreach (array_slice($categories, 0, 8) as $category): ?>
+            <a href="/blog.php?category=<?php echo $category['category_id']; ?>" class="blog-category-badge">
+              <?php echo htmlspecialchars($category['name']); ?>
+            </a>
+            <?php endforeach; ?>
           </div>
         </div>
 
         <div class="row g-4">
           <div class="col-lg-8">
             <div class="row g-3">
+              <?php if ($featured_post): ?>
               <div class="col-12">
                 <div class="blog-banner position-relative rounded-4 overflow-hidden mb-3">
-                  <img src="/assets/images/anh_ngau_nhien.jpg" class="w-100 h-100 object-fit-cover" style="min-height:220px;max-height:260px;object-fit:cover;" alt="Banner Blog">
+                  <img src="<?php echo htmlspecialchars($featured_post['featured_image']); ?>" 
+                       class="w-100 h-100 object-fit-cover" 
+                       style="min-height:220px;max-height:260px;object-fit:cover;" 
+                       alt="<?php echo htmlspecialchars($featured_post['title']); ?>">
                   <div class="position-absolute bottom-0 start-0 p-4 w-100" style="background: linear-gradient(0deg,rgba(0,0,0,0.55) 60%,rgba(0,0,0,0.01) 100%);">
-                    <div class="text-white fw-bold" style="font-size:1.2rem;">Dự phòng viêm phổi do RSV cho trẻ sinh non - tim bẩm sinh</div>
-                    <div class="text-white-50" style="font-size:0.98rem;">Thuốc hàng đầu thế giới đã có tại Long Châu</div>
+                    <div class="text-white fw-bold" style="font-size:1.2rem;">
+                      <?php echo htmlspecialchars($featured_post['title']); ?>
+                    </div>
+                    <div class="text-white-50" style="font-size:0.98rem;">
+                      <?php echo htmlspecialchars($featured_post['category_name']); ?> • 
+                      <?php echo date('d/m/Y', strtotime($featured_post['created_at'])); ?>
+                    </div>
                   </div>
                 </div>
               </div>
               <div class="col-12">
                 <div class="featured-article bg-white rounded-4 shadow-sm p-4 mb-2">
-                  <div class="mb-2 text-primary fw-bold" style="font-size:0.98rem;">Truyền thông</div>
-                  <h3 class="mb-2" style="font-size:1.3rem;line-height:1.3;">Giải pháp bảo vệ trẻ sinh non, tim bẩm sinh trước nguy cơ viêm phổi do RSV chính thức có mặt ở Việt Nam</h3>
-                  <p class="mb-2 text-muted" style="font-size:1rem;">Tìm hiểu về các giải pháp phòng ngừa viêm phổi do RSV cho trẻ sinh non, tim bẩm sinh và vai trò của thuốc mới trên thị trường Việt Nam...</p>
-                  <a href="#" class="btn btn-link text-primary p-0">Đọc thêm <i class="fas fa-arrow-right ms-2"></i></a>
+                  <div class="mb-2 text-primary fw-bold" style="font-size:0.98rem;">
+                    <?php echo htmlspecialchars($featured_post['category_name']); ?>
+                  </div>
+                  <h3 class="mb-2" style="font-size:1.3rem;line-height:1.3;">
+                    <?php echo htmlspecialchars($featured_post['title']); ?>
+                  </h3>
+                  <p class="mb-2 text-muted" style="font-size:1rem;">
+                    <?php echo htmlspecialchars($featured_post['excerpt']); ?>
+                  </p>
+                  <a href="/blog-post.php?slug=<?php echo $featured_post['slug']; ?>" class="btn btn-link text-primary p-0">
+                    Đọc thêm <i class="fas fa-arrow-right ms-2"></i>
+                  </a>
                 </div>
               </div>
+              <?php else: ?>
+              <div class="col-12">
+                <div class="text-center py-5">
+                  <i class="fas fa-newspaper text-muted mb-3" style="font-size: 3rem;"></i>
+                  <h4 class="text-muted">Chưa có bài viết nổi bật</h4>
+                  <p class="text-muted">Hãy quay lại sau để xem những bài viết mới nhất</p>
+                </div>
+              </div>
+              <?php endif; ?>
             </div>
           </div>
           <!-- Right Column: List of Articles -->
           <div class="col-lg-4">
             <div class="d-flex flex-column gap-3">
-              <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
-                <img src="/assets/images/anh_ngau_nhien.jpg" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;" alt="Bài viết 1">
-                <div>
-                  <div class="text-primary fw-bold small mb-1">Kiến thức y khoa</div>
-                  <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">Bà bầu bị tay chân miệng có sao không? Nguy hiểm tiềm ẩn và những điều cần biết</div>
+              <?php if (!empty($recent_posts)): ?>
+                <?php foreach ($recent_posts as $post): ?>
+                <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
+                  <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" 
+                       class="rounded-3 me-3" 
+                       style="width:64px;height:64px;object-fit:cover;" 
+                       alt="<?php echo htmlspecialchars($post['title']); ?>">
+                  <div>
+                    <div class="text-primary fw-bold small mb-1">
+                      <?php echo htmlspecialchars($post['category_name']); ?>
+                    </div>
+                    <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">
+                      <a href="/blog-post.php?slug=<?php echo $post['slug']; ?>" 
+                         class="text-decoration-none text-dark">
+                        <?php echo htmlspecialchars($post['title']); ?>
+                      </a>
+                    </div>
+                    <div class="text-muted small mt-1">
+                      <i class="far fa-calendar me-1"></i>
+                      <?php echo date('d/m/Y', strtotime($post['created_at'])); ?>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
-                <img src="/assets/images/anh_ngau_nhien.jpg" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;" alt="Bài viết 2">
-                <div>
-                  <div class="text-success fw-bold small mb-1">Truyền thông</div>
-                  <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">Cục Quản lý dược chi cách tra cứu thông tin thuốc, 'kỹ năng' tránh mua thuốc giả</div>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <div class="text-center py-4">
+                  <i class="fas fa-newspaper text-muted mb-2" style="font-size: 2rem;"></i>
+                  <p class="text-muted">Chưa có bài viết mới</p>
                 </div>
-              </div>
-              <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
-                <img src="/assets/images/anh_ngau_nhien.jpg" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;" alt="Bài viết 3">
-                <div>
-                  <div class="text-primary fw-bold small mb-1">Kiến thức y khoa</div>
-                  <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">Sơ cứu đột quỵ tại nhà đúng cách giúp bạn thoát khỏi nguy hiểm!</div>
-                </div>
-              </div>
-              <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
-                <img src="/assets/images/anh_ngau_nhien.jpg" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;" alt="Bài viết 4">
-                <div>
-                  <div class="text-success fw-bold small mb-1">Truyền thông</div>
-                  <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">FPT Long Châu lên tiếng về thông tin sai lệch liên quan sản phẩm Happy Mom</div>
-                </div>
-              </div>
-              <div class="mini-article d-flex align-items-center bg-white rounded-4 shadow-sm p-2">
-                <img src="/assets/images/anh_ngau_nhien.jpg" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;" alt="Bài viết 5">
-                <div>
-                  <div class="text-primary fw-bold small mb-1">Kiến thức y khoa</div>
-                  <div class="fw-semibold" style="font-size:1rem;line-height:1.3;">Chất béo chuyển hóa là gì? Tác hại của chất béo chuyển hóa như thế nào?</div>
-                </div>
-              </div>
+              <?php endif; ?>
+            </div>
+            
+            <!-- View All Button -->
+            <div class="text-center mt-4">
+              <a href="/blog.php" class="btn btn-primary rounded-pill px-4 py-2">
+                <i class="fas fa-newspaper me-2"></i>
+                Xem tất cả bài viết
+              </a>
             </div>
           </div>
         </div>
@@ -816,43 +922,79 @@
 
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>
+  
+  <!-- Appointment Modal -->
+  <?php include 'includes/appointment-modal.php'; ?>
+  
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- AOS Animation -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  
+  <!-- Global Enhancements -->
+  <script src="assets/js/global-enhancements.js"></script>
+  
   <?php include 'includes/floating_chat.php'; ?>
   <script src="assets/js/team.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const slides = document.querySelectorAll('.skillful-slide');
-      const dots = document.querySelectorAll('.skillful-dot');
-      let currentSlide = 0;
+  document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.rotating-image');
+    const texts = document.querySelectorAll('.rotating-text');
+    let currentIndex = 0;
 
-      function showSlide(index) {
-        slides.forEach(slide => slide.classList.remove('active'));
-        dots.forEach(dot => dot.classList.remove('active'));
-        slides[index].classList.add('active');
-        dots[index].classList.add('active');
-      }
-
-      function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
-        showSlide(currentSlide);
-      }
-
-      // Auto change slide every 10 seconds
-      setInterval(nextSlide, 10000);
-
-      // Click on dots to change slide
-      dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-          currentSlide = index;
-          showSlide(currentSlide);
-        });
+    function rotateContent() {
+      // Hide all images and texts
+      images.forEach(img => img.style.opacity = '0');
+      texts.forEach(text => {
+        text.style.display = 'none';
+        text.classList.remove('active');
       });
 
-    });
+      // Show current image and text
+      images[currentIndex].style.opacity = '1';
+      texts[currentIndex].style.display = 'block';
+      texts[currentIndex].classList.add('active');
+
+      // Update index
+      currentIndex = (currentIndex + 1) % images.length;
+    }
+
+    // Initial state
+    images[0].style.opacity = '1';
+    texts[0].style.display = 'block';
+    texts[0].classList.add('active');
+
+    // Rotate every 15 seconds
+    setInterval(rotateContent, 5000);
+  });
   </script>
+
+  <style>
+  .rotating-text.active {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .rotating-image {
+    transform: scale(1.02);
+    transition: transform 0.3s ease, opacity 0.5s ease;
+  }
+
+  .rotating-image.active {
+    transform: scale(1);
+  }
+  </style>
 </body>
+</html>
+
 
 </html>

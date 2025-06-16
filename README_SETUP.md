@@ -7,6 +7,7 @@
 - PHP 7.4 trở lên
 - MySQL 5.7 trở lên
 - XAMPP/WAMP/LAMP server
+- Sử dụng MySQLi
 
 ### 2. Cài đặt database
 
@@ -149,3 +150,26 @@ This project is open source. Feel free to modify and distribute.
 ---
 
 **Liên hệ hỗ trợ**: Tạo issue trên GitHub hoặc liên hệ developer.
+
+Từ db.php:
+
+✅ format_currency() - Format tiền tệ VN
+Từ format_helpers.php (với safety check):
+✅ calculateDiscountPrice() - Tính giá giảm dựa trên rating
+✅ getProductImage() - Xử lý ảnh với fallback
+✅ formatRating() - Format rating 1 chữ số thập phân
+✅ generateStars() - Tạo HTML stars cho rating
+✅ calculateVAT() - Tính thuế VAT 10%
+✅ calculateShipping() - Tính phí ship (miễn phí >500k)
+✅ formatQuantity() - Format số lượng
+✅ formatOrderCode() - Tạo mã đơn hàng QM000001
+✅ formatDateVN() - Format ngày tháng VN
+✅ timeAgo() - Thời gian tương đối
+
+🏢 Tích hợp API Địa chỉ Việt Nam:
+Select2 integration - Sử dụng Select2 cho dropdown đẹp và có search
+Vietnam Address API - Tích hợp provinces.open-api.vn để lấy đầy đủ dữ liệu địa chỉ VN
+Cascade selection - Logic chọn địa chỉ theo cấu trúc:
+Quốc gia → Tỉnh/Thành phố → Quận/Huyện → Phường/Xã
+Smart form handling - Tự động điền lại địa chỉ cũ khi edit
+Dynamic loading - Load data theo realtime khi user chọn

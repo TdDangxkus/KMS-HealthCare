@@ -7,29 +7,75 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $err = $msg = '';
 
-// Lấy thông tin user
-$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+// Lấy thông tin user đầy đủ
+$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
-// Cập nhật thông tin
+// Lấy địa chỉ mặc định của user
+$stmt = $conn->prepare("SELECT * FROM user_addresses WHERE user_id=? AND is_default=1 LIMIT 1");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$address = $stmt->get_result()->fetch_assoc();
+
+// Cập nhật thông tin cá nhân
 if (isset($_POST['update_info'])) {
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
+    $gender = $_POST['gender'];
+    $date_of_birth = $_POST['date_of_birth'];
+    
     if ($full_name && $email) {
-        $stmt1 = $conn->prepare("UPDATE users_info SET full_name=? WHERE user_id=?");
-        $stmt1->bind_param('si', $full_name, $user_id);
+        // Cập nhật bảng users_info
+        $stmt1 = $conn->prepare("UPDATE users_info SET full_name=?, gender=?, date_of_birth=? WHERE user_id=?");
+        $stmt1->bind_param('sssi', $full_name, $gender, $date_of_birth, $user_id);
         $stmt1->execute();
+        
+        // Cập nhật bảng users
         $stmt2 = $conn->prepare("UPDATE users SET email=? WHERE user_id=?");
         $stmt2->bind_param('si', $email, $user_id);
         $stmt2->execute();
-        $msg = 'Cập nhật thành công!';
+        
+        $msg = 'Cập nhật thông tin cá nhân thành công!';
         
         // Update session data
         $_SESSION['full_name'] = $full_name;
     } else {
-        $err = 'Vui lòng nhập đầy đủ thông tin!';
+        $err = 'Vui lòng nhập đầy đủ thông tin bắt buộc!';
+    }
+}
+
+// Cập nhật địa chỉ
+if (isset($_POST['update_address'])) {
+    $address_line = trim($_POST['address_line']);
+    $ward = trim($_POST['ward']);
+    $district = trim($_POST['district']);
+    $city = trim($_POST['city']);
+    $postal_code = trim($_POST['postal_code']);
+    $country = trim($_POST['country']) ?: 'Vietnam';
+    
+    if ($address_line && $ward && $district && $city) {
+        // Kiểm tra xem đã có địa chỉ mặc định chưa
+        $stmt = $conn->prepare("SELECT id FROM user_addresses WHERE user_id=? AND is_default=1");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $existing = $stmt->get_result()->fetch_assoc();
+        
+        if ($existing) {
+            // Cập nhật địa chỉ hiện tại
+            $stmt = $conn->prepare("UPDATE user_addresses SET address_line=?, ward=?, district=?, city=?, postal_code=?, country=? WHERE user_id=? AND is_default=1");
+            $stmt->bind_param('ssssssi', $address_line, $ward, $district, $city, $postal_code, $country, $user_id);
+        } else {
+            // Tạo địa chỉ mới
+            $stmt = $conn->prepare("INSERT INTO user_addresses (user_id, address_line, ward, district, city, postal_code, country, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
+            $stmt->bind_param('issssss', $user_id, $address_line, $ward, $district, $city, $postal_code, $country);
+        }
+        $stmt->execute();
+        
+        $msg = 'Cập nhật địa chỉ thành công!';
+    } else {
+        $err = 'Vui lòng nhập đầy đủ thông tin địa chỉ!';
     }
 }
 
@@ -88,10 +134,16 @@ if (isset($_POST['upload_avatar']) && isset($_FILES['avatar']['name']) && $_FILE
 }
 
 // Reload lại thông tin mới nhất
-$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
+
+// Reload địa chỉ
+$stmt = $conn->prepare("SELECT * FROM user_addresses WHERE user_id=? AND is_default=1 LIMIT 1");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$address = $stmt->get_result()->fetch_assoc();
 
 // Get user role
 $role_names = [1 => 'Quản trị viên', 2 => 'Bệnh nhân', 3 => 'Bác sĩ'];
@@ -106,6 +158,7 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
     <title>Hồ sơ cá nhân - Qickmed</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <link href="/assets/css/style.css" rel="stylesheet">
     <style>
         * {
@@ -118,20 +171,21 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding-top: 100px; /* Fix header overlap */
         }
 
         .profile-wrapper {
-            min-height: 100vh;
+            min-height: calc(100vh - 100px);
             padding: 2rem 0;
         }
 
         .profile-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 2rem;
-            padding: 0 1rem;
+            grid-template-columns: 380px 1fr;
+            gap: 2.5rem;
+            padding: 0 1.5rem;
         }
 
         /* Sidebar Profile */
@@ -139,11 +193,18 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             height: fit-content;
             position: sticky;
-            top: 2rem;
+            top: 120px; /* Adjusted for header height */
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-sidebar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
         }
 
         .profile-avatar-section {
@@ -218,6 +279,21 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
             font-weight: 500;
         }
 
+        .profile-detail {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-detail i {
+            color: #667eea;
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+
         .profile-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -255,8 +331,14 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .profile-content:hover {
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
         }
 
         .content-header {
@@ -532,6 +614,56 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
         .hidden-input {
             display: none;
         }
+
+        /* Select2 Custom Styling */
+        .select2-container--default .select2-selection--single {
+            height: 45px !important;
+            padding: 0.75rem 1rem !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            font-size: 0.95rem !important;
+            background: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 27px !important;
+            color: #4a5568 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 43px !important;
+            right: 10px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            border: 2px solid #667eea !important;
+            border-radius: 10px !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #667eea !important;
+        }
+
+        /* Loading state */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -574,6 +706,27 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                         <i class="fa-solid fa-at me-1"></i>
                         <?= htmlspecialchars($user['username']) ?>
                     </div>
+                    
+                    <?php if ($user['gender']): ?>
+                    <div class="profile-detail">
+                        <i class="fa-solid fa-venus-mars me-1"></i>
+                        <?= htmlspecialchars($user['gender']) ?>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($user['date_of_birth']): ?>
+                    <div class="profile-detail">
+                        <i class="fa-solid fa-birthday-cake me-1"></i>
+                        <?= date('d/m/Y', strtotime($user['date_of_birth'])) ?>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($address): ?>
+                    <div class="profile-detail">
+                        <i class="fa-solid fa-map-marker-alt me-1"></i>
+                        <?= htmlspecialchars($address['city'] . ', ' . $address['country']) ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="profile-stats">
@@ -609,6 +762,10 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                         <i class="fa-solid fa-user"></i>
                         Thông tin cá nhân
                     </button>
+                    <button class="tab-btn" onclick="showTab('address')">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        Địa chỉ
+                    </button>
                     <button class="tab-btn" onclick="showTab('password')">
                         <i class="fa-solid fa-lock"></i>
                         Đổi mật khẩu
@@ -631,17 +788,38 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">
-                                        <i class="fa-solid fa-signature me-1"></i>Họ và tên
+                                        <i class="fa-solid fa-signature me-1"></i>Họ và tên *
                                     </label>
                                     <input type="text" name="full_name" class="form-input" 
                                            value="<?= htmlspecialchars($user['full_name']) ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">
-                                        <i class="fa-solid fa-envelope me-1"></i>Email
+                                        <i class="fa-solid fa-envelope me-1"></i>Email *
                                     </label>
                                     <input type="email" name="email" class="form-input" 
                                            value="<?= htmlspecialchars($user['email']) ?>" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-venus-mars me-1"></i>Giới tính
+                                    </label>
+                                    <select name="gender" class="form-input">
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="Nam" <?= ($user['gender'] == 'Nam') ? 'selected' : '' ?>>Nam</option>
+                                        <option value="Nữ" <?= ($user['gender'] == 'Nữ') ? 'selected' : '' ?>>Nữ</option>
+                                        <option value="Khác" <?= ($user['gender'] == 'Khác') ? 'selected' : '' ?>>Khác</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-birthday-cake me-1"></i>Ngày sinh
+                                    </label>
+                                    <input type="date" name="date_of_birth" class="form-input" 
+                                           value="<?= htmlspecialchars($user['date_of_birth']) ?>">
                                 </div>
                             </div>
                             
@@ -657,6 +835,91 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                                 <button type="submit" name="update_info" class="btn btn-primary">
                                     <i class="fa-solid fa-save"></i>Lưu thay đổi
+                                </button>
+                                <button type="reset" class="btn btn-secondary">
+                                    <i class="fa-solid fa-undo"></i>Hủy bỏ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="address" class="tab-content">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fa-solid fa-map-marker-alt"></i>
+                            Cập nhật địa chỉ
+                        </h3>
+                        
+                        <form method="post" id="updateAddressForm">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa-solid fa-home me-1"></i>Địa chỉ cụ thể *
+                                </label>
+                                <input type="text" name="address_line" class="form-input" 
+                                       placeholder="Số nhà, tên đường..."
+                                       value="<?= htmlspecialchars($address['address_line'] ?? '') ?>" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa-solid fa-globe me-1"></i>Quốc gia
+                                </label>
+                                <select name="country" id="countrySelect" class="form-input">
+                                    <option value="Vietnam" <?= ($address['country'] ?? 'Vietnam') == 'Vietnam' ? 'selected' : '' ?>>Việt Nam</option>
+                                    <option value="USA" <?= ($address['country'] ?? '') == 'USA' ? 'selected' : '' ?>>Hoa Kỳ</option>
+                                    <option value="China" <?= ($address['country'] ?? '') == 'China' ? 'selected' : '' ?>>Trung Quốc</option>
+                                    <option value="Japan" <?= ($address['country'] ?? '') == 'Japan' ? 'selected' : '' ?>>Nhật Bản</option>
+                                    <option value="Korea" <?= ($address['country'] ?? '') == 'Korea' ? 'selected' : '' ?>>Hàn Quốc</option>
+                                    <option value="Thailand" <?= ($address['country'] ?? '') == 'Thailand' ? 'selected' : '' ?>>Thái Lan</option>
+                                    <option value="Singapore" <?= ($address['country'] ?? '') == 'Singapore' ? 'selected' : '' ?>>Singapore</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-map me-1"></i>Tỉnh/Thành phố *
+                                    </label>
+                                    <select name="city" id="citySelect" class="form-input select2" required>
+                                        <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                    </select>
+                                    <input type="hidden" name="city_text" id="cityText" value="<?= htmlspecialchars($address['city'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-city me-1"></i>Quận/Huyện *
+                                    </label>
+                                    <select name="district" id="districtSelect" class="form-input select2" required disabled>
+                                        <option value="">-- Chọn Quận/Huyện --</option>
+                                    </select>
+                                    <input type="hidden" name="district_text" id="districtText" value="<?= htmlspecialchars($address['district'] ?? '') ?>">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-map-pin me-1"></i>Phường/Xã *
+                                    </label>
+                                    <select name="ward" id="wardSelect" class="form-input select2" required disabled>
+                                        <option value="">-- Chọn Phường/Xã --</option>
+                                    </select>
+                                    <input type="hidden" name="ward_text" id="wardText" value="<?= htmlspecialchars($address['ward'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fa-solid fa-mail-bulk me-1"></i>Mã bưu điện
+                                    </label>
+                                    <input type="text" name="postal_code" class="form-input" 
+                                           placeholder="Mã bưu điện"
+                                           value="<?= htmlspecialchars($address['postal_code'] ?? '') ?>">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                                <button type="submit" name="update_address" class="btn btn-primary">
+                                    <i class="fa-solid fa-save"></i>Lưu địa chỉ
                                 </button>
                                 <button type="reset" class="btn btn-secondary">
                                     <i class="fa-solid fa-undo"></i>Hủy bỏ
@@ -748,6 +1011,13 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Global Enhancements -->
+    
     <script>
         // Tab functionality
         function showTab(tabName) {
@@ -821,6 +1091,7 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
         document.getElementById('updateInfoForm').addEventListener('submit', function(e) {
             const fullName = this.full_name.value.trim();
             const email = this.email.value.trim();
+            const dateOfBirth = this.date_of_birth.value;
 
             if (fullName.length < 2) {
                 e.preventDefault();
@@ -831,6 +1102,51 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
             if (!email.includes('@')) {
                 e.preventDefault();
                 alert('Email không hợp lệ!');
+                return;
+            }
+
+            // Validate date of birth
+            if (dateOfBirth) {
+                const birthDate = new Date(dateOfBirth);
+                const today = new Date();
+                const age = today.getFullYear() - birthDate.getFullYear();
+                
+                if (age > 120 || age < 0) {
+                    e.preventDefault();
+                    alert('Ngày sinh không hợp lệ!');
+                    return;
+                }
+            }
+        });
+
+        // Address form validation
+        document.getElementById('updateAddressForm').addEventListener('submit', function(e) {
+            const addressLine = this.address_line.value.trim();
+            const ward = this.ward.value.trim();
+            const district = this.district.value.trim();
+            const city = this.city.value.trim();
+
+            if (addressLine.length < 5) {
+                e.preventDefault();
+                alert('Địa chỉ cụ thể phải có ít nhất 5 ký tự!');
+                return;
+            }
+
+            if (ward.length < 2) {
+                e.preventDefault();
+                alert('Phường/Xã không hợp lệ!');
+                return;
+            }
+
+            if (district.length < 2) {
+                e.preventDefault();
+                alert('Quận/Huyện không hợp lệ!');
+                return;
+            }
+
+            if (city.length < 2) {
+                e.preventDefault();
+                alert('Tỉnh/Thành phố không hợp lệ!');
                 return;
             }
         });
@@ -864,8 +1180,189 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                 });
             }, 5000);
         });
+
+        // Address API and Cascade Selection
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2({
+                placeholder: 'Chọn...',
+                allowClear: true,
+                width: '100%'
+            });
+
+            let provincesData = [];
+            let districtsData = [];
+            let wardsData = [];
+
+            // Load provinces when country is Vietnam
+            function loadProvinces() {
+                if ($('#countrySelect').val() === 'Vietnam') {
+                    $.ajax({
+                        url: 'https://provinces.open-api.vn/api/?depth=3',
+                        method: 'GET',
+                        dataType: 'json',
+                        beforeSend: function() {
+                            $('#citySelect').html('<option value="">Đang tải...</option>');
+                        },
+                        success: function(data) {
+                            provincesData = data;
+                            populateProvinces(data);
+                            
+                            // If editing existing address, select current values
+                            const currentCity = $('#cityText').val();
+                            const currentDistrict = $('#districtText').val();
+                            const currentWard = $('#wardText').val();
+                            
+                            if (currentCity) {
+                                setTimeout(() => {
+                                    const province = data.find(p => p.name === currentCity);
+                                    if (province) {
+                                        $('#citySelect').val(province.code).trigger('change');
+                                        setTimeout(() => {
+                                            if (currentDistrict) {
+                                                const district = province.districts.find(d => d.name === currentDistrict);
+                                                if (district) {
+                                                    $('#districtSelect').val(district.code).trigger('change');
+                                                    setTimeout(() => {
+                                                        if (currentWard) {
+                                                            const ward = district.wards.find(w => w.name === currentWard);
+                                                            if (ward) {
+                                                                $('#wardSelect').val(ward.code);
+                                                            }
+                                                        }
+                                                    }, 100);
+                                                }
+                                            }
+                                        }, 100);
+                                    }
+                                }, 100);
+                            }
+                        },
+                        error: function() {
+                            $('#citySelect').html('<option value="">Lỗi tải dữ liệu</option>');
+                        }
+                    });
+                } else {
+                    // If not Vietnam, disable all address selects
+                    $('#citySelect').html('<option value="">Chỉ hỗ trợ địa chỉ Việt Nam</option>').prop('disabled', true);
+                    $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
+                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                }
+            }
+
+            function populateProvinces(provinces) {
+                const $citySelect = $('#citySelect');
+                $citySelect.empty().append('<option value="">-- Chọn Tỉnh/Thành phố --</option>');
+                
+                provinces.forEach(province => {
+                    $citySelect.append(`<option value="${province.code}">${province.name}</option>`);
+                });
+                
+                $citySelect.prop('disabled', false);
+            }
+
+            function populateDistricts(districts) {
+                const $districtSelect = $('#districtSelect');
+                $districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
+                
+                districts.forEach(district => {
+                    $districtSelect.append(`<option value="${district.code}">${district.name}</option>`);
+                });
+                
+                $districtSelect.prop('disabled', false);
+            }
+
+            function populateWards(wards) {
+                const $wardSelect = $('#wardSelect');
+                $wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>');
+                
+                wards.forEach(ward => {
+                    $wardSelect.append(`<option value="${ward.code}">${ward.name}</option>`);
+                });
+                
+                $wardSelect.prop('disabled', false);
+            }
+
+            // Event handlers
+            $('#countrySelect').change(function() {
+                loadProvinces();
+                $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
+                $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+            });
+
+            $('#citySelect').change(function() {
+                const provinceCode = $(this).val();
+                if (provinceCode) {
+                    const province = provincesData.find(p => p.code == provinceCode);
+                    if (province) {
+                        populateDistricts(province.districts);
+                        $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                    }
+                } else {
+                    $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
+                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                }
+            });
+
+            $('#districtSelect').change(function() {
+                const districtCode = $(this).val();
+                if (districtCode) {
+                    const provinceCode = $('#citySelect').val();
+                    const province = provincesData.find(p => p.code == provinceCode);
+                    if (province) {
+                        const district = province.districts.find(d => d.code == districtCode);
+                        if (district) {
+                            populateWards(district.wards);
+                        }
+                    }
+                } else {
+                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                }
+            });
+
+            // Update hidden fields with text values before form submission
+            $('#updateAddressForm').submit(function() {
+                const cityText = $('#citySelect option:selected').text();
+                const districtText = $('#districtSelect option:selected').text();
+                const wardText = $('#wardSelect option:selected').text();
+                
+                if (cityText && cityText !== '-- Chọn Tỉnh/Thành phố --') {
+                    $('input[name="city"]').remove();
+                    $(this).append(`<input type="hidden" name="city" value="${cityText}">`);
+                }
+                if (districtText && districtText !== '-- Chọn Quận/Huyện --') {
+                    $('input[name="district"]').remove();
+                    $(this).append(`<input type="hidden" name="district" value="${districtText}">`);
+                }
+                if (wardText && wardText !== '-- Chọn Phường/Xã --') {
+                    $('input[name="ward"]').remove();
+                    $(this).append(`<input type="hidden" name="ward" value="${wardText}">`);
+                }
+            });
+
+            // Initialize on page load
+            loadProvinces();
+
+            // Add entrance animations
+            $('.profile-sidebar').css({
+                'opacity': '0',
+                'transform': 'translateX(-50px)'
+            }).animate({
+                'opacity': '1'
+            }, 600).css('transform', 'translateX(0)');
+
+            $('.profile-content').css({
+                'opacity': '0',
+                'transform': 'translateX(50px)'
+            }).delay(200).animate({
+                'opacity': '1'
+            }, 600).css('transform', 'translateX(0)');
+        });
     </script>
 
+    <!-- Appointment Modal -->
+    <?php include 'includes/appointment-modal.php'; ?>
+    
     <?php include 'includes/footer.php'; ?>
 </body>
 </html> 
