@@ -33,31 +33,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$terms) {
         $err = 'Vui lòng đồng ý với điều khoản sử dụng!';
     } else {
-        // Kiểm tra username và email đã tồn tại chưa
-        $stmt = $conn->prepare("SELECT user_id FROM users WHERE username = ? OR email = ?");
+        // Kiểm tra username, email và phone đã tồn tại chưa
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE username = ? OR email = ? OR phone_number = ?");
         if ($stmt) {
-            $stmt->bind_param('ss', $username, $email);
+            $stmt->bind_param('sss', $username, $email, $phone);
             $stmt->execute();
             $result = $stmt->get_result();
             
             if ($result->num_rows > 0) {
-                $err = 'Tên đăng nhập hoặc email đã tồn tại!';
+                $err = 'Tên đăng nhập, email hoặc số điện thoại đã tồn tại!';
             } else {
                 // Bắt đầu transaction
                 $conn->begin_transaction();
                 
                 try {
                     // Thêm user mới (role_id = 2 cho patient)
-                    $stmt = $conn->prepare("INSERT INTO users (username, email, password, role_id, status, created_at) VALUES (?, ?, ?, 2, 'active', NOW())");
+                    $stmt = $conn->prepare("INSERT INTO users (username, email, phone_number, password, role_id, status, created_at) VALUES (?, ?, ?, ?, 2, 'active', NOW())");
                     if ($stmt) {
-                        $stmt->bind_param('sss', $username, $email, $password);
+                        $stmt->bind_param('ssss', $username, $email, $phone, $password);
                         if ($stmt->execute()) {
                             $user_id = $conn->insert_id;
                             
-                            // Thêm thông tin chi tiết (không có date_of_birth)
-                            $stmt2 = $conn->prepare("INSERT INTO users_info (user_id, full_name, gender, phone, created_at) VALUES (?, ?, ?, ?, NOW())");
+                            // Thêm thông tin chi tiết
+                            $stmt2 = $conn->prepare("INSERT INTO users_info (user_id, full_name, gender, created_at) VALUES (?, ?, ?, NOW())");
                             if ($stmt2) {
-                                $stmt2->bind_param('isss', $user_id, $full_name, $gender, $phone);
+                                $stmt2->bind_param('iss', $user_id, $full_name, $gender);
                                 if ($stmt2->execute()) {
                                     $conn->commit();
                                     

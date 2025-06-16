@@ -1,3 +1,24 @@
+<?php
+require_once 'includes/db.php';
+require_once 'includes/functions/product_functions.php';
+
+// Lấy danh sách danh mục
+$categories = getCategories();
+// Lấy sản phẩm nổi bật
+$featuredProducts = getFeaturedProducts(4);
+
+// Lấy từ khóa tìm kiếm phổ biến
+$popularSearches = [
+    'Vitamin' => 'search.php?q=vitamin',
+    'Thuốc bổ' => 'search.php?q=thuoc-bo',
+    'Máy đo huyết áp' => 'search.php?q=may-do-huyet-ap',
+    'Omega 3' => 'search.php?q=omega-3'
+];
+?>
+<?php
+session_start();
+require_once 'includes/db.php';
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +27,8 @@
     <title>Cửa hàng - Qickmed Medical & Health Care</title>
     <meta name="description" content="Mua sắm các sản phẩm y tế chất lượng cao tại Qickmed - thuốc, thực phẩm chức năng, thiết bị y tế và dược phẩm.">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -19,22 +42,61 @@
     <main>
         <!-- Hero Section -->
         <section class="hero-section">
-            <div class="hero-overlay"></div>
-            <div class="container">
-                <div class="row align-items-center min-vh-100">
-                    <div class="col-lg-8 mx-auto text-center">
-                        <div class="hero-content">
-                            <h1 class="hero-title">Cửa hàng Y tế</h1>
+            <div class="hero-bg-pattern"></div>
+            <div class="container position-relative">
+                <div class="row align-items-center min-vh-50">
+                    <div class="col-lg-6 hero-content" data-aos="fade-right">
+                        <div class="hero-badge">
+                            <i class="fas fa-star-of-life"></i>
+                            Qickmed Healthcare
+                        </div>
+                        <h1 class="hero-title">
+                            Chăm Sóc Sức Khỏe 
+                            <span class="text-primary">Tận Tâm</span>
+                        </h1>
                             <p class="hero-subtitle">
-                                Khám phá hàng ngàn sản phẩm y tế chất lượng cao từ các thương hiệu uy tín
-                            </p>
-                            <div class="hero-search">
-                                <div class="search-box">
-                                    <input type="text" placeholder="Tìm kiếm sản phẩm..." class="form-control">
-                                    <button class="btn btn-primary">
+                            Khám phá các sản phẩm y tế chất lượng cao, được chứng nhận và 
+                            tin dùng bởi các chuyên gia hàng đầu
+                        </p>
+                        <div class="search-container">
+                            <form action="search.php" method="GET" class="search-box" id="searchForm">
+                                <input type="text" 
+                                       name="q" 
+                                       id="searchInput"
+                                       class="search-input" 
+                                       placeholder="Tìm kiếm sản phẩm..." 
+                                       autocomplete="off"
+                                       required>
+                                <button type="submit" class="search-button">
                                         <i class="fas fa-search"></i>
+                                    Tìm Kiếm
                                     </button>
+                            </form>
+                            <div class="search-suggestions" id="searchSuggestions"></div>
+                            <div class="popular-searches">
+                                <div class="popular-label">Tìm kiếm phổ biến:</div>
+                                <div class="popular-tags">
+                                    <?php foreach ($popularSearches as $text => $url): ?>
+                                    <a href="<?php echo htmlspecialchars($url); ?>" class="popular-tag"><?php echo htmlspecialchars($text); ?></a>
+                                    <?php endforeach; ?>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 hero-image" data-aos="fade-left">
+                        <div class="image-wrapper">
+                            <img src="/assets/images/thuoc_icon.jpg" alt="Medical Products" class="main-image">
+                            <div class="floating-card card-1">
+                                <i class="fas fa-pills"></i>
+                                <span>100% Chính Hãng</span>
+                            </div>
+                            <div class="floating-card card-2">
+                                <i class="fas fa-truck-fast"></i>
+                                <span>Giao Hàng 24/7</span>
+                            </div>
+                            <div class="floating-card card-3">
+                                <i class="fas fa-certificate"></i>
+                                <span>Chứng Nhận Bộ Y Tế</span>
                             </div>
                         </div>
                     </div>
@@ -43,203 +105,200 @@
         </section>
 
         <!-- Categories Section -->
-        <section class="categories-section py-5">
+        <section class="categories-section">
             <div class="container">
+                <!-- Section Header -->
                 <div class="row">
-                    <div class="col-lg-8 mx-auto text-center mb-5">
-                        <h2 class="section-title">Danh mục sản phẩm</h2>
+                    <div class="col-lg-8 mx-auto text-center">
+                        <div class="section-header">
+                            <span class="section-badge">Danh Mục</span>
+                            <h2 class="section-title">Danh Mục Sản Phẩm</h2>
                         <p class="section-description">
-                            Tìm kiếm sản phẩm theo danh mục phù hợp với nhu cầu của bạn
+                                Khám phá các danh mục sản phẩm y tế chất lượng cao, được chọn lọc kỹ lưỡng để đáp ứng nhu cầu chăm sóc sức khỏe của bạn
                         </p>
+                        </div>
                     </div>
                 </div>
-                <div class="row g-4">
-                    <!-- Supplements -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="category-card">
-                            <div class="category-icon">
-                                <i class="fas fa-pills"></i>
-                            </div>
-                            <h4>Thực phẩm chức năng</h4>
-                            <p>Vitamin, khoáng chất và các loại thực phẩm bổ sung sức khỏe</p>
-                            <div class="category-count">120+ sản phẩm</div>
-                            <a href="/shop/supplements/" class="btn btn-outline-primary">Xem ngay</a>
-                        </div>
-                    </div>
 
-                    <!-- Medicine -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="category-card featured">
-                            <div class="featured-badge">Bán chạy</div>
+                <!-- Categories Grid -->
+                <div class="row g-4 categories-grid">
+                    <?php 
+                    // Lặp qua mảng categories được truyền từ controller
+                    foreach ($categories as $category): 
+                        // Lấy số lượng sản phẩm trong danh mục
+                        $productCount = getCategoryProductCount($category['category_id']);
+                        
+                        // Xác định icon mặc định
+                        $iconClass = 'fa-pills';
+                        $bgClass = 'bg-medicine';
+                        
+                        // Gán icon và background class dựa trên tên danh mục
+                        switch(true) {
+                            case stripos($category['name'], 'thiết bị') !== false:
+                            $iconClass = 'fa-stethoscope';
+                                $bgClass = 'bg-equipment';
+                                break;
+                            case stripos($category['name'], 'thuốc') !== false:
+                            $iconClass = 'fa-prescription-bottle-alt';
+                                $bgClass = 'bg-medicine';
+                                break;
+                            case stripos($category['name'], 'dược phẩm') !== false:
+                            $iconClass = 'fa-flask';
+                                $bgClass = 'bg-pharma';
+                                break;
+                            case stripos($category['name'], 'thực phẩm') !== false:
+                                $iconClass = 'fa-apple-alt';
+                                $bgClass = 'bg-supplement';
+                                break;
+                        }
+                    ?>
+                    <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?php echo $loop * 100; ?>">
+                        <div class="category-card <?php echo $bgClass; ?>">
+                            <div class="category-card-inner">
                             <div class="category-icon">
-                                <i class="fas fa-prescription-bottle-alt"></i>
+                                <i class="fas <?php echo $iconClass; ?>"></i>
+                                </div>
+                                <div class="category-content">
+                                    <h4 class="category-title">
+                                        <?php echo htmlspecialchars($category['name']); ?>
+                                    </h4>
+                                    <p class="category-description">
+                                        <?php echo htmlspecialchars($category['description']); ?>
+                                    </p>
+                                    <div class="category-meta">
+                                        <span class="category-count">
+                                            <i class="fas fa-box-open"></i>
+                                            <?php echo $productCount; ?>+ sản phẩm
+                                        </span>
+                                    </div>
+                                    <a href="/shop/category.php?id=<?php echo $category['category_id']; ?>" 
+                                       class="btn btn-category">
+                                        Xem chi tiết
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <h4>Thuốc</h4>
-                            <p>Thuốc kê đơn và không kê đơn từ các nhà sản xuất uy tín</p>
-                            <div class="category-count">300+ sản phẩm</div>
-                            <a href="/shop/medicine/" class="btn btn-primary">Xem ngay</a>
                         </div>
                     </div>
-
-                    <!-- Medical Devices -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="category-card">
-                            <div class="category-icon">
-                                <i class="fas fa-stethoscope"></i>
-                            </div>
-                            <h4>Thiết bị y tế</h4>
-                            <p>Máy đo huyết áp, nhiệt kế và các thiết bị y tế gia đình</p>
-                            <div class="category-count">80+ sản phẩm</div>
-                            <a href="/shop/devices/" class="btn btn-outline-primary">Xem ngay</a>
-                        </div>
-                    </div>
-
-                    <!-- Pharmaceuticals -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="category-card">
-                            <div class="category-icon">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <h4>Dược phẩm</h4>
-                            <p>Các sản phẩm dược phẩm chuyên dụng và thuốc đặc trị</p>
-                            <div class="category-count">200+ sản phẩm</div>
-                            <a href="/shop/pharma/" class="btn btn-outline-primary">Xem ngay</a>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>
 
         <!-- Featured Products -->
-        <section class="products-section py-5 bg-light">
+        <section class="featured-products">
             <div class="container">
+                <!-- Section Header -->
                 <div class="row">
-                    <div class="col-lg-8 mx-auto text-center mb-5">
-                        <h2 class="section-title">Sản phẩm nổi bật</h2>
+                    <div class="col-lg-8 mx-auto text-center">
+                        <div class="section-header">
+                            <span class="section-badge">Sản Phẩm Nổi Bật</span>
+                            <h2 class="section-title">Được Tin Dùng Nhiều Nhất</h2>
                         <p class="section-description">
-                            Những sản phẩm được yêu thích và đánh giá cao nhất
+                                Khám phá những sản phẩm chất lượng cao được đánh giá và tin dùng bởi hàng nghìn khách hàng
                         </p>
-                    </div>
-                </div>
-                <div class="row g-4">
-                    <!-- Product 1 -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="product-card">
-                            <div class="product-image">
-                                <img src="/assets/images/product-1.jpg" alt="Vitamin C 1000mg" class="img-fluid">
-                                <div class="product-badge sale">-20%</div>
-                                <div class="product-actions">
-                                    <button class="btn btn-sm btn-primary add-to-cart" data-id="1">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-content">
-                                <h5>Vitamin C 1000mg</h5>
-                                <p class="product-brand">Nature's Way</p>
-                                <div class="product-rating">
-                                    <span class="stars">★★★★★</span>
-                                    <span class="rating-count">(128)</span>
-                                </div>
-                                <div class="product-price">
-                                    <span class="current-price">320.000đ</span>
-                                    <span class="original-price">400.000đ</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product 2 -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="product-card">
-                            <div class="product-image">
-                                <img src="/assets/images/product-2.jpg" alt="Máy đo huyết áp" class="img-fluid">
-                                <div class="product-badge new">Mới</div>
-                                <div class="product-actions">
-                                    <button class="btn btn-sm btn-primary add-to-cart" data-id="2">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-content">
-                                <h5>Máy đo huyết áp Omron</h5>
-                                <p class="product-brand">Omron</p>
-                                <div class="product-rating">
-                                    <span class="stars">★★★★☆</span>
-                                    <span class="rating-count">(89)</span>
-                                </div>
-                                <div class="product-price">
-                                    <span class="current-price">1.250.000đ</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product 3 -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="product-card">
-                            <div class="product-image">
-                                <img src="/assets/images/product-3.jpg" alt="Paracetamol 500mg" class="img-fluid">
-                                <div class="product-actions">
-                                    <button class="btn btn-sm btn-primary add-to-cart" data-id="3">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-content">
-                                <h5>Paracetamol 500mg</h5>
-                                <p class="product-brand">Taisho</p>
-                                <div class="product-rating">
-                                    <span class="stars">★★★★★</span>
-                                    <span class="rating-count">(256)</span>
-                                </div>
-                                <div class="product-price">
-                                    <span class="current-price">25.000đ</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product 4 -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="product-card">
-                            <div class="product-image">
-                                <img src="/assets/images/product-4.jpg" alt="Omega 3" class="img-fluid">
-                                <div class="product-badge hot">Hot</div>
-                                <div class="product-actions">
-                                    <button class="btn btn-sm btn-primary add-to-cart" data-id="4">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-content">
-                                <h5>Omega 3 Fish Oil</h5>
-                                <p class="product-brand">Kirkland</p>
-                                <div class="product-rating">
-                                    <span class="stars">★★★★★</span>
-                                    <span class="rating-count">(342)</span>
-                                </div>
-                                <div class="product-price">
-                                    <span class="current-price">580.000đ</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="text-center mt-4">
-                    <a href="#" class="btn btn-primary btn-lg">Xem tất cả sản phẩm</a>
+
+                <!-- Products Grid -->
+                <div class="featured-products-grid">
+                    <?php foreach ($featuredProducts as $index => $product): ?>
+                    <div class="product-item" data-aos="fade-up" data-aos-delay="<?php echo $index * 100; ?>">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="<?php echo htmlspecialchars($product['display_image']); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="img-fluid">
+                                
+                                <?php if ($product['discount_percent'] > 0): ?>
+                                <div class="product-badge discount">
+                                    -<?php echo $product['discount_percent']; ?>%
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if ($product['stock'] <= 0): ?>
+                                <div class="product-badge out-of-stock">
+                                    Hết hàng
+                                </div>
+                                <?php endif; ?>
+
+                                <div class="product-actions">
+                                    <button class="action-btn add-to-cart" 
+                                            data-id="<?php echo $product['product_id']; ?>"
+                                            <?php echo $product['stock'] <= 0 ? 'disabled' : ''; ?>>
+                                        <i class="fas fa-cart-plus"></i>
+                                        <span class="tooltip">Thêm vào giỏ</span>
+                                    </button>
+                                    <button class="action-btn add-to-wishlist"
+                                            data-id="<?php echo $product['product_id']; ?>">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="tooltip">Yêu thích</span>
+                                    </button>
+                                    <button class="action-btn quick-view"
+                                            data-id="<?php echo $product['product_id']; ?>">
+                                        <i class="fas fa-eye"></i>
+                                        <span class="tooltip">Xem nhanh</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="product-content">
+                                <div class="product-category">
+                                    <i class="fas fa-tag"></i>
+                                    <?php echo htmlspecialchars($product['category_name']); ?>
+                                </div>
+                                
+                                <h3 class="product-title">
+                                    <a href="/shop/details.php?id=<?php echo $product['product_id']; ?>">
+                                        <?php echo htmlspecialchars($product['name']); ?>
+                                    </a>
+                                </h3>
+
+                                <div class="product-rating">
+                                    <div class="rating-stars">
+                                    <?php 
+                                    $rating = round($product['avg_rating']);
+                                    for ($i = 1; $i <= 5; $i++) {
+                                            if ($i <= $rating) {
+                                                echo '<i class="fas fa-star"></i>';
+                                            } else {
+                                                echo '<i class="far fa-star"></i>';
+                                            }
+                                        }
+                                        ?>
+                                    </div>
+                                    <span class="rating-count">(<?php echo $product['review_count']; ?> đánh giá)</span>
+                                </div>
+
+                                <div class="product-price">
+                                    <?php if ($product['discount_price']): ?>
+                                    <span class="current-price"><?php echo number_format($product['discount_price'], 0, ',', '.'); ?>đ</span>
+                                    <span class="original-price"><?php echo number_format($product['price'], 0, ',', '.'); ?>đ</span>
+                                    <?php else: ?>
+                                    <span class="current-price"><?php echo number_format($product['price'], 0, ',', '.'); ?>đ</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php if ($product['stock'] > 0): ?>
+                                <div class="product-stock">
+                                    <div class="stock-bar" style="--stock-percent: <?php echo min(($product['stock'] / 100) * 100, 100); ?>%">
+                                        <span class="stock-text">Còn <?php echo $product['stock']; ?> sản phẩm</span>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- View All Button -->
+                <div class="text-center mt-5">
+                    <a href="/shop/products.php" class="btn btn-view-all">
+                        Xem tất cả sản phẩm
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </section>
@@ -296,9 +355,23 @@
 
     <?php include 'includes/footer.php'; ?>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="/assets/js/shop.js"></script>
+    <script src="/assets/js/search.js"></script>
+    <script src="/assets/js/cart-new.js"></script>
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Global Enhancements -->
+    <script src="assets/js/global-enhancements.js"></script>
+    <script>
+        // Khởi tạo thư viện AOS để tạo hiệu ứng animation khi scroll
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    </script>
 </body>
 </html> 

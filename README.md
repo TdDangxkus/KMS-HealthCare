@@ -1,151 +1,168 @@
-# QickMed - Hệ thống đăng nhập và đăng ký
+# QickMed - Hệ thống Quản lý Phòng khám
 
-## Hướng dẫn cài đặt
+## 📚 Thư viện và Công nghệ sử dụng
 
-### 1. Yêu cầu hệ thống
+### Frontend Libraries
 
-- PHP 7.4 trở lên
-- MySQL 5.7 trở lên
-- XAMPP/WAMP/LAMP server
+#### CSS Frameworks & UI
 
-### 2. Cài đặt database
+- **Bootstrap 5.3.0** - Framework CSS responsive và component library
+  - URL: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css`
+- **Font Awesome 6.4.0** - Icon library với hơn 7000+ icons
+  - URL: `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`
+- **Select2 4.1.0** - Advanced select boxes với search và multi-select
+  - URL: `https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css`
+- **Flatpickr** - Modern date/time picker library
+  - URL: `https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css`
+- **SweetAlert2** - Beautiful, responsive alerts và confirmations
+  - URL: `https://cdn.jsdelivr.net/npm/sweetalert2@11`
 
-#### Cách 1: Sử dụng file setup.php (Khuyến nghị)
+#### JavaScript Libraries
 
-1. Đảm bảo XAMPP/WAMP đã khởi động MySQL
-2. Truy cập: `http://localhost/your-project/setup.php`
-3. Làm theo hướng dẫn trên màn hình
-4. **Quan trọng**: Xóa file `setup.php` sau khi cài đặt xong
+- **jQuery 3.6.0** - Fast JavaScript library
+  - URL: `https://code.jquery.com/jquery-3.6.0.min.js`
+- **Bootstrap Bundle JS 5.3.0** - Bootstrap JavaScript components
+  - URL: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js`
+- **Select2 JS** - JavaScript functionality cho Select2
+  - URL: `https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js`
+- **Flatpickr JS** - Date picker functionality
+  - URL: `https://cdn.jsdelivr.net/npm/flatpickr`
+- **AOS (Animate On Scroll)** - Animation library for scroll effects
+  - URL: `https://unpkg.com/aos@2.3.1/dist/aos.js`
 
-#### Cách 2: Import trực tiếp SQL
+### Backend Technologies
 
-1. Mở phpMyAdmin (`http://localhost/phpmyadmin`)
-2. Import file `setup_database.sql`
-3. Hoặc copy nội dung file và paste vào SQL tab
+- **PHP 8.0+** - Server-side scripting language
+- **MySQL 8.0+** - Relational database management system
+- **Apache/Nginx** - Web server
 
-### 3. Cấu hình
+### Address Integration
 
-#### Kiểm tra file `includes/db.php`:
+- **Vietnam Provinces API** - `provinces.open-api.vn` - Complete Vietnam address data
+  - 63 Tỉnh/Thành phố
+  - 700+ Quận/Huyện
+  - 10,000+ Phường/Xã/Thị trấn
+  - API URL: `https://provinces.open-api.vn/api/?depth=3`
+
+### Appointment System Features
+
+- **Real-time booking** - Live availability checking
+- **Cascade address selection** - Vietnam location hierarchy
+- **Modal integration** - Reusable booking modal component
+- **Responsive design** - Mobile-first approach
+- **Status management** - Pending → Confirmed → Completed → Canceled
+
+### API Endpoints
+
+- `/api/get-doctors.php` - Fetch available doctors
+- `/api/get-time-slots.php` - Get available appointment slots
+- `/api/book-appointment.php` - Process appointment booking
+- External: `provinces.open-api.vn/api/?depth=3` - Vietnam address data
+
+### File Structure
+
+```
+├── appointments.php              # User appointment management
+├── book-appointment.php          # Appointment booking page
+├── profile.php                   # User profile with address integration
+├── includes/
+│   └── appointment-modal.php     # Reusable booking modal
+├── api/
+│   ├── get-doctors.php          # Doctors API
+│   ├── get-time-slots.php       # Time slots API
+│   └── book-appointment.php     # Booking API
+└── assets/
+    ├── css/style.css            # Custom styles
+    └── images/                  # Static images
+```
+
+### Key Features Implemented
+
+#### 🏥 Appointment Management System
+
+- ✅ **User Appointment Dashboard** - View, filter, cancel appointments
+- ✅ **Professional Booking Page** - Step-by-step appointment booking
+- ✅ **Reusable Modal Component** - Quick booking from any page
+- ✅ **Real-time Availability** - Live checking of doctor schedules
+- ✅ **Status Tracking** - Pending → Confirmed → Completed → Canceled
+
+#### 🇻🇳 Vietnam Address Integration
+
+- ✅ **Complete Location Data** - All 63 provinces with districts/wards
+- ✅ **Cascade Selection** - Province → District → Ward hierarchy
+- ✅ **Search Functionality** - Find locations quickly with Select2
+- ✅ **Auto-population** - Load existing addresses for editing
+- ✅ **Form Integration** - Seamless integration with user profiles
+
+#### 🎨 UI/UX Enhancements
+
+- ✅ **Modern Design** - Professional gradient backgrounds
+- ✅ **Header Overlap Fix** - Proper spacing for fixed navigation
+- ✅ **Responsive Layout** - Mobile-first responsive design
+- ✅ **Interactive Elements** - Smooth animations and transitions
+- ✅ **Loading States** - User feedback during async operations
+
+#### 🔄 Workflow Integration
+
+- ✅ **Admin Approval System** - All appointments start as 'pending'
+- ✅ **Status Management** - Complete appointment lifecycle
+- ✅ **User Notifications** - Success/error messages with auto-hide
+- ✅ **Validation** - Client and server-side form validation
+- ✅ **Conflict Prevention** - Check for time slot conflicts
+
+### Usage Examples
+
+#### Include Appointment Modal in any page:
 
 ```php
-$host = 'localhost';
-$db   = 'qickmed';  // Tên database
-$user = 'root';     // Username MySQL
-$pass = '';         // Password MySQL (để trống nếu dùng XAMPP)
+<?php include 'includes/appointment-modal.php'; ?>
+
+<!-- Trigger button -->
+<button onclick="openAppointmentModal()" class="btn btn-primary">
+    Đặt lịch khám
+</button>
 ```
 
-### 4. Cấu trúc Database
+#### Vietnam Address Selection:
 
-#### Bảng chính:
-
-- `roles`: Vai trò người dùng (admin, patient, doctor)
-- `users`: Thông tin đăng nhập
-- `users_info`: Thông tin chi tiết người dùng
-- `user_addresses`: Địa chỉ người dùng
-- `guest_users`: Khách vãng lai
-- `remember_tokens`: Token "Ghi nhớ đăng nhập"
-
-#### Tài khoản mặc định:
-
-- **Username**: admin
-- **Password**: admin123
-- **Email**: admin@qickmed.com
-- **Role**: Administrator
-
-### 5. Tính năng
-
-#### Đăng ký:
-
-- ✅ Validation đầy đủ (email, phone, password)
-- ✅ Mã hóa mật khẩu bằng bcrypt
-- ✅ Kiểm tra trùng lặp username/email/phone
-- ✅ Transaction để đảm bảo dữ liệu
-- ✅ Giao diện responsive với Bootstrap 5
-
-#### Đăng nhập:
-
-- ✅ Đăng nhập bằng username hoặc email
-- ✅ Tính năng "Ghi nhớ đăng nhập" (30 ngày)
-- ✅ Redirect theo role người dùng
-- ✅ Validation client-side và server-side
-- ✅ Bảo mật chống XSS
-
-#### Bảo mật:
-
-- ✅ Password hashing với PHP password_hash()
-- ✅ Prepared statements chống SQL injection
-- ✅ XSS protection với htmlspecialchars()
-- ✅ CSRF protection (có thể thêm)
-- ✅ Session management
-
-### 6. Cấu trúc file
-
-```
-project/
-├── includes/
-│   ├── db.php              # Kết nối database
-│   ├── header.php          # Header chung
-│   └── footer.php          # Footer chung
-├── assets/                 # CSS, JS, images
-├── login.php              # Trang đăng nhập
-├── register.php           # Trang đăng ký
-├── logout.php             # Đăng xuất
-├── setup.php              # Setup database (xóa sau khi dùng)
-├── setup_database.sql     # File SQL database
-└── README_SETUP.md        # Hướng dẫn này
+```javascript
+// Initialize cascade selection
+$("#countrySelect").change(function () {
+  if ($(this).val() === "Vietnam") {
+    loadProvinces(); // Load all 63 provinces
+  }
+});
 ```
 
-### 7. Sử dụng
+#### API Usage:
 
-1. **Truy cập trang chủ**: `http://localhost/your-project/`
-2. **Đăng ký tài khoản mới**: `/register.php`
-3. **Đăng nhập**: `/login.php`
-4. **Đăng xuất**: `/logout.php`
+```javascript
+// Get available time slots
+fetch(`/api/get-time-slots.php?doctor_id=${doctorId}&date=${date}`)
+  .then((response) => response.json())
+  .then((data) => {
+    // Handle available slots
+  });
+```
 
-### 8. Customization
+### Deployment Notes
 
-#### Thay đổi cấu hình database:
+- Ensure PHP 8.0+ and MySQL 8.0+ are installed
+- Configure database connection in `includes/db.php`
+- Set proper file permissions for upload directories
+- Enable mod_rewrite for clean URLs
+- Configure SSL for production use
 
-Sửa file `includes/db.php`
+### Development Team
 
-#### Thêm validation:
-
-Sửa file `register.php` và `login.php`
-
-#### Thay đổi giao diện:
-
-Các file sử dụng Bootstrap 5, có thể custom CSS trong `assets/`
-
-### 9. Troubleshooting
-
-#### Lỗi kết nối database:
-
-- Kiểm tra MySQL đã chạy chưa
-- Kiểm tra username/password trong `includes/db.php`
-- Kiểm tra tên database có đúng không
-
-#### Lỗi không tạo được bảng:
-
-- Kiểm tra quyền user MySQL
-- Chạy lại `setup.php`
-
-#### Lỗi session:
-
-- Kiểm tra PHP session có hoạt động không
-- Kiểm tra quyền ghi folder temp
-
-### 10. Security Notes
-
-- **Xóa `setup.php`** sau khi cài đặt
-- Đổi mật khẩu admin mặc định
-- Cập nhật PHP và MySQL thường xuyên
-- Backup database định kỳ
-- Sử dụng HTTPS trong production
-
-### 11. License
-
-This project is open source. Feel free to modify and distribute.
+- **Frontend**: Bootstrap 5, Modern CSS3, JavaScript ES6+
+- **Backend**: PHP 8, MySQL, RESTful APIs
+- **Integration**: Vietnam Address API, Real-time validation
+- **Design**: Mobile-first, Professional healthcare theme
 
 ---
 
-**Liên hệ hỗ trợ**: Tạo issue trên GitHub hoặc liên hệ developer qua email ( dvtdang1101@gmail.com ).
+**Version**: 1.0.0  
+**Last Updated**: 2024  
+**License**: Proprietary  
+**Contact**: QickMed Development Team

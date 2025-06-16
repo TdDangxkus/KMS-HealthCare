@@ -18,6 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize scroll animations
     initializeScrollAnimations();
+    
+    // Xử lý sự kiện click vào nút Xem nhanh
+    document.querySelectorAll('.quick-view').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            // Chuyển hướng đến trang chi tiết sản phẩm
+            window.location.href = `/shop/details.php?id=${productId}`;
+        });
+    });
 });
 
 // Initialize scroll-triggered animations
@@ -70,25 +79,25 @@ function initializeProductCards() {
             card.style.boxShadow = '';
         });
         
-        // Add to cart animation
-        if (addToCartBtn) {
-            addToCartBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const productId = addToCartBtn.getAttribute('data-id');
-                addToCart(productId);
-                
-                // Animation feedback
-                addToCartBtn.innerHTML = '<i class="fas fa-check"></i>';
-                addToCartBtn.style.background = '#28a745';
-                
-                setTimeout(() => {
-                    addToCartBtn.innerHTML = '<i class="fas fa-cart-plus"></i>';
-                    addToCartBtn.style.background = '';
-                }, 1500);
-            });
-        }
+        // Add to cart animation - REMOVED TO AVOID CONFLICT WITH cart-new.js
+        // if (addToCartBtn) {
+        //     addToCartBtn.addEventListener('click', (e) => {
+        //         e.preventDefault();
+        //         e.stopPropagation();
+        //         
+        //         const productId = addToCartBtn.getAttribute('data-id');
+        //         addToCart(productId);
+        //         
+        //         // Animation feedback
+        //         addToCartBtn.innerHTML = '<i class="fas fa-check"></i>';
+        //         addToCartBtn.style.background = '#28a745';
+        //         
+        //         setTimeout(() => {
+        //             addToCartBtn.innerHTML = '<i class="fas fa-cart-plus"></i>';
+        //             addToCartBtn.style.background = '';
+        //         }, 1500);
+        //     });
+        // }
     });
 }
 
@@ -551,4 +560,9 @@ function addScrollProgress() {
 }
 
 // Initialize scroll progress
-document.addEventListener('DOMContentLoaded', addScrollProgress); 
+document.addEventListener('DOMContentLoaded', addScrollProgress);
+
+// Hàm format giá tiền
+function formatPrice(price) {
+    return new Intl.NumberFormat('vi-VN').format(price);
+} 

@@ -485,33 +485,24 @@ function processCheckout() {
         return;
     }
     
-    // Validate payment method
-    const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
-    if (!selectedPayment) {
-        showNotification('Vui lòng chọn phương thức thanh toán', 'error');
-        return;
-    }
+    // Create form to send cart data to checkout page
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'checkout.php';
     
-    // Show loading
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    const originalText = checkoutBtn.innerHTML;
-    checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
-    checkoutBtn.disabled = true;
+    const cartInput = document.createElement('input');
+    cartInput.type = 'hidden';
+    cartInput.name = 'cart_data';
+    cartInput.value = JSON.stringify(cartData.items);
     
-    // Simulate checkout process
-    setTimeout(() => {
-        // Success
-        showNotification('Đặt hàng thành công! Chúng tôi sẽ liên hệ xác nhận trong ít phút.', 'success');
-        
-        // Clear cart
-        cartData.items = [];
-        localStorage.removeItem('qickmed_cart');
-        
-        // Redirect to success page
-        setTimeout(() => {
-            window.location.href = '/order-success.php';
-        }, 2000);
-    }, 3000);
+    form.appendChild(cartInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Proceed to checkout function for cart page
+function proceedToCheckout() {
+    processCheckout();
 }
 
 // Initialize animations
@@ -554,6 +545,7 @@ function formatPrice(price) {
 
 function saveCartData() {
     localStorage.setItem('qickmed_cart', JSON.stringify(cartData.items));
+    updateCartCount(cartData.items.reduce((total, item) => total + item.quantity, 0));
 }
 
 function showNotification(message, type = 'info') {
@@ -713,4 +705,19 @@ style.textContent = `
         padding: 3rem;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+// Update cart count in header
+function updateCartCount(count) {
+    const cartCountElement = document.querySelector('.cart-count');
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+        
+        // Hiển thị số lượng nếu > 0, ẩn nếu = 0
+        if (count > 0) {
+            cartCountElement.style.display = 'flex';
+        } else {
+            cartCountElement.style.display = 'none';
+        }
+    }
+} 
