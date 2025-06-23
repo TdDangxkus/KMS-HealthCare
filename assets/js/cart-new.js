@@ -198,14 +198,24 @@ class CartManager {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `cart-notification alert alert-${this.getAlertClass(type)} position-fixed`;
+        
+        // Check if mobile
+        const isMobile = window.innerWidth <= 768;
+        
         notification.style.cssText = `
-            top: 20px; 
-            right: 20px; 
-            z-index: 9999; 
-            min-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            animation: slideInRight 0.3s ease-out;
+            position: fixed !important;
+            top: ${isMobile ? '80px' : '100px'} !important; 
+            ${isMobile ? 'left: 10px !important; right: 10px !important;' : 'right: 20px !important; min-width: 300px !important; max-width: 400px !important;'}
+            z-index: 999999 !important; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+            border-radius: 12px !important;
+            animation: slideInRight 0.3s ease-out !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            padding: 1rem !important;
+            transform: translateZ(0) !important;
         `;
         
         notification.innerHTML = `
@@ -217,6 +227,22 @@ class CartManager {
         `;
         
         document.body.appendChild(notification);
+        
+        // Force z-index and styles after append - multiple attempts to ensure it works
+        setTimeout(() => {
+            notification.style.setProperty('z-index', '999999', 'important');
+            notification.style.setProperty('position', 'fixed', 'important');
+            notification.style.setProperty('top', isMobile ? '80px' : '100px', 'important');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.style.setProperty('z-index', '999999', 'important');
+            notification.style.setProperty('position', 'fixed', 'important');
+        }, 50);
+        
+        setTimeout(() => {
+            notification.style.setProperty('z-index', '999999', 'important');
+        }, 100);
         
         // Auto remove after 4 seconds
         setTimeout(() => {
@@ -305,6 +331,29 @@ style.textContent = `
     
     .cart-notification {
         transition: all 0.3s ease;
+        font-weight: 500;
+        z-index: 99999 !important;
+    }
+    
+    .cart-notification .alert {
+        z-index: 99999 !important;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .cart-notification {
+            top: 80px !important;
+            left: 10px !important;
+            right: 10px !important;
+            min-width: auto !important;
+            max-width: none !important;
+        }
+    }
+    
+    /* Ensure notification is always on top */
+    .cart-notification.position-fixed {
+        z-index: 99999 !important;
+        position: fixed !important;
     }
 `;
 document.head.appendChild(style); 

@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'includes/db.php';
 require_once 'includes/blog_functions.php';
 
@@ -38,29 +39,29 @@ if ($category_id) {
     }
 }
 ?>
-<?php
-session_start();
-require_once 'includes/db.php';
-?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $current_category ? $current_category['name'] . ' - ' : ''; ?>Góc sức khỏe - Qickmed</title>
-    <meta name="description" content="Đọc những bài viết y khoa mới nhất, mẹo chăm sóc sức khỏe và tin tức y tế từ các chuyên gia tại Qickmed.">
+    <title><?php echo $current_category ? $current_category['name'] . ' - ' : ''; ?>Góc sức khỏe - MediSync</title>
+    <meta name="description" content="Đọc những bài viết y khoa mới nhất, mẹo chăm sóc sức khỏe và tin tức y tế từ các chuyên gia tại MediSync.">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/blog.css">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="assets/css/blog.css">  
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
+    <!-- Appointment Modal -->
+    <?php include 'includes/appointment-modal.php'; ?>
 
     <main class="blog-main">
         <!-- Breadcrumb -->

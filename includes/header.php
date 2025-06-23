@@ -1210,6 +1210,8 @@ body {
                         <li><a class="dropdown-item" href="/shop.php?cat=medicine"><i class="fas fa-capsules"></i>Thuốc</a></li>
                         <li><a class="dropdown-item" href="/shop.php?cat=supplements"><i class="fas fa-leaf"></i>Thực phẩm chức năng</a></li>
                         <li><a class="dropdown-item" href="/shop.php?cat=devices"><i class="fas fa-heartbeat"></i>Thiết bị y tế</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item" href="orders.php"><i class="fas fa-shopping-bag"></i>Đơn hàng của tôi</a></li>
                     </ul>
         </div>
         

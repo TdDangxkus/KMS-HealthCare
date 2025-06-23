@@ -1,24 +1,31 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'includes/functions/format_helpers.php';
 
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id']) || !isset($_GET['order_id'])) {
-    header('Location: /shop.php');
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
-$order_id = (int)$_GET['order_id'];
+$order_id = $_GET['order_id'] ?? null;
+
+if (!$order_id) {
+    header('Location: orders.php');
+    exit();
+}
 
 // Lấy thông tin đơn hàng
 $stmt = $conn->prepare("
     SELECT 
-        o.order_id, o.total, o.payment_method, o.order_date, o.shipping_address,
+        o.order_id, o.total, o.status, o.payment_method, o.payment_status,
+        o.shipping_address, o.order_note, o.order_date,
         COUNT(oi.item_id) as item_count
     FROM orders o 
     LEFT JOIN order_items oi ON o.order_id = oi.order_id 
-    WHERE o.order_id = ? AND o.user_id = ? AND o.status != 'cart'
+    WHERE o.order_id = ? AND o.user_id = ?
     GROUP BY o.order_id
 ");
 $stmt->bind_param('ii', $order_id, $user_id);
@@ -26,11 +33,29 @@ $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
 
 if (!$order) {
-    header('Location: /shop.php');
+    header('Location: orders.php');
     exit();
 }
 
-$shipping_address = json_decode($order['shipping_address'], true);
+// Lấy chi tiết sản phẩm trong đơn hàng
+$stmt = $conn->prepare("
+    SELECT 
+        oi.quantity, oi.unit_price,
+        p.name, p.image_url as display_image
+    FROM order_items oi 
+    JOIN products p ON oi.product_id = p.product_id 
+    WHERE oi.order_id = ?
+");
+$stmt->bind_param('i', $order_id);
+$stmt->execute();
+$order_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Xử lý ảnh mặc định
+foreach ($order_items as $index => $item) {
+    if (empty($item['display_image'])) {
+        $order_items[$index]['display_image'] = '/assets/images/default-product.jpg';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,349 +63,484 @@ $shipping_address = json_decode($order['shipping_address'], true);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt hàng thành công - Qickmed</title>
+    <title>Đặt hàng thành công - QickMed</title>
     
-    <!-- Bootstrap CSS -->
+    <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --success-color: #48bb78;
+            --radius: 20px;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
         body {
-            background: #f8f9fa;
-            font-family: 'Inter', sans-serif;
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding-top: 140px;
+            min-height: 100vh;
+            line-height: 1.6;
         }
-        
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
         .success-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            padding: 3rem 0;
         }
-        
+
         .success-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        
-        .success-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 3rem 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 3rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
             text-align: center;
+            animation: slideInUp 0.8s ease-out;
         }
-        
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .success-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.2);
+            width: 120px;
+            height: 120px;
+            background: var(--success-gradient);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
+            margin: 0 auto 2rem;
+            animation: bounceIn 1s ease-out 0.3s both;
         }
-        
-        .success-content {
-            padding: 2rem;
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-        
-        .order-info {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+
+        .success-icon i {
+            font-size: 3rem;
+            color: white;
         }
-        
-        .info-row {
+
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .success-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .order-summary-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.8s ease-out 1s both;
+        }
+
+        .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
         }
-        
-        .info-row:last-child {
-            border-bottom: none;
+
+        .order-info h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
         }
-        
+
+        .order-meta {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #004085;
+            border: 2px solid #667eea;
+        }
+
+        .order-items {
+            margin-bottom: 2rem;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: #667eea;
+        }
+
+        .item-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .item-quantity {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .order-total {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .total-amount {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .shipping-address {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            white-space: pre-line;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
         .action-buttons {
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 1.2s both;
         }
-        
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .btn-action {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
         }
-        
-        .btn-primary-custom:hover {
+
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
             color: white;
         }
-        
-        .btn-outline-custom {
-            border: 2px solid #667eea;
+
+        .btn-outline {
+            background: white;
             color: #667eea;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            border: 2px solid #667eea;
         }
-        
-        .btn-outline-custom:hover {
+
+        .btn-outline:hover {
             background: #667eea;
             color: white;
+            transform: translateY(-2px);
         }
-        
-        .timeline {
-            padding: 1rem 0;
-        }
-        
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .timeline-icon {
-            width: 40px;
-            height: 40px;
-            background: #28a745;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-        }
-        
-        .timeline-icon.pending {
-            background: #ffc107;
-        }
-        
-        .timeline-icon.inactive {
-            background: #dee2e6;
-            color: #6c757d;
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+
+            .success-card {
+                padding: 2rem;
+            }
+
+            .success-title {
+                font-size: 2rem;
+            }
+
+            .order-summary-card {
+                padding: 2rem;
+            }
+
+            .order-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .order-item {
+                padding: 1rem;
+            }
+
+            .item-image {
+                width: 60px;
+                height: 60px;
+                margin-right: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-action {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
         }
     </style>
 </head>
+
 <body>
     <?php include 'includes/header.php'; ?>
-    
+
     <div class="success-container">
-        <div class="success-card">
-            <div class="success-header">
-                <div class="success-icon">
-                    <i class="fas fa-check"></i>
+        <div class="container">
+            <!-- Success Message -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="success-card">
+                        <div class="success-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h1 class="success-title">Đặt hàng thành công!</h1>
+                        <p class="success-subtitle">
+                            Cảm ơn bạn đã tin tưởng QickMed. Đơn hàng #<?php echo $order['order_id']; ?> của bạn đã được xác nhận và đang được xử lý.
+                        </p>
+                    </div>
                 </div>
-                <h1 class="mb-3">Đặt hàng thành công!</h1>
-                <p class="mb-0">Cảm ơn bạn đã tin tưởng và mua sắm tại Qickmed</p>
             </div>
-            
-            <div class="success-content">
-                <div class="order-info">
-                    <h5 class="mb-3">
-                        <i class="fas fa-receipt me-2"></i>
-                        Thông tin đơn hàng
-                    </h5>
-                    
-                    <div class="info-row">
-                        <span>Mã đơn hàng:</span>
-                        <strong>#QM<?php echo str_pad($order['order_id'], 6, '0', STR_PAD_LEFT); ?></strong>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Ngày đặt:</span>
-                        <span><?php echo date('d/m/Y H:i', strtotime($order['order_date'])); ?></span>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Số lượng sản phẩm:</span>
-                        <span><?php echo $order['item_count']; ?> sản phẩm</span>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Tổng tiền:</span>
-                        <strong class="text-primary fs-5"><?php echo number_format($order['total'], 0, ',', '.'); ?>đ</strong>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Phương thức thanh toán:</span>
-                        <span>
+
+            <!-- Order Details -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="order-summary-card">
+                        <!-- Order Header -->
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>Đơn hàng #<?php echo $order['order_id']; ?></h3>
+                                <div class="order-meta">
+                                    <div><i class="fas fa-calendar me-2"></i>Ngày đặt: <?php echo date('d/m/Y H:i', strtotime($order['order_date'])); ?></div>
+                                    <div><i class="fas fa-box me-2"></i><?php echo $order['item_count']; ?> sản phẩm</div>
+                                </div>
+                            </div>
+                            <div class="status-badge">
+                                <i class="fas fa-shipping-fast"></i>
+                                Đã gửi hàng
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="order-items">
+                            <?php foreach ($order_items as $item): ?>
+                                <div class="order-item">
+                                    <img src="<?php echo htmlspecialchars($item['display_image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($item['name']); ?>" 
+                                         class="item-image">
+                                    <div class="item-info">
+                                        <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
+                                        <div class="item-quantity">Số lượng: <?php echo $item['quantity']; ?></div>
+                                    </div>
+                                    <div class="item-price">
+                                        <?php echo number_format($item['unit_price'] * $item['quantity'], 0, ',', '.'); ?>đ
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Order Total -->
+                        <div class="order-total">
+                            <div class="total-amount"><?php echo number_format($order['total'], 0, ',', '.'); ?>đ</div>
+                            <div class="total-label">Tổng cộng (đã bao gồm phí vận chuyển)</div>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        <div class="shipping-address">
+                            <strong><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ giao hàng:</strong><br>
+                            <?php echo htmlspecialchars($order['shipping_address']); ?>
+                        </div>
+
+                        <!-- Payment Info -->
+                        <div class="shipping-address">
+                            <strong><i class="fas fa-credit-card me-2"></i>Phương thức thanh toán:</strong><br>
                             <?php 
-                            switch($order['payment_method']) {
-                                case 'cod': echo 'Thanh toán khi nhận hàng'; break;
-                                case 'vnpay': echo 'VNPay'; break;
-                                case 'momo': echo 'MoMo'; break;
-                                default: echo 'Không xác định';
-                            }
+                            $payment_methods = [
+                                'cod' => 'Thanh toán khi nhận hàng (COD)',
+                                'vnpay' => 'VNPay',
+                                'momo' => 'MoMo'
+                            ];
+                            echo $payment_methods[$order['payment_method']] ?? ucfirst($order['payment_method']);
                             ?>
-                        </span>
-                    </div>
-                </div>
-                
-                <?php if ($shipping_address): ?>
-                <div class="order-info">
-                    <h5 class="mb-3">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        Địa chỉ giao hàng
-                    </h5>
-                    
-                    <div class="info-row">
-                        <span>Người nhận:</span>
-                        <span><?php echo htmlspecialchars($shipping_address['name']); ?></span>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Số điện thoại:</span>
-                        <span><?php echo htmlspecialchars($shipping_address['phone']); ?></span>
-                    </div>
-                    
-                    <div class="info-row">
-                        <span>Địa chỉ:</span>
-                        <span>
-                            <?php 
-                            echo htmlspecialchars($shipping_address['address_line']) . ', ' .
-                                 htmlspecialchars($shipping_address['ward']) . ', ' .
-                                 htmlspecialchars($shipping_address['district']) . ', ' .
-                                 htmlspecialchars($shipping_address['city']);
-                            ?>
-                        </span>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <div class="order-info">
-                    <h5 class="mb-3">
-                        <i class="fas fa-truck me-2"></i>
-                        Trạng thái đơn hàng
-                    </h5>
-                    
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-icon">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            <div>
-                                <strong>Đặt hàng thành công</strong>
-                                <div class="text-muted small"><?php echo date('d/m/Y H:i', strtotime($order['order_date'])); ?></div>
-                            </div>
                         </div>
-                        
-                        <div class="timeline-item">
-                            <div class="timeline-icon pending">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div>
-                                <strong>Đang xử lý</strong>
-                                <div class="text-muted small">Chúng tôi đang chuẩn bị đơn hàng của bạn</div>
-                            </div>
+
+                        <!-- Order Note -->
+                        <?php if (!empty($order['order_note'])): ?>
+                        <div class="shipping-address">
+                            <strong><i class="fas fa-sticky-note me-2"></i>Ghi chú:</strong><br>
+                            <?php echo htmlspecialchars($order['order_note']); ?>
                         </div>
-                        
-                        <div class="timeline-item">
-                            <div class="timeline-icon inactive">
-                                <i class="fas fa-truck"></i>
-                            </div>
-                            <div>
-                                <strong>Đang giao hàng</strong>
-                                <div class="text-muted small">Đơn hàng sẽ được giao trong 1-3 ngày</div>
-                            </div>
+                        <?php endif; ?>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a href="orders.php" class="btn-action btn-primary">
+                                <i class="fas fa-list"></i>
+                                Xem tất cả đơn hàng
+                            </a>
+                            <a href="shop.php" class="btn-action btn-outline">
+                                <i class="fas fa-shopping-bag"></i>
+                                Tiếp tục mua sắm
+                            </a>
                         </div>
-                        
-                        <div class="timeline-item">
-                            <div class="timeline-icon inactive">
-                                <i class="fas fa-box"></i>
-                            </div>
-                            <div>
-                                <strong>Đã giao</strong>
-                                <div class="text-muted small">Bạn đã nhận được đơn hàng</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <a href="/profile.php?tab=orders" class="btn-primary-custom">
-                        <i class="fas fa-list me-2"></i>
-                        Xem đơn hàng của tôi
-                    </a>
-                    
-                    <a href="/shop.php" class="btn-outline-custom">
-                        <i class="fas fa-shopping-bag me-2"></i>
-                        Tiếp tục mua sắm
-                    </a>
-                </div>
-                
-                <div class="text-center mt-4">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Lưu ý:</strong> Chúng tôi sẽ gửi email xác nhận và cập nhật trạng thái đơn hàng qua email và SMS.
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Appointment Modal -->
+    <?php include 'includes/appointment-modal.php'; ?>
+
     <?php include 'includes/footer.php'; ?>
-    
-    <!-- Scripts -->
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Confetti animation
-        function createConfetti() {
-            const colors = ['#667eea', '#764ba2', '#28a745', '#ffc107', '#dc3545'];
-            
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.cssText = `
-                    position: fixed;
-                    width: 8px;
-                    height: 8px;
-                    background: ${colors[Math.floor(Math.random() * colors.length)]};
-                    left: ${Math.random() * 100}vw;
-                    top: -10px;
-                    z-index: 9999;
-                    border-radius: 2px;
-                    animation: fall ${2 + Math.random() * 3}s linear forwards;
-                `;
-                
-                document.body.appendChild(confetti);
-                
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
-            }
-        }
-        
-        // Add confetti animation CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fall {
-                0% {
-                    transform: translateY(-10px) rotate(0deg);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(100vh) rotate(360deg);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Trigger confetti on page load
-        window.addEventListener('load', createConfetti);
+        $(document).ready(function() {
+            // Add celebration effect
+            setTimeout(function() {
+                // You can add confetti or other celebration effects here
+                console.log('Order placed successfully!');
+            }, 1000);
+        });
     </script>
 </body>
 </html> 

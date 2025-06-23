@@ -60,14 +60,14 @@ if ($status_filter != 'all') {
 }
 
 if (!empty($date_filter)) {
-    $where_conditions[] = "DATE(a.appointment_date) = ?";
+    $where_conditions[] = "DATE(a.appointment_time) = ?";
     $params[] = $date_filter;
 }
 
 if (!empty($search)) {
-    $where_conditions[] = "(ui_patient.full_name LIKE ? OR ui_doctor.full_name LIKE ? OR s.name LIKE ?)";
+    $where_conditions[] = "(COALESCE(ui_patient.full_name, u_patient.username, gu.full_name) LIKE ? OR COALESCE(ui_doctor.full_name, u_doctor.username, u_doctor.email) LIKE ?)";
     $search_param = "%$search%";
-    $params = array_merge($params, [$search_param, $search_param, $search_param]);
+    $params = array_merge($params, [$search_param, $search_param]);
 }
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
@@ -80,46 +80,71 @@ $offset = ($page - 1) * $limit;
 // Count total
 $count_sql = "SELECT COUNT(*) as total 
               FROM appointments a
-              LEFT JOIN users_info ui_patient ON a.patient_id = ui_patient.user_id
-              LEFT JOIN users_info ui_doctor ON a.doctor_id = ui_doctor.user_id
-              LEFT JOIN services s ON a.service_id = s.service_id
+              LEFT JOIN users u_patient ON a.user_id = u_patient.user_id
+              LEFT JOIN users_info ui_patient ON a.user_id = ui_patient.user_id
+              LEFT JOIN guest_users gu ON a.guest_id = gu.guest_id
+              LEFT JOIN doctors d ON a.doctor_id = d.doctor_id
+              LEFT JOIN users u_doctor ON d.user_id = u_doctor.user_id
+              LEFT JOIN users_info ui_doctor ON d.user_id = ui_doctor.user_id
+              LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
               $where_clause";
 
-if (!empty($params)) {
-    $count_stmt = $conn->prepare($count_sql);
-    $count_stmt->bind_param(str_repeat('s', count($params)), ...$params);
-    $count_stmt->execute();
-    $total_records = $count_stmt->get_result()->fetch_assoc()['total'];
-} else {
-    $total_records = $conn->query($count_sql)->fetch_assoc()['total'];
+try {
+    if (!empty($params)) {
+        $count_stmt = $conn->prepare($count_sql);
+        if ($count_stmt) {
+            $count_stmt->bind_param(str_repeat('s', count($params)), ...$params);
+            $count_stmt->execute();
+            $result = $count_stmt->get_result();
+            $total_records = $result ? $result->fetch_assoc()['total'] : 0;
+        } else {
+            $total_records = 0;
+        }
+    } else {
+        $result = $conn->query($count_sql);
+        $total_records = $result ? $result->fetch_assoc()['total'] : 0;
+    }
+} catch (Exception $e) {
+    $total_records = 0;
 }
 
 $total_pages = ceil($total_records / $limit);
 
 // Get appointments
 $sql = "SELECT a.*, 
-               ui_patient.full_name as patient_name,
-               ui_patient.phone as patient_phone,
-               ui_doctor.full_name as doctor_name,
-               s.name as service_name,
-               s.price as service_price
+               COALESCE(ui_patient.full_name, u_patient.username, gu.full_name) as patient_name,
+               COALESCE(u_patient.phone_number, gu.phone) as patient_phone,
+               COALESCE(ui_doctor.full_name, u_doctor.username, u_doctor.email) as doctor_name,
+               c.name as clinic_name
         FROM appointments a
-        LEFT JOIN users_info ui_patient ON a.patient_id = ui_patient.user_id
-        LEFT JOIN users_info ui_doctor ON a.doctor_id = ui_doctor.user_id
-        LEFT JOIN services s ON a.service_id = s.service_id
+        LEFT JOIN users u_patient ON a.user_id = u_patient.user_id
+        LEFT JOIN users_info ui_patient ON a.user_id = ui_patient.user_id
+        LEFT JOIN guest_users gu ON a.guest_id = gu.guest_id
+        LEFT JOIN doctors d ON a.doctor_id = d.doctor_id
+        LEFT JOIN users u_doctor ON d.user_id = u_doctor.user_id
+        LEFT JOIN users_info ui_doctor ON d.user_id = ui_doctor.user_id
+        LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
         $where_clause
-        ORDER BY a.appointment_date DESC
+        ORDER BY a.appointment_time DESC
         LIMIT ? OFFSET ?";
 
 $params[] = $limit;
 $params[] = $offset;
 
-$stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param(str_repeat('s', count($params) - 2) . 'ii', ...$params);
+try {
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        if (!empty($params)) {
+            $stmt->bind_param(str_repeat('s', count($params) - 2) . 'ii', ...$params);
+        }
+        $stmt->execute();
+        $appointments = $stmt->get_result();
+    } else {
+        $appointments = false;
+    }
+} catch (Exception $e) {
+    $appointments = false;
 }
-$stmt->execute();
-$appointments = $stmt->get_result();
 
 // Thống kê nhanh
 $stats_sql = "SELECT 
@@ -128,9 +153,21 @@ $stats_sql = "SELECT
     SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as confirmed,
     SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
     SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
-    SUM(CASE WHEN DATE(appointment_date) = CURDATE() THEN 1 ELSE 0 END) as today
+    SUM(CASE WHEN DATE(appointment_time) = CURDATE() THEN 1 ELSE 0 END) as today
 FROM appointments";
-$stats = $conn->query($stats_sql)->fetch_assoc();
+
+try {
+    $stats_result = $conn->query($stats_sql);
+    $stats = $stats_result ? $stats_result->fetch_assoc() : [
+        'total' => 0, 'pending' => 0, 'confirmed' => 0, 
+        'completed' => 0, 'cancelled' => 0, 'today' => 0
+    ];
+} catch (Exception $e) {
+    $stats = [
+        'total' => 0, 'pending' => 0, 'confirmed' => 0, 
+        'completed' => 0, 'cancelled' => 0, 'today' => 0
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -143,10 +180,12 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/admin.css" rel="stylesheet">
+    <link href="assets/css/sidebar.css" rel="stylesheet">
+    <link href="assets/css/header.css" rel="stylesheet">
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include 'includes/headeradmin.php'; ?>
+    <?php include 'includes/sidebaradmin.php'; ?>
 
     <main class="main-content">
         <div class="container-fluid">
@@ -339,10 +378,10 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
                                     <th width="5%">#</th>
                                     <th width="15%">Bệnh nhân</th>
                                     <th width="15%">Bác sĩ</th>
-                                    <th width="15%">Dịch vụ</th>
+                                    <th width="15%">Phòng khám</th>
                                     <th width="15%">Ngày giờ hẹn</th>
                                     <th width="10%">Trạng thái</th>
-                                    <th width="10%">Giá</th>
+                                    <th width="10%">Lý do</th>
                                     <th width="15%">Thao tác</th>
                                 </tr>
                             </thead>
@@ -366,13 +405,13 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
                                                 <h6 class="mb-0"><?= htmlspecialchars($appointment['doctor_name']) ?></h6>
                                             </td>
                                             <td>
-                                                <h6 class="mb-0"><?= htmlspecialchars($appointment['service_name']) ?></h6>
+                                                <h6 class="mb-0"><?= htmlspecialchars($appointment['clinic_name'] ?? 'Chưa chọn') ?></h6>
                                             </td>
                                             <td>
                                                 <div>
-                                                    <strong><?= date('d/m/Y', strtotime($appointment['appointment_date'])) ?></strong>
+                                                    <strong><?= date('d/m/Y', strtotime($appointment['appointment_time'])) ?></strong>
                                                 </div>
-                                                <small class="text-muted"><?= date('H:i', strtotime($appointment['appointment_date'])) ?></small>
+                                                <small class="text-muted"><?= date('H:i', strtotime($appointment['appointment_time'])) ?></small>
                                             </td>
                                             <td>
                                                 <?php
@@ -387,61 +426,67 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
                                                 <span class="badge bg-<?= $status_config['class'] ?>"><?= $status_config['text'] ?></span>
                                             </td>
                                             <td>
-                                                <?php if ($appointment['service_price']): ?>
-                                                    <strong><?= number_format($appointment['service_price']) ?>₫</strong>
+                                                <?php if ($appointment['reason']): ?>
+                                                    <small><?= htmlspecialchars(substr($appointment['reason'], 0, 50)) ?><?= strlen($appointment['reason']) > 50 ? '...' : '' ?></small>
                                                 <?php else: ?>
-                                                    <span class="text-muted">Chưa có</span>
+                                                    <span class="text-muted">Không có</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" 
-                                                                data-bs-toggle="dropdown">
-                                                            <i class="fas fa-edit"></i>
+                                                <div class="d-flex gap-1">
+                                                    <!-- Quick Status Actions -->
+                                                    <?php if ($appointment['status'] == 'pending'): ?>
+                                                        <button class="btn btn-success btn-sm" 
+                                                                onclick="updateStatus(<?= $appointment['appointment_id'] ?>, 'confirmed')"
+                                                                data-bs-toggle="tooltip" title="Xác nhận">
+                                                            <i class="fas fa-check"></i>
                                                         </button>
-                                                        <ul class="dropdown-menu">
-                                                            <?php if ($appointment['status'] == 'pending'): ?>
-                                                                <li><a class="dropdown-item" 
-                                                                       href="?action=update_status&id=<?= $appointment['appointment_id'] ?>&status=confirmed">
-                                                                    <i class="fas fa-check text-success me-2"></i>Xác nhận
-                                                                </a></li>
-                                                                <li><a class="dropdown-item" 
-                                                                       href="?action=update_status&id=<?= $appointment['appointment_id'] ?>&status=cancelled">
-                                                                    <i class="fas fa-times text-danger me-2"></i>Hủy bỏ
-                                                                </a></li>
-                                                            <?php endif; ?>
-                                                            
-                                                            <?php if ($appointment['status'] == 'confirmed'): ?>
-                                                                <li><a class="dropdown-item" 
-                                                                       href="?action=update_status&id=<?= $appointment['appointment_id'] ?>&status=completed">
-                                                                    <i class="fas fa-check-double text-primary me-2"></i>Hoàn thành
-                                                                </a></li>
-                                                                <li><a class="dropdown-item" 
-                                                                       href="?action=update_status&id=<?= $appointment['appointment_id'] ?>&status=cancelled">
-                                                                    <i class="fas fa-times text-danger me-2"></i>Hủy bỏ
-                                                                </a></li>
-                                                            <?php endif; ?>
-                                                            
-                                                            <li><hr class="dropdown-divider"></li>
-                                                            <li><a class="dropdown-item" href="appointment-edit.php?id=<?= $appointment['appointment_id'] ?>">
-                                                                <i class="fas fa-edit text-info me-2"></i>Chỉnh sửa
-                                                            </a></li>
-                                                        </ul>
-                                                    </div>
+                                                        <button class="btn btn-danger btn-sm" 
+                                                                onclick="updateStatus(<?= $appointment['appointment_id'] ?>, 'cancelled')"
+                                                                data-bs-toggle="tooltip" title="Hủy bỏ">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    <?php elseif ($appointment['status'] == 'confirmed'): ?>
+                                                        <button class="btn btn-primary btn-sm" 
+                                                                onclick="updateStatus(<?= $appointment['appointment_id'] ?>, 'completed')"
+                                                                data-bs-toggle="tooltip" title="Hoàn thành">
+                                                            <i class="fas fa-check-double"></i>
+                                                        </button>
+                                                    <?php endif; ?>
                                                     
+                                                    <!-- View Button -->
                                                     <a href="appointment-view.php?id=<?= $appointment['appointment_id'] ?>" 
-                                                       class="btn btn-outline-info btn-sm"
+                                                       class="btn btn-info btn-sm"
                                                        data-bs-toggle="tooltip" title="Xem chi tiết">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
-                                                    <a href="?action=delete&id=<?= $appointment['appointment_id'] ?>" 
-                                                       class="btn btn-outline-danger btn-sm btn-delete"
-                                                       data-bs-toggle="tooltip" title="Xóa"
-                                                       data-message="Bạn có chắc chắn muốn xóa lịch hẹn này?">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    <!-- More Actions Dropdown -->
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                                                type="button" data-bs-toggle="dropdown"
+                                                                data-bs-toggle="tooltip" title="Thêm thao tác">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li><a class="dropdown-item" href="appointment-edit.php?id=<?= $appointment['appointment_id'] ?>">
+                                                                <i class="fas fa-edit text-primary me-2"></i>Chỉnh sửa
+                                                            </a></li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <?php if ($appointment['status'] != 'cancelled'): ?>
+                                                                <li><a class="dropdown-item text-warning" 
+                                                                       href="?action=update_status&id=<?= $appointment['appointment_id'] ?>&status=cancelled"
+                                                                       onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')">
+                                                                    <i class="fas fa-ban me-2"></i>Hủy lịch hẹn
+                                                                </a></li>
+                                                            <?php endif; ?>
+                                                            <li><a class="dropdown-item text-danger" 
+                                                                   href="?action=delete&id=<?= $appointment['appointment_id'] ?>"
+                                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa lịch hẹn này? Hành động này không thể hoàn tác!')">
+                                                                <i class="fas fa-trash me-2"></i>Xóa vĩnh viễn
+                                                            </a></li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -513,6 +558,94 @@ $stats = $conn->query($stats_sql)->fetch_assoc();
     <?php include 'includes/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/notifications.js"></script>
     <script src="assets/js/admin.js"></script>
+    
+    <style>
+        .btn-group .btn {
+            border-radius: 6px !important;
+            margin-right: 2px;
+        }
+        
+        .gap-1 {
+            gap: 0.25rem !important;
+        }
+        
+        .dropdown-menu-end {
+            --bs-position: end;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+            padding: 0.35em 0.65em;
+        }
+        
+        .btn-sm {
+            --bs-btn-padding-y: 0.25rem;
+            --bs-btn-padding-x: 0.5rem;
+            --bs-btn-font-size: 0.875rem;
+        }
+        
+        .dropdown-toggle::after {
+            display: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+    </style>
+    
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Update appointment status function
+        function updateStatus(appointmentId, status) {
+            const statusText = {
+                'confirmed': 'xác nhận',
+                'cancelled': 'hủy bỏ', 
+                'completed': 'hoàn thành'
+            };
+            
+            if (confirm(`Bạn có chắc chắn muốn ${statusText[status]} lịch hẹn này?`)) {
+                // Show loading
+                const btn = event.target.closest('button');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.innerHTML = `
+                    <input type="hidden" name="action" value="update_status">
+                    <input type="hidden" name="id" value="${appointmentId}">
+                    <input type="hidden" name="status" value="${status}">
+                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        // Auto refresh every 30 seconds
+        setInterval(function() {
+            // Only refresh if no modal is open
+            if (!document.querySelector('.modal.show')) {
+                const url = new URL(window.location);
+                url.searchParams.set('auto_refresh', '1');
+                if (!url.searchParams.get('search') && !url.searchParams.get('status') && !url.searchParams.get('date')) {
+                    window.location.reload();
+                }
+            }
+        }, 30000);
+    </script>
 </body>
 </html> 

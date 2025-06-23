@@ -8,7 +8,7 @@ $user_id = $_SESSION['user_id'];
 $err = $msg = '';
 
 // Lấy thông tin user đầy đủ
-$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+$stmt = $conn->prepare("SELECT u.username, u.email, u.phone_number, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -23,6 +23,7 @@ $address = $stmt->get_result()->fetch_assoc();
 if (isset($_POST['update_info'])) {
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
+    $phone_number = trim($_POST['phone_number']);
     $gender = $_POST['gender'];
     $date_of_birth = $_POST['date_of_birth'];
     
@@ -32,9 +33,9 @@ if (isset($_POST['update_info'])) {
         $stmt1->bind_param('sssi', $full_name, $gender, $date_of_birth, $user_id);
         $stmt1->execute();
         
-        // Cập nhật bảng users
-        $stmt2 = $conn->prepare("UPDATE users SET email=? WHERE user_id=?");
-        $stmt2->bind_param('si', $email, $user_id);
+        // Cập nhật bảng users (bao gồm phone_number)
+        $stmt2 = $conn->prepare("UPDATE users SET email=?, phone_number=? WHERE user_id=?");
+        $stmt2->bind_param('ssi', $email, $phone_number, $user_id);
         $stmt2->execute();
         
         $msg = 'Cập nhật thông tin cá nhân thành công!';
@@ -134,7 +135,7 @@ if (isset($_POST['upload_avatar']) && isset($_FILES['avatar']['name']) && $_FILE
 }
 
 // Reload lại thông tin mới nhất
-$stmt = $conn->prepare("SELECT u.username, u.email, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+$stmt = $conn->prepare("SELECT u.username, u.email, u.phone_number, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -802,6 +803,15 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                                 </div>
                             </div>
                             
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa-solid fa-phone me-1"></i>Số điện thoại
+                                </label>
+                                <input type="tel" name="phone_number" class="form-input" 
+                                       placeholder="Số điện thoại của bạn"
+                                       value="<?= htmlspecialchars($user['phone_number'] ?? '') ?>">
+                            </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">
@@ -1019,23 +1029,28 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
     <!-- Global Enhancements -->
     
     <script>
-        // Tab functionality
+        // Tab functionality with performance optimization
         function showTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+            // Use more efficient selectors
+            const allContents = document.querySelectorAll('.tab-content');
+            const allButtons = document.querySelectorAll('.tab-btn');
+            const targetContent = document.getElementById(tabName);
+            const clickedButton = event.target;
             
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            // Remove active classes efficiently
+            allContents.forEach(content => content.classList.remove('active'));
+            allButtons.forEach(btn => btn.classList.remove('active'));
             
-            // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
+            // Add active classes
+            targetContent.classList.add('active');
+            clickedButton.classList.add('active');
             
-            // Add active class to clicked button
-            event.target.classList.add('active');
+            // Load address data only when needed
+            if (tabName === 'address' && window.provincesData && window.provincesData.length === 0) {
+                if (typeof loadProvinces === 'function') {
+                    loadProvinces();
+                }
+            }
         }
 
         // File Upload Functionality
@@ -1183,63 +1198,52 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
 
         // Address API and Cascade Selection
         $(document).ready(function() {
-            // Initialize Select2
+            // Initialize Select2 with minimal config for better performance
             $('.select2').select2({
                 placeholder: 'Chọn...',
                 allowClear: true,
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: 10
             });
 
-            let provincesData = [];
-            let districtsData = [];
-            let wardsData = [];
+            // Make data globally accessible
+            window.provincesData = [];
+            let isLoading = false;
 
             // Load provinces when country is Vietnam
             function loadProvinces() {
+                if (isLoading) return;
+                
                 if ($('#countrySelect').val() === 'Vietnam') {
+                    isLoading = true;
+                    
+                    // Use cached data if available
+                    if (window.provincesData.length > 0) {
+                        populateProvinces(window.provincesData);
+                        restoreSelectedValues();
+                        isLoading = false;
+                        return;
+                    }
+                    
                     $.ajax({
                         url: 'https://provinces.open-api.vn/api/?depth=3',
                         method: 'GET',
                         dataType: 'json',
+                        timeout: 10000,
                         beforeSend: function() {
-                            $('#citySelect').html('<option value="">Đang tải...</option>');
+                            $('#citySelect').html('<option value="">Đang tải...</option>').prop('disabled', true);
                         },
                         success: function(data) {
-                            provincesData = data;
+                            window.provincesData = data;
                             populateProvinces(data);
-                            
-                            // If editing existing address, select current values
-                            const currentCity = $('#cityText').val();
-                            const currentDistrict = $('#districtText').val();
-                            const currentWard = $('#wardText').val();
-                            
-                            if (currentCity) {
-                                setTimeout(() => {
-                                    const province = data.find(p => p.name === currentCity);
-                                    if (province) {
-                                        $('#citySelect').val(province.code).trigger('change');
-                                        setTimeout(() => {
-                                            if (currentDistrict) {
-                                                const district = province.districts.find(d => d.name === currentDistrict);
-                                                if (district) {
-                                                    $('#districtSelect').val(district.code).trigger('change');
-                                                    setTimeout(() => {
-                                                        if (currentWard) {
-                                                            const ward = district.wards.find(w => w.name === currentWard);
-                                                            if (ward) {
-                                                                $('#wardSelect').val(ward.code);
-                                                            }
-                                                        }
-                                                    }, 100);
-                                                }
-                                            }
-                                        }, 100);
-                                    }
-                                }, 100);
-                            }
+                            restoreSelectedValues();
                         },
                         error: function() {
-                            $('#citySelect').html('<option value="">Lỗi tải dữ liệu</option>');
+                            $('#citySelect').html('<option value="">Lỗi tải dữ liệu</option>').prop('disabled', true);
+                            console.error('Failed to load provinces data');
+                        },
+                        complete: function() {
+                            isLoading = false;
                         }
                     });
                 } else {
@@ -1249,15 +1253,49 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                     $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
                 }
             }
+            
+            function restoreSelectedValues() {
+                const currentCity = $('#cityText').val();
+                const currentDistrict = $('#districtText').val();
+                const currentWard = $('#wardText').val();
+                
+                if (currentCity && window.provincesData.length > 0) {
+                    const province = window.provincesData.find(p => p.name === currentCity);
+                    if (province) {
+                        $('#citySelect').val(province.code);
+                        populateDistricts(province.districts);
+                        
+                        if (currentDistrict) {
+                            const district = province.districts.find(d => d.name === currentDistrict);
+                            if (district) {
+                                $('#districtSelect').val(district.code);
+                                populateWards(district.wards);
+                                
+                                if (currentWard) {
+                                    const ward = district.wards.find(w => w.name === currentWard);
+                                    if (ward) {
+                                        $('#wardSelect').val(ward.code);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             function populateProvinces(provinces) {
                 const $citySelect = $('#citySelect');
                 $citySelect.empty().append('<option value="">-- Chọn Tỉnh/Thành phố --</option>');
                 
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
                 provinces.forEach(province => {
-                    $citySelect.append(`<option value="${province.code}">${province.name}</option>`);
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    fragment.appendChild(option);
                 });
-                
+                $citySelect[0].appendChild(fragment);
                 $citySelect.prop('disabled', false);
             }
 
@@ -1265,59 +1303,81 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                 const $districtSelect = $('#districtSelect');
                 $districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
                 
+                const fragment = document.createDocumentFragment();
                 districts.forEach(district => {
-                    $districtSelect.append(`<option value="${district.code}">${district.name}</option>`);
+                    const option = document.createElement('option');
+                    option.value = district.code;
+                    option.textContent = district.name;
+                    fragment.appendChild(option);
                 });
-                
+                $districtSelect[0].appendChild(fragment);
                 $districtSelect.prop('disabled', false);
+                
+                // Reset ward select
+                $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
             }
 
             function populateWards(wards) {
                 const $wardSelect = $('#wardSelect');
                 $wardSelect.empty().append('<option value="">-- Chọn Phường/Xã --</option>');
                 
+                const fragment = document.createDocumentFragment();
                 wards.forEach(ward => {
-                    $wardSelect.append(`<option value="${ward.code}">${ward.name}</option>`);
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.name;
+                    fragment.appendChild(option);
                 });
-                
+                $wardSelect[0].appendChild(fragment);
                 $wardSelect.prop('disabled', false);
             }
 
-            // Event handlers
+            // Event handlers with debouncing for better performance
+            let changeTimeout;
+            
             $('#countrySelect').change(function() {
-                loadProvinces();
-                $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
-                $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                clearTimeout(changeTimeout);
+                changeTimeout = setTimeout(() => {
+                    loadProvinces();
+                    $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
+                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
+                }, 100);
             });
 
             $('#citySelect').change(function() {
                 const provinceCode = $(this).val();
-                if (provinceCode) {
-                    const province = provincesData.find(p => p.code == provinceCode);
-                    if (province) {
-                        populateDistricts(province.districts);
+                clearTimeout(changeTimeout);
+                changeTimeout = setTimeout(() => {
+                    if (provinceCode && window.provincesData.length > 0) {
+                        const province = window.provincesData.find(p => p.code == provinceCode);
+                        if (province && province.districts) {
+                            populateDistricts(province.districts);
+                        }
+                    } else {
+                        $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
                         $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
                     }
-                } else {
-                    $('#districtSelect').html('<option value="">-- Chọn Quận/Huyện --</option>').prop('disabled', true);
-                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
-                }
+                }, 100);
             });
 
             $('#districtSelect').change(function() {
                 const districtCode = $(this).val();
-                if (districtCode) {
-                    const provinceCode = $('#citySelect').val();
-                    const province = provincesData.find(p => p.code == provinceCode);
-                    if (province) {
-                        const district = province.districts.find(d => d.code == districtCode);
-                        if (district) {
-                            populateWards(district.wards);
+                const provinceCode = $('#citySelect').val();
+                
+                clearTimeout(changeTimeout);
+                changeTimeout = setTimeout(() => {
+                    if (districtCode && provinceCode && window.provincesData.length > 0) {
+                        const province = window.provincesData.find(p => p.code == provinceCode);
+                        if (province && province.districts) {
+                            const district = province.districts.find(d => d.code == districtCode);
+                            if (district && district.wards) {
+                                populateWards(district.wards);
+                            }
                         }
+                    } else {
+                        $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
                     }
-                } else {
-                    $('#wardSelect').html('<option value="">-- Chọn Phường/Xã --</option>').prop('disabled', true);
-                }
+                }, 100);
             });
 
             // Update hidden fields with text values before form submission
@@ -1340,23 +1400,20 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                 }
             });
 
-            // Initialize on page load
-            loadProvinces();
+            // Initialize on page load only when address tab is active
+            if ($('#address').hasClass('active')) {
+                loadProvinces();
+            }
 
-            // Add entrance animations
-            $('.profile-sidebar').css({
-                'opacity': '0',
-                'transform': 'translateX(-50px)'
-            }).animate({
-                'opacity': '1'
-            }, 600).css('transform', 'translateX(0)');
+            // Load provinces when address tab is clicked
+            $('button[onclick="showTab(\'address\')"]').click(function() {
+                if (window.provincesData.length === 0) {
+                    loadProvinces();
+                }
+            });
 
-            $('.profile-content').css({
-                'opacity': '0',
-                'transform': 'translateX(50px)'
-            }).delay(200).animate({
-                'opacity': '1'
-            }, 600).css('transform', 'translateX(0)');
+            // Simplified entrance animations with CSS transitions
+            $('.profile-sidebar, .profile-content').css('opacity', '1');
         });
     </script>
 

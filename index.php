@@ -570,7 +570,7 @@ $categories = get_blog_categories();
             Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!
           </p>
 
-          <div class="booking-button-group">
+          <!-- <div class="booking-button-group">
             <a href="/booking.php" class="btn btn-primary btn-booking">
               <span class="btn-icon">
                 <i class="fas fa-calendar-plus"></i>
@@ -594,7 +594,7 @@ $categories = get_blog_categories();
                 <small>0123 456 789</small>
               </span>
             </a>
-          </div>
+          </div> -->
 
           <div class="booking-note mt-4">
             <i class="fas fa-clock text-primary me-2"></i>

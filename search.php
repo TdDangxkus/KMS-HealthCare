@@ -1,7 +1,7 @@
 <?php
+session_start();
 require_once 'includes/db.php';
 require_once 'includes/functions/product_functions.php';
-include 'includes/header.php';
 
 // Debug mode - set to false to ẩn thông tin debug
 define('DEBUG_MODE', false);
@@ -99,40 +99,53 @@ if (!empty($search)) {
 // Tính số trang
 $totalPages = ceil($totalProducts / $perPage);
 ?>
-
-<?php
-session_start();
-require_once 'includes/db.php';
-?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kết quả tìm kiếm - <?php echo htmlspecialchars($search); ?></title>
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="assets/css/layout.css">
-    <link rel="stylesheet" href="assets/css/search.css">
-    
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Kết quả tìm kiếm - <?php echo htmlspecialchars($search); ?> - MediSync</title>
+    <meta name="description" content="Tìm kiếm sản phẩm y tế, thuốc, thiết bị y tế tại MediSync">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- AOS -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <style>
+        /* Fix body padding for fixed header */
+        body {
+            font-family: 'Inter', sans-serif;
+            padding-top: 140px !important; /* Height of fixed header */
+        }
+        
+        /* Ensure header is below appointment modal */
+        .medical-header {
+            z-index: 999990 !important;
+        }
+        
+        /* Make sure main content is below header */
+        main.search-page {
+            position: relative;
+            z-index: 1;
+        }
+        
         .search-page {
             padding: 2rem 0;
             background-color: #f5f5f5;
-            min-height: 500px;
+            min-height: calc(100vh - 200px);
+            margin-top: 20px; /* Extra space from header */
+        }
+        
+        /* Extra protection for container */
+        .search-page .container {
+            position: relative;
+            z-index: 1;
         }
         
         .product-grid {
@@ -357,10 +370,103 @@ require_once 'includes/db.php';
             border-radius: 12px;
             margin-bottom: 24px;
             border: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .filter-bar .row {
+        .filter-left {
+            display: flex;
             align-items: center;
+            gap: 12px;
+        }
+
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-toggle:hover {
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+
+        .sort-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sort-label {
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sort-option {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sort-option:hover,
+        .sort-option.active {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        .view-mode {
+            display: flex;
+            gap: 4px;
+        }
+
+        .view-mode-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-mode-btn:hover,
+        .view-mode-btn.active {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
         }
 
         .filter-group {
@@ -614,6 +720,28 @@ require_once 'includes/db.php';
             padding: 0 16px;
         }
 
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .no-results-text {
+            font-size: 18px;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .product-grid {
@@ -625,11 +753,29 @@ require_once 'includes/db.php';
             .product-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+            
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-right {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
 
         @media (max-width: 767px) {
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .sort-options {
+                flex-wrap: wrap;
+            }
+            
+            .view-mode {
+                display: none;
             }
         }
 
@@ -637,10 +783,24 @@ require_once 'includes/db.php';
             .product-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .filter-bar {
+                padding: 12px;
+            }
+            
+            .sort-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
         }
     </style>
 </head>
 <body>
+    <?php include 'includes/header.php'; ?>
+    <!-- Appointment Modal -->
+    <?php include 'includes/appointment-modal.php'; ?>
+    
     <main class="search-page">
         <div class="container">
             <!-- Search Type -->
@@ -762,25 +922,24 @@ require_once 'includes/db.php';
                     <div class="pagination-wrapper">
                         <ul class="pagination">
                             <?php if ($page > 1): ?>
-                                <li>
-                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $page-1; ?>" class="page-nav prev">
+                                <li class="page-item">
+                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $page-1; ?>" class="page-link">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>
                             
                             <?php for ($i = max(1, $page-2); $i <= min($totalPages, $page+2); $i++): ?>
-                                <li>
-                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $i; ?>" 
-                                       class="page-number <?php echo $i == $page ? 'active' : ''; ?>">
+                                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $i; ?>" class="page-link">
                                         <?php echo $i; ?>
                                     </a>
                                 </li>
                             <?php endfor; ?>
                             
                             <?php if ($page < $totalPages): ?>
-                                <li>
-                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $page+1; ?>" class="page-nav next">
+                                <li class="page-item">
+                                    <a href="?q=<?php echo urlencode($search); ?>&page=<?php echo $page+1; ?>" class="page-link">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
