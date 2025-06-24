@@ -902,12 +902,12 @@ $categories = get_blog_categories();
       </div>
 
       <!-- Floating AI Chat Button -->
-      <div class="ai-chat-float">
+      <!-- <div class="ai-chat-float">
         <div class="chat-pulse"></div>
         <button class="ai-chat-float-btn" id="floating-ai-chat">
           <i class="fas fa-robot"></i>
         </button>
-      </div>
+      </div> -->
     </section>
   </main>
 
@@ -931,6 +931,7 @@ $categories = get_blog_categories();
   <script src="assets/js/global-enhancements.js"></script>
   
   <?php include 'includes/floating_chat.php'; ?>
+  
   <script src="assets/js/team.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -962,6 +963,9 @@ $categories = get_blog_categories();
 
     // Rotate every 15 seconds
     setInterval(rotateContent, 5000);
+
+    // Initialize AOS animation
+    AOS.init();
   });
   </script>
 
@@ -983,6 +987,8 @@ $categories = get_blog_categories();
   .rotating-image.active {
     transform: scale(1);
   }
+
+
   </style>
 </body>
 </html>

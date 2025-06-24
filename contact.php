@@ -260,6 +260,8 @@ require_once 'includes/db.php';
     </main>
 
     <?php include 'includes/footer.php'; ?>
+      <!-- Appointment Modal -->
+  <?php include 'includes/appointment-modal.php'; ?>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
