@@ -1,11 +1,11 @@
 <?php
 session_start();
-include '../includes/db.php';
+require_once '../includes/db.php';
 
 // Kiểm tra đăng nhập và quyền admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role_id'] != 1) {
     header('Location: ../login.php');
-    exit;
+    exit();
 }
 
 // Xử lý các actions
@@ -22,7 +22,7 @@ if ($action == 'delete' && isset($_GET['id'])) {
     // Không cho phép xóa admin hiện tại
     if ($user_id == $_SESSION['user_id']) {
         header('Location: users.php?error=cannot_delete_self');
-        exit;
+        exit();
     }
     
     $conn->begin_transaction();
@@ -34,11 +34,11 @@ if ($action == 'delete' && isset($_GET['id'])) {
         
         $conn->commit();
         header('Location: users.php?success=deleted');
-        exit;
+        exit();
     } catch (Exception $e) {
         $conn->rollback();
         header('Location: users.php?error=delete_failed');
-        exit;
+        exit();
     }
 }
 
@@ -60,7 +60,7 @@ if ($role_filter != 'all') {
 }
 
 if (!empty($search)) {
-    $where_conditions[] = "(u.username LIKE ? OR u.email LIKE ? OR ui.full_name LIKE ? OR ui.phone LIKE ?)";
+    $where_conditions[] = "(u.username LIKE ? OR u.email LIKE ? OR ui.full_name LIKE ? OR u.phone_number LIKE ?)";
     $search_param = "%$search%";
     $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param]);
 }
@@ -77,20 +77,29 @@ $count_sql = "SELECT COUNT(*) as total FROM users u
               LEFT JOIN users_info ui ON u.user_id = ui.user_id 
               $where_clause";
 
-if (!empty($params)) {
-    $count_stmt = $conn->prepare($count_sql);
-    $count_stmt->bind_param(str_repeat('s', count($params)), ...$params);
-    $count_stmt->execute();
-    $total_records = $count_stmt->get_result()->fetch_assoc()['total'];
-} else {
-    $total_records = $conn->query($count_sql)->fetch_assoc()['total'];
+try {
+    if (!empty($params)) {
+        $count_stmt = $conn->prepare($count_sql);
+        if ($count_stmt) {
+            $count_stmt->bind_param(str_repeat('s', count($params)), ...$params);
+            $count_stmt->execute();
+            $total_records = $count_stmt->get_result()->fetch_assoc()['total'];
+        } else {
+            $total_records = 0;
+        }
+    } else {
+        $result = $conn->query($count_sql);
+        $total_records = $result ? $result->fetch_assoc()['total'] : 0;
+    }
+} catch (Exception $e) {
+    $total_records = 0;
 }
 
 $total_pages = ceil($total_records / $limit);
 
-// Get users data
-$sql = "SELECT u.*, ui.full_name, ui.phone, ui.address, ui.date_of_birth,
-               r.name as role_name
+// Get users data - Sử dụng CASE để xử lý role_name
+$sql = "SELECT u.*, ui.full_name, ui.date_of_birth,
+               r.role_name
         FROM users u
         LEFT JOIN users_info ui ON u.user_id = ui.user_id
         LEFT JOIN roles r ON u.role_id = r.role_id
@@ -101,12 +110,21 @@ $sql = "SELECT u.*, ui.full_name, ui.phone, ui.address, ui.date_of_birth,
 $params[] = $limit;
 $params[] = $offset;
 
-$stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param(str_repeat('s', count($params) - 2) . 'ii', ...$params);
+try {
+    $stmt = $conn->prepare($sql);
+    if ($stmt && !empty($params)) {
+        $stmt->bind_param(str_repeat('s', count($params) - 2) . 'ii', ...$params);
+        $stmt->execute();
+        $users = $stmt->get_result();
+    } elseif ($stmt) {
+        $stmt->execute();
+        $users = $stmt->get_result();
+    } else {
+        $users = false;
+    }
+} catch (Exception $e) {
+    $users = false;
 }
-$stmt->execute();
-$users = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -114,15 +132,17 @@ $users = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng - QickMed Admin</title>
+    <title>Quản lý người dùng - MediSync Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/admin.css" rel="stylesheet">
+<link href="assets/css/sidebar.css" rel="stylesheet">
+<link href="assets/css/header.css" rel="stylesheet">
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include 'includes/headeradmin.php'; ?>
+    <?php include 'includes/sidebaradmin.php'; ?>
 
     <main class="main-content">
         <div class="container-fluid">
@@ -269,29 +289,31 @@ $users = $stmt->get_result();
                                                     <i class="fas fa-envelope me-2 text-muted"></i>
                                                     <?= htmlspecialchars($user['email']) ?>
                                                 </div>
-                                                <?php if ($user['phone']): ?>
+                                                <?php if ($user['phone_number']): ?>
                                                     <div class="mt-1">
                                                         <i class="fas fa-phone me-2 text-muted"></i>
-                                                        <?= htmlspecialchars($user['phone']) ?>
+                                                        <?= htmlspecialchars($user['phone_number']) ?>
                                                     </div>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php
                                                 $role_colors = [
-                                                    'Administrator' => 'danger',
-                                                    'Patient' => 'primary',
-                                                    'Doctor' => 'success'
+                                                    'admin' => 'danger',
+                                                    'patient' => 'primary',
+                                                    'doctor' => 'success'
                                                 ];
                                                 $role_color = $role_colors[$user['role_name']] ?? 'secondary';
                                                 ?>
-                                                <span class="badge bg-<?= $role_color ?>"><?= htmlspecialchars($user['role_name']) ?></span>
+                                                <span class="badge bg-<?= $role_color ?>"><?= ucfirst($user['role_name']) ?></span>
                                             </td>
                                             <td>
                                                 <?php if ($user['status'] == 'active'): ?>
                                                     <span class="badge bg-success">Hoạt động</span>
-                                                <?php else: ?>
+                                                <?php elseif ($user['status'] == 'inactive'): ?>
                                                     <span class="badge bg-warning">Không hoạt động</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger">Bị khóa</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -300,20 +322,17 @@ $users = $stmt->get_result();
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="user-edit.php?id=<?= $user['user_id'] ?>" 
-                                                       class="btn btn-outline-primary" 
-                                                       data-bs-toggle="tooltip" title="Chỉnh sửa">
+                                                       class="btn btn-outline-primary" title="Chỉnh sửa">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <a href="user-view.php?id=<?= $user['user_id'] ?>" 
-                                                       class="btn btn-outline-info"
-                                                       data-bs-toggle="tooltip" title="Xem chi tiết">
+                                                       class="btn btn-outline-info" title="Xem chi tiết">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <?php if ($user['user_id'] != $_SESSION['user_id']): ?>
                                                         <a href="users.php?action=delete&id=<?= $user['user_id'] ?>" 
-                                                           class="btn btn-outline-danger btn-delete"
-                                                           data-bs-toggle="tooltip" title="Xóa"
-                                                           data-message="Bạn có chắc chắn muốn xóa người dùng này?">
+                                                           class="btn btn-outline-danger" title="Xóa"
+                                                           onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">
                                                             <i class="fas fa-trash"></i>
                                                         </a>
                                                     <?php endif; ?>
@@ -323,9 +342,9 @@ $users = $stmt->get_result();
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted mb-0">Không có người dùng nào</p>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                                            Không tìm thấy người dùng nào
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -337,47 +356,40 @@ $users = $stmt->get_result();
                 <!-- Pagination -->
                 <?php if ($total_pages > 1): ?>
                     <div class="card-footer bg-white">
-                        <div class="row align-items-center">
-                            <div class="col">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
                                 <small class="text-muted">
-                                    Hiển thị <?= min($offset + 1, $total_records) ?> - <?= min($offset + $limit, $total_records) ?> 
-                                    trong tổng số <?= number_format($total_records) ?> bản ghi
+                                    Hiển thị <?= $offset + 1 ?> - <?= min($offset + $limit, $total_records) ?> 
+                                    trong tổng số <?= $total_records ?> người dùng
                                 </small>
                             </div>
-                            <div class="col-auto">
-                                <nav>
-                                    <ul class="pagination pagination-sm mb-0">
-                                        <?php if ($page > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?= $page - 1 ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
-                                                    <i class="fas fa-chevron-left"></i>
-                                                </a>
-                                            </li>
-                                        <?php endif; ?>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <?php if ($page > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?= $page - 1 ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
 
-                                        <?php
-                                        $start_page = max(1, $page - 2);
-                                        $end_page = min($total_pages, $page + 2);
-                                        ?>
+                                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                        <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $i ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
+                                                <?= $i ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
 
-                                        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                                                <a class="page-link" href="?page=<?= $i ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
-                                                    <?= $i ?>
-                                                </a>
-                                            </li>
-                                        <?php endfor; ?>
-
-                                        <?php if ($page < $total_pages): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?= $page + 1 ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
-                                                    <i class="fas fa-chevron-right"></i>
-                                                </a>
-                                            </li>
-                                        <?php endif; ?>
-                                    </ul>
-                                </nav>
-                            </div>
+                                    <?php if ($page < $total_pages): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?= $page + 1 ?>&role=<?= $role_filter ?>&search=<?= urlencode($search) ?>">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -388,6 +400,7 @@ $users = $stmt->get_result();
     <?php include 'includes/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/notifications.js"></script>
     <script src="assets/js/admin.js"></script>
 </body>
 </html> 

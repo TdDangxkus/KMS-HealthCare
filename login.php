@@ -12,76 +12,115 @@ $err = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Bắt đầu output buffering để tránh output trước JSON
+    // Json khởi tạo trước nhưng chưa có dữ liệu
+    ob_start();
+    
+    // Set content type để đảm bảo response luôn là JSON
+    header('Content-Type: application/json');
+    
     $username = trim($_POST['username']);
     $password = $_POST['password'];
     $remember = isset($_POST['remember']);
-    
-    if (!$username || !$password) {
-        $err = 'Vui lòng nhập đầy đủ thông tin!';
-    } else {
-        // Kiểm tra kết nối database
-        if (!$conn) {
-            $err = 'Lỗi kết nối cơ sở dữ liệu!';
-        } else {
-            $stmt = $conn->prepare("SELECT u.user_id, u.username, u.email, u.password, u.role_id, ui.full_name 
-                                FROM users u 
-                                LEFT JOIN users_info ui ON u.user_id = ui.user_id 
-                                WHERE u.username = ? OR u.email = ? OR u.phone_number = ?");
-            
-            if ($stmt === false) {
-                $err = 'Lỗi chuẩn bị câu truy vấn: ' . $conn->error;
-            } else {
-                $stmt->bind_param('sss', $username, $username, $username);
-                $stmt->execute();
-                $result = $stmt->get_result();
 
-                
-                if ($row = $result->fetch_assoc()) {
-                    // So sánh password trực tiếp (không sử dụng hash)
-                    if ($password === $row['password']) {
-                        // Đăng nhập thành công
-                        $_SESSION['user_id'] = $row['user_id'];
-                        $_SESSION['username'] = $row['username'];
-                        $_SESSION['email'] = $row['email'];
-                        $_SESSION['role_id'] = $row['role_id'];
-                        $_SESSION['full_name'] = $row['full_name'];
-                        
-                        // Xử lý "Remember me"
-                        if ($remember) {
-                            $token = bin2hex(random_bytes(32));
-                            setcookie('remember_token', $token, time() + (86400 * 30), '/'); // 30 ngày
-                            
-                            // Lưu token vào database
-                            $stmt_token = $conn->prepare("INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY)) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)");
-                            if ($stmt_token) {
-                                $stmt_token->bind_param('is', $row['user_id'], $token);
-                                $stmt_token->execute();
-                            }
-                        }
-                        
-                        // Redirect theo role
-                        switch ($row['role_id']) {
-                            case 1: // Admin
-                                header('Location: admin/dashboard.php');
-                                break;
-                            case 3: // Doctor
-                                header('Location: doctor/dashboard.php');
-                                break;
-                            default: // Patient
-                                header('Location: index.php');
-                                break;
-                        }
-                        exit;
-                    } else {
-                        $err = 'Mật khẩu không chính xác!';
-                    }
-                } else {
-                    $err = 'Tài khoản không tồn tại!';
-                }
-                $stmt->close();
-            }
-        }
+    if (!$username || !$password) {
+        ob_clean(); // Clear any output
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Vui lòng nhập đầy đủ thông tin!'
+        ]);
+        exit;
     }
+
+    try {
+        $query = "
+            SELECT u.user_id, u.username, u.email, u.password, u.phone_number, r.role_name, ui.full_name 
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            LEFT JOIN users_info ui ON u.user_id = ui.user_id
+            WHERE u.username = ? OR u.email = ? OR u.phone_number = ?
+            LIMIT 1
+        ";
+
+        $stmt = $conn->prepare($query);
+        if ($stmt === false) {
+            ob_clean(); // Clear any output
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Lỗi hệ thống, vui lòng thử lại sau!'
+            ]);
+            exit;
+        }
+
+        $stmt->bind_param('sss', $username, $username, $username);
+        $stmt->execute();
+
+        // Lấy kết quả dưới dạng associative array
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            // Kiểm tra mật khẩu (có thể dùng password_verify nếu đã hash)
+            if ($password === $row['password'] || password_verify($password, $row['password'])) {
+                $_SESSION['user_id'] = $row['user_id'];
+                $_SESSION['username'] = $row['username'];
+                $_SESSION['email'] = $row['email'];
+                $_SESSION['role_name'] = $row['role_name'];
+                $_SESSION['full_name'] = $row['full_name'];
+
+                if ($remember) {
+                    $token = bin2hex(random_bytes(32));
+                    setcookie('remember_token', $token, time() + (86400 * 30), '/');
+
+                    $stmt_token = $conn->prepare("
+                        INSERT INTO remember_tokens (user_id, token, expires_at)
+                        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))
+                        ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)
+                    ");
+                    if ($stmt_token) {
+                        $stmt_token->bind_param('is', $row['user_id'], $token);
+                        $stmt_token->execute();
+                        $stmt_token->close();
+                    }
+                }   
+
+                // Trả JSON cho JS xử lý
+                ob_clean(); // Clear any output
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Đăng nhập thành công!',
+                    'user' => [
+                        'user_id' => $row['user_id'],
+                        'username' => $row['username'],
+                        'role' => $row['role_name']
+                    ]
+                ]);
+            } else {
+                ob_clean(); // Clear any output
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Mật khẩu không chính xác!'
+                ]);
+            }
+        } else {
+            ob_clean(); // Clear any output
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Tài khoản không tồn tại!'
+            ]);
+        }
+
+        $stmt->close();
+        
+    } catch (Exception $e) {
+        ob_clean(); // Clear any output
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Lỗi hệ thống, vui lòng thử lại sau!'
+        ]);
+        error_log("Login error: " . $e->getMessage());
+    }
+    exit;
 }
 
 // Kiểm tra thông báo từ register
@@ -303,6 +342,7 @@ if (isset($_GET['logout'])) {
             background: #f9fafb;
             transition: all 0.3s ease;
             color: #1f2937;
+            position: relative;
         }
 
         .form-control:focus {
@@ -315,6 +355,27 @@ if (isset($_GET['logout'])) {
         .form-control::placeholder {
             color: #9ca3af;
             font-weight: 400;
+        }
+
+        /* States for form validation */
+        .form-control.error {
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .form-control.success {
+            border-color: #10b981 !important;
+            background: #ecfdf5 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .form-control.success + .password-toggle {
+            color: #10b981 !important;
+        }
+
+        .form-control.error + .password-toggle {
+            color: #ef4444 !important;
         }
 
         .password-wrapper {
@@ -333,11 +394,40 @@ if (isset($_GET['logout'])) {
             padding: 8px;
             border-radius: 6px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
         }
 
         .password-toggle:hover {
             color: #3b82f6;
             background: #f3f4f6;
+        }
+
+        /* Validation icon styles */
+        .validation-icon {
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .validation-icon.show {
+            opacity: 1;
+        }
+
+        .validation-icon.success {
+            color: #10b981;
+        }
+
+        .validation-icon.error {
+            color: #ef4444;
         }
 
         .form-check {
@@ -571,15 +661,66 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        /* Form validation styles */
+        /* Enhanced form validation styles */
         .form-control.is-invalid {
             border-color: #ef4444;
             background: #fef2f2;
+            animation: shake 0.5s ease-in-out;
         }
 
         .form-control.is-valid {
             border-color: #10b981;
             background: #ecfdf5;
+        }
+
+        /* Shake animation for errors */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Better error message styling */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
         }
 
         /* Accessibility improvements */
@@ -625,13 +766,16 @@ if (isset($_GET['logout'])) {
                     <p>Bạn có thể đăng nhập bằng: <strong>Tên đăng nhập</strong>, <strong>Email</strong> hoặc <strong>Số điện thoại</strong></p>
                 </div>
 
-                <form method="post" class="needs-validation" novalidate>
+                <form method="post" class="needs-validation" id="loginForm" novalidate>
                     <div class="form-group">
                         <label class="form-label">Tên đăng nhập, Email hoặc Số điện thoại</label>
-                        <input type="text" name="username" class="form-control" 
-                               placeholder="Nhập tên đăng nhập, email hoặc số điện thoại"
-                               value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>" 
-                               required>
+                        <div class="password-wrapper">
+                            <input type="text" name="username" id="username" class="form-control" 
+                                   placeholder="Nhập tên đăng nhập, email hoặc số điện thoại"
+                                   value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>" 
+                                   required>
+                            <i class="fas fa-check validation-icon" id="usernameValidIcon"></i>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -639,6 +783,7 @@ if (isset($_GET['logout'])) {
                         <div class="password-wrapper">
                             <input type="password" name="password" id="password" class="form-control" 
                                    placeholder="Nhập mật khẩu" required>
+                            <i class="fas fa-check validation-icon" id="passwordValidIcon"></i>
                             <button type="button" class="password-toggle" onclick="togglePassword()">
                                 <i class="fas fa-eye" id="toggleIcon"></i>
                             </button>
@@ -656,6 +801,9 @@ if (isset($_GET['logout'])) {
                         Đăng nhập
                     </button>
                 </form>
+
+                <div id="loginMessage" class="alert alert-danger" style="display: none; margin-top: 15px;">
+                </div>
 
                 <a href="forgot_password.php" class="forgot-link">
                     <i class="fas fa-key me-1"></i>Quên mật khẩu?
@@ -697,15 +845,76 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        // Form validation and loading state
+        // Enhanced form validation and visual feedback
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('.needs-validation');
             const loginBtn = document.getElementById('loginBtn');
-            
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameValidIcon = document.getElementById('usernameValidIcon');
+            const passwordValidIcon = document.getElementById('passwordValidIcon');
+
+            // Real-time validation
+            usernameInput.addEventListener('input', function() {
+                validateField(this, usernameValidIcon);
+            });
+
+            passwordInput.addEventListener('input', function() {
+                validateField(this, passwordValidIcon);
+            });
+
+            function validateField(input, icon) {
+                const value = input.value.trim();
+                
+                if (value.length >= 3) {
+                    input.classList.remove('error');
+                    input.classList.add('success');
+                    icon.classList.remove('error');
+                    icon.classList.add('success', 'show');
+                } else if (value.length > 0) {
+                    input.classList.remove('success');
+                    input.classList.add('error');
+                    icon.classList.remove('success', 'show');
+                    icon.classList.add('error');
+                } else {
+                    input.classList.remove('success', 'error');
+                    icon.classList.remove('success', 'error', 'show');
+                }
+            }
+
+            function setFieldError(input, icon) {
+                input.classList.remove('success');
+                input.classList.add('error', 'is-invalid');
+                icon.classList.remove('success', 'show');
+                icon.classList.add('error');
+                
+                // Add shake animation
+                setTimeout(() => {
+                    input.classList.remove('is-invalid');
+                }, 500);
+            }
+
+            function resetFieldStates() {
+                [usernameInput, passwordInput].forEach(input => {
+                    input.classList.remove('success', 'error', 'is-invalid');
+                });
+                [usernameValidIcon, passwordValidIcon].forEach(icon => {
+                    icon.classList.remove('success', 'error', 'show');
+                });
+            }
+
             form.addEventListener('submit', function(event) {
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                    
+                    // Visual feedback for invalid fields
+                    if (!usernameInput.value.trim()) {
+                        setFieldError(usernameInput, usernameValidIcon);
+                    }
+                    if (!passwordInput.value.trim()) {
+                        setFieldError(passwordInput, passwordValidIcon);
+                    }
                 } else {
                     // Add loading state
                     loginBtn.classList.add('loading');
@@ -715,7 +924,20 @@ if (isset($_GET['logout'])) {
             }, false);
 
             // Auto focus first input
-            document.querySelector('input[name="username"]').focus();
+            usernameInput.focus();
+
+            // Global function for login response handling
+            window.handleLoginResponse = function(success, message) {
+                if (success) {
+                    usernameInput.classList.add('success');
+                    passwordInput.classList.add('success');
+                    usernameValidIcon.classList.add('success', 'show');
+                    passwordValidIcon.classList.add('success', 'show');
+                } else {
+                    setFieldError(usernameInput, usernameValidIcon);
+                    setFieldError(passwordInput, passwordValidIcon);
+                }
+            };
         });
 
         document.getElementById("loginForm").addEventListener("submit", async function (e) {
@@ -723,31 +945,85 @@ if (isset($_GET['logout'])) {
 
             const formData = new FormData(this);
             const data = new URLSearchParams(formData);
+            const loginBtn = document.getElementById('loginBtn');
+            const loginMessage = document.getElementById('loginMessage');
+
+            // Add loading state
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+            loginMessage.style.display = 'none';
 
             try {
                 const res = await fetch("login.php", {
-                method: "POST",
-                body: data
+                    method: "POST",
+                    body: data
                 });
+
+                // Kiểm tra response status
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+
+                const contentType = res.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Response không phải JSON');
+                }
 
                 const result = await res.json();
 
                 if (result.status === "success") {
-                const u = result.user;
-                localStorage.setItem("userInfo", JSON.stringify({
-                    user_id: u.user_id,
-                    username: u.username,
-                    role: u.role
-                }));
-                window.location.href = "Index_Chat.php";
-                }
-                else {
-                document.getElementById("loginMessage").innerText = "Đăng nhập thất bại!";
+                    const u = result.user;
+                    localStorage.setItem("userInfo", JSON.stringify({
+                        user_id: u.user_id,
+                        username: u.username,
+                        role: u.role
+                    }));
+                    
+                    // Visual feedback cho success
+                    window.handleLoginResponse(true, result.message);
+                    
+                    // Hiển thị thông báo thành công
+                    loginMessage.className = 'alert alert-success';
+                    loginMessage.innerHTML = '<i class="fas fa-check-circle"></i>' + result.message;
+                    loginMessage.style.display = 'block';
+                    
+                    // Redirect sau 1.5 giây
+                    setTimeout(() => {
+                        switch(u.role) {
+                            case 'admin':
+                                window.location.href = "admin/dashboard.php";
+                                break;
+                            case 'doctor':
+                                window.location.href = "doctor/dashboard.php";
+                                break;
+                            default:
+                                window.location.href = "index.php";
+                                break;
+                        }
+                    }, 1500);
+                } else {
+                    // Visual feedback cho error
+                    window.handleLoginResponse(false, result.message);
+                    
+                    // Hiển thị thông báo lỗi cụ thể từ server
+                    loginMessage.className = 'alert alert-danger';
+                    loginMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i>' + (result.message || "Đăng nhập thất bại!");
+                    loginMessage.style.display = 'block';
                 }
 
             } catch (err) {
-                console.error("Lỗi kết nối:", err);
-                document.getElementById("loginMessage").innerText = "Lỗi server!";
+                console.error("Lỗi:", err);
+                
+                // Visual feedback cho error
+                window.handleLoginResponse(false, "Lỗi kết nối");
+                
+                loginMessage.className = 'alert alert-danger';
+                loginMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i>Lỗi kết nối hoặc server không phản hồi!';
+                loginMessage.style.display = 'block';
+            } finally {
+                // Remove loading state
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
             }
         });
 

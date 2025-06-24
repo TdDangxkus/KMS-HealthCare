@@ -266,7 +266,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </div>
             <div class="text-center mt-3">
-                <small class="text-muted">© 2025 Dalziel-2025</small>
+                <small style="color: black !important;" class="text-muted">© 2025 Dalziel</small>
             </div>
         </div>
     </div>

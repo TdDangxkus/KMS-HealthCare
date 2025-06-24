@@ -76,12 +76,22 @@
 /* Fixed Modal Backdrop - No blur for performance */
 .modal-backdrop {
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
+    z-index: 999998 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 /* Modal Container */
 .modal {
-    z-index: 1050;
+    z-index: 999999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* Ensure modal centers properly */
@@ -91,7 +101,7 @@
     align-items: center;
     min-height: calc(100vh - 2rem);
     position: relative;
-    z-index: 1055;
+    z-index: 1000000 !important;
     max-width: 550px;
     width: 90%;
 }
@@ -99,13 +109,38 @@
 /* Mobile responsiveness */
 @media (max-width: 576px) {
     .modal-dialog {
-        width: 95%;
-        min-height: calc(100vh - 1rem);
-        margin: 0.5rem auto;
+        width: 95% !important;
+        min-height: calc(100vh - 1rem) !important;
+        margin: 0.5rem auto !important;
     }
     
     .modal-glass {
-        max-height: 95vh;
+        max-height: 95vh !important;
+        border-radius: 16px !important;
+    }
+    
+    .modal-header {
+        padding: 1.5rem 1.5rem !important;
+    }
+    
+    .modal-body {
+        padding: 1.5rem !important;
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.5rem !important;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* Tablet responsiveness */
+@media (max-width: 768px) {
+    #appointmentModal .modal-dialog {
+        max-width: 90% !important;
+        margin: 1rem auto !important;
     }
 }
 
@@ -123,6 +158,7 @@
     max-height: 90vh;
     width: 100%;
     margin: 0;
+    z-index: 1000001 !important;
 }
 
 .modal-glass::before {
@@ -299,6 +335,53 @@
     will-change: opacity;
 }
 
+/* Override any conflicting styles from other pages */
+#appointmentModal {
+    z-index: 999999 !important;
+    position: fixed !important;
+    display: none !important;
+}
+
+#appointmentModal.show {
+    display: block !important;
+}
+
+#appointmentModal .modal-dialog {
+    position: relative !important;
+    width: auto !important;
+    margin: 1.75rem auto !important;
+    pointer-events: none !important;
+    z-index: 1000000 !important;
+}
+
+#appointmentModal .modal-content {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    pointer-events: auto !important;
+    background-clip: padding-box !important;
+    outline: 0 !important;
+    z-index: 1000001 !important;
+}
+
+/* Ensure modal is above all headers/navbars */
+#appointmentModal,
+#appointmentModal .modal-backdrop {
+    z-index: 999999 !important;
+}
+
+/* Force modal to be on top of everything */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Prevent any other z-index conflicts */
+.modal-backdrop.show {
+    opacity: 0.5 !important;
+    z-index: 999998 !important;
+}
+
 /* Button styling for header appointment button */
 .auth-btn.appointment-btn {
     background: linear-gradient(135deg, #667eea, #764ba2) !important;
@@ -311,6 +394,36 @@
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
     color: white !important;
+}
+
+/* Ultra high z-index to override everything */
+#appointmentModal .modal-backdrop.show {
+    z-index: 999998 !important;
+}
+
+#appointmentModal.show {
+    z-index: 999999 !important;
+}
+
+#appointmentModal.show .modal-dialog {
+    z-index: 1000000 !important;
+}
+
+#appointmentModal.show .modal-content {
+    z-index: 1000001 !important;
+}
+
+/* Force header to be below modal when modal is open */
+body.modal-open .medical-header {
+    z-index: 999989 !important;
+}
+
+body.modal-open .medical-header .user-account {
+    z-index: 999989 !important;
+}
+
+body.modal-open .medical-header * {
+    z-index: 999989 !important;
 }
 </style>
 
@@ -537,10 +650,44 @@ function openAppointmentModal() {
     
     const modalElement = document.getElementById('appointmentModal');
     if (modalElement) {
+        // Ensure modal is properly positioned and styled
+        modalElement.style.zIndex = '999999';
+        modalElement.style.position = 'fixed';
+        
         const modal = new bootstrap.Modal(modalElement, {
             backdrop: 'static',
             keyboard: true
         });
+        
+        // Add event listener to ensure proper styling when modal is shown
+        modalElement.addEventListener('shown.bs.modal', function() {
+            // Force the backdrop to have correct z-index
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.style.zIndex = '999998';
+            }
+            
+            // Force modal dialog to have higher z-index
+            const modalDialog = modalElement.querySelector('.modal-dialog');
+            if (modalDialog) {
+                modalDialog.style.zIndex = '1000000';
+            }
+            
+            // Force modal content to be on top
+            const modalContent = modalElement.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.zIndex = '1000001';
+            }
+            
+            // Ensure body has modal-open class for proper overflow handling
+            document.body.classList.add('modal-open');
+        });
+        
+        // Clean up when modal is hidden
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            document.body.classList.remove('modal-open');
+        });
+        
         modal.show();
     }
 }

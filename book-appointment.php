@@ -609,7 +609,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
                             </h3>
                             
                             <!-- Quick Select Dropdown -->
-                            <!-- <div class="form-group mb-3">
+                            <div class="form-group mb-3">
                                 <select id="doctorDropdown" class="form-control">
                                     <option value="">-- Chọn nhanh bác sĩ --</option>
                                     <?php foreach ($doctors as $doctor): ?>
@@ -618,7 +618,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                            </div> -->
+                            </div>
                             
                             <!-- Doctor Cards Grid -->
                             <div class="doctor-grid">

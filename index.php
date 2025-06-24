@@ -574,8 +574,8 @@ $categories = get_blog_categories();
             Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!
           </p>
 
-          <div class="booking-button-group">
-            <a href="#" class="btn btn-primary btn-booking" data-bs-toggle="modal" data-bs-target="#bookingModal">
+          <!-- <div class="booking-button-group">
+            <a href="/booking.php" class="btn btn-primary btn-booking">
               <span class="btn-icon">
                 <i class="fas fa-calendar-plus"></i>
               </span>
@@ -598,7 +598,7 @@ $categories = get_blog_categories();
                 <small>0123 456 789</small>
               </span>
             </a>
-          </div>
+          </div> -->
 
           <div class="booking-note mt-4">
             <i class="fas fa-clock text-primary me-2"></i>
@@ -908,12 +908,12 @@ $categories = get_blog_categories();
 
 
       <!-- Floating AI Chat Button -->
-      <div class="ai-chat-float">
+      <!-- <div class="ai-chat-float">
         <div class="chat-pulse"></div>
         <button class="ai-chat-float-btn" id="floating-ai-chat">
           <i class="fas fa-robot"></i>
         </button>
-      </div>
+      </div> -->
     </section>
   </main>
 
@@ -940,6 +940,7 @@ $categories = get_blog_categories();
   <script src="assets/js/global-enhancements.js"></script>
   
   <?php include 'includes/floating_chat.php'; ?>
+  
   <script src="assets/js/team.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -971,6 +972,9 @@ $categories = get_blog_categories();
 
     // Rotate every 15 seconds
     setInterval(rotateContent, 5000);
+
+    // Initialize AOS animation
+    AOS.init();
   });
   </script>
 
@@ -992,6 +996,8 @@ $categories = get_blog_categories();
   .rotating-image.active {
     transform: scale(1);
   }
+
+
   </style>
 </body>
 </html>

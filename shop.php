@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'includes/db.php';
 require_once 'includes/functions/product_functions.php';
 
@@ -14,10 +15,6 @@ $popularSearches = [
     'Máy đo huyết áp' => 'search.php?q=may-do-huyet-ap',
     'Omega 3' => 'search.php?q=omega-3'
 ];
-?>
-<?php
-session_start();
-require_once 'includes/db.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -35,9 +32,55 @@ require_once 'includes/db.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/assets/css/shop.css">
+    
+    <!-- Notification Override CSS -->
+    <style>
+        .cart-notification {
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 100px !important;
+            right: 20px !important;
+            min-width: 300px !important;
+            max-width: 400px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .cart-notification.alert {
+            position: fixed !important;
+            z-index: 999999 !important;
+            margin: 0 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .cart-notification {
+                top: 80px !important;
+                left: 10px !important;
+                right: 10px !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+        }
+        
+        /* Force notification to be on top of everything */
+        .cart-notification,
+        .cart-notification.position-fixed,
+        .cart-notification.alert,
+        .cart-notification.alert.position-fixed {
+            position: fixed !important;
+            z-index: 999999 !important;
+        }
+    </style>
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
+     <!-- Appointment Modal -->
+     <?php include 'includes/appointment-modal.php'; ?>
 
     <main>
         <!-- Hero Section -->
