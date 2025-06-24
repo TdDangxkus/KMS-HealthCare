@@ -1104,8 +1104,8 @@ body {
                             </div>
                             <div class="user-role">
                                 <?php 
-                                $role_names = [1 => 'Quản trị viên', 2 => 'Bệnh nhân', 3 => 'Bác sĩ'];
-                                echo $role_names[$_SESSION['role_id']] ?? 'Người dùng';
+                                $role_names = ["admin" => 'Quản trị viên', "patient" => 'Bệnh nhân', "doctor" => 'Bác sĩ'];
+                                echo $role_names[$_SESSION['role_name']] ?? 'Người dùng';
                                 ?>
                             </div>
                         </div>
@@ -1135,7 +1135,7 @@ body {
                                 <span>Đơn hàng</span>
                             </a>
                         </div>
-                        <?php if ($_SESSION['role_id'] == 1): ?>
+                        <?php if ($_SESSION['role_name'] == 'admin'): ?>
                         <div class="menu-divider"></div>
                         <div class="menu-item">
                             <a href="/admin/dashboard.php">

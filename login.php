@@ -15,71 +15,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
     $remember = isset($_POST['remember']);
-    
+
     if (!$username || !$password) {
         $err = 'Vui lòng nhập đầy đủ thông tin!';
     } else {
-        // Kiểm tra kết nối database
-        if (!$conn) {
-            $err = 'Lỗi kết nối cơ sở dữ liệu!';
-        } else {
-            $stmt = $conn->prepare("SELECT u.user_id, u.username, u.email, u.password, u.role_id, ui.full_name 
-                                FROM users u 
-                                LEFT JOIN users_info ui ON u.user_id = ui.user_id 
-                                WHERE u.username = ? OR u.email = ? OR u.phone_number = ?");
-            
-            if ($stmt === false) {
-                $err = 'Lỗi chuẩn bị câu truy vấn: ' . $conn->error;
-            } else {
-                $stmt->bind_param('sss', $username, $username, $username);
-                $stmt->execute();
-                $result = $stmt->get_result();
+        $query = "
+            SELECT u.user_id, u.username, u.email, u.password, u.phone_number, r.role_name, ui.full_name 
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            LEFT JOIN users_info ui ON u.user_id = ui.user_id
+            WHERE u.username = ? OR u.email = ? OR u.phone_number = ?
+            LIMIT 1
+        ";
 
-                
-                if ($row = $result->fetch_assoc()) {
-                    // So sánh password trực tiếp (không sử dụng hash)
-                    if ($password === $row['password']) {
-                        // Đăng nhập thành công
-                        $_SESSION['user_id'] = $row['user_id'];
-                        $_SESSION['username'] = $row['username'];
-                        $_SESSION['email'] = $row['email'];
-                        $_SESSION['role_id'] = $row['role_id'];
-                        $_SESSION['full_name'] = $row['full_name'];
-                        
-                        // Xử lý "Remember me"
-                        if ($remember) {
-                            $token = bin2hex(random_bytes(32));
-                            setcookie('remember_token', $token, time() + (86400 * 30), '/'); // 30 ngày
-                            
-                            // Lưu token vào database
-                            $stmt_token = $conn->prepare("INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY)) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)");
-                            if ($stmt_token) {
-                                $stmt_token->bind_param('is', $row['user_id'], $token);
-                                $stmt_token->execute();
-                            }
+        $stmt = $conn->prepare($query);
+        if ($stmt === false) {
+            $err = 'Lỗi chuẩn bị câu truy vấn: ' . $conn->error;
+        } else {
+            $stmt->bind_param('sss', $username, $username, $username);
+            $stmt->execute();
+
+            // Lấy kết quả dưới dạng associative array
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+
+            if ($row) {
+                if ($password === $row['password']) {  // Hoặc dùng password_verify nếu hash rồi
+                    $_SESSION['user_id'] = $row['user_id'];
+                    $_SESSION['username'] = $row['username'];
+                    $_SESSION['email'] = $row['email'];
+                    $_SESSION['role_name'] = $row['role_name'];
+                    $_SESSION['full_name'] = $row['full_name'];
+
+                    if ($remember) {
+                        $token = bin2hex(random_bytes(32));
+                        setcookie('remember_token', $token, time() + (86400 * 30), '/');
+
+                        $stmt_token = $conn->prepare("
+                            INSERT INTO remember_tokens (user_id, token, expires_at)
+                            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))
+                            ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)
+                        ");
+                        if ($stmt_token) {
+                            $stmt_token->bind_param('is', $row['user_id'], $token);
+                            $stmt_token->execute();
+                            $stmt_token->close();
                         }
-                        
-                        // Redirect theo role
-                        switch ($row['role_id']) {
-                            case 1: // Admin
-                                header('Location: admin/dashboard.php');
-                                break;
-                            case 3: // Doctor
-                                header('Location: doctor/dashboard.php');
-                                break;
-                            default: // Patient
-                                header('Location: index.php');
-                                break;
-                        }
-                        exit;
-                    } else {
-                        $err = 'Mật khẩu không chính xác!';
-                    }
+                    }   
+
+                    // ✅ Trả JSON cho JS xử lý
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Đăng nhập thành công!',
+                        'user' => [
+                            'user_id' => $row['user_id'],
+                            'username' => $row['username'],
+                            'role' => $row['role_name']
+                        ]
+                    ]);
+                    exit;
                 } else {
-                    $err = 'Tài khoản không tồn tại!';
+                    $err = 'Mật khẩu không chính xác!';
                 }
-                $stmt->close();
+            } else {
+                $err = 'Tài khoản không tồn tại!';
             }
+
+            $stmt->close();
         }
     }
 }
