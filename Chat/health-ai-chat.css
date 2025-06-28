@@ -454,6 +454,11 @@ body {
     animation: slideUp 0.3s ease-out;
 }
 
+.message.bot {
+    flex-direction: row;
+    align-self: flex-start;
+}
+
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -507,16 +512,32 @@ body {
 }
 
 /* Typing Dots (now inside message) */
+.bot-msg {
+    align-self: flex-start;
+    background-color: #f1f0f0;
+    border-radius: 12px 12px 12px 0;
+    padding: 8px 12px;
+    max-width: 70%;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+}
+
 .typing-dots {
-    background: white;
-    padding: 1rem 1.25rem;
-    border-radius: 18px;
-    border-bottom-left-radius: 6px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
     display: flex;
     gap: 0.25rem;
-    max-width: 70%;
+    align-items: center;
+
+    /* ❌ Loại bỏ mọi kiểu dáng giống bubble */
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .typing-dot {
@@ -621,6 +642,31 @@ body {
     transform: none;
 }
 
+.reset-btn {
+    background: var(--gradient-chat);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reset-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.reset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* Remove duplicate chat controls since we have them in header */
 .chat-controls {
     display: none;
@@ -700,3 +746,33 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 } 
+
+/* sql table for chat */
+.chat-result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.chat-result-table th,
+.chat-result-table td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.chat-result-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+.chat-sql-text {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+    background: #f8f8f8;
+    padding: 6px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+}

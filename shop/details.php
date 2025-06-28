@@ -28,524 +28,910 @@ if ($totalReviews > 0) {
     $avgRating = round($totalStars / $totalReviews, 1);
 }
 
+// Tính giá hiển thị
+$displayPrice = $product['discount_price'] ?? $product['price'];
+$originalPrice = $product['price'];
+$discountPercent = $product['discount_price'] ? round((($originalPrice - $displayPrice) / $originalPrice) * 100) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['name']); ?> - Qickmed</title>
+    <title><?php echo htmlspecialchars($product['name']); ?> - QickMed</title>
     <meta name="description" content="<?php echo htmlspecialchars($product['description']); ?>">
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="/assets/css/layout.css">
-    <link rel="stylesheet" href="/assets/css/shop.css">
-    <link rel="stylesheet" href="/assets/css/product-details.css">
-    
-    <!-- Bootstrap -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Swiper Slider -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .product-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .product-detail-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .product-image-section {
+            position: relative;
+            background: #f8f9fa;
+            padding: 2rem;
+        }
+        
+        .main-product-image {
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .main-product-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .discount-badge {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: linear-gradient(135deg, #ff416c 0%, #ff4757 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+        
+        .product-info-section {
+            padding: 3rem;
+        }
+        
+        .product-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .rating-stars {
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+        
+        .rating-count {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .product-price-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            color: white;
+        }
+        
+        .current-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .original-price {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            text-decoration: line-through;
+            margin-right: 1rem;
+        }
+        
+        .price-save {
+            background: rgba(255,255,255,0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .product-stock {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #e8f5e8;
+            border-radius: 12px;
+            color: #2d5a27;
+            font-weight: 500;
+        }
+        
+        .product-stock.out-of-stock {
+            background: #fdeaea;
+            color: #c53030;
+        }
+        
+        .quantity-section {
+            margin-bottom: 2rem;
+        }
+        
+        .quantity-label {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #2c3e50;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quantity-wrapper {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .quantity-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            background: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-btn:hover {
+            background: #2980b9;
+        }
+        
+        .quantity-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .quantity-input {
+            width: 80px;
+            height: 45px;
+            border: none;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+        
+        .quantity-input:focus {
+            outline: none;
+            background: white;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn-buy-now {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-buy-now:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-add-cart {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-add-cart:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-wishlist {
+            background: white;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-wishlist:hover {
+            background: #e74c3c;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .product-description {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        
+        .description-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .description-text {
+            color: #5a6c7d;
+            line-height: 1.8;
+        }
+        
+        .product-specs {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .specs-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        
+        .specs-table {
+            width: 100%;
+        }
+        
+        .specs-table tr {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .specs-table td {
+            padding: 0.8rem 0;
+            vertical-align: top;
+        }
+        
+        .specs-table td:first-child {
+            font-weight: 600;
+            color: #2c3e50;
+            width: 30%;
+        }
+        
+        .specs-table td:last-child {
+            color: #5a6c7d;
+        }
+        
+        .related-products {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .related-product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
+        }
+        
+        .related-product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .related-product-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .related-product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .related-product-card:hover .related-product-image img {
+            transform: scale(1.1);
+        }
+        
+        .related-product-info {
+            padding: 1.5rem;
+        }
+        
+        .related-product-name {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        .related-product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .breadcrumb-item a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item a:hover {
+            color: #2980b9;
+        }
+        
+        @media (max-width: 768px) {
+            .product-container {
+                padding: 0 0.5rem;
+            }
+            
+            .product-info-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .product-title {
+                font-size: 1.8rem;
+            }
+            
+            .current-price {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            .main-product-image {
+                height: 300px;
+            }
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <main class="py-5">
-        <div class="container">
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/shop.php">Cửa hàng</a></li>
-                    <li class="breadcrumb-item">
-                        <a href="/shop/products.php?category=<?php echo $product['category_id']; ?>">
-                            <?php echo htmlspecialchars($product['category_name']); ?>
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        <?php echo htmlspecialchars($product['name']); ?>
-                    </li>
-                </ol>
-            </nav>
+    <div class="product-container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/shop.php">Cửa hàng</a></li>
+                <li class="breadcrumb-item">
+                    <a href="/shop/products.php?category=<?php echo $product['category_id']; ?>">
+                        <?php echo htmlspecialchars($product['category_name'] ?? 'Sản phẩm'); ?>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <?php echo htmlspecialchars($product['name']); ?>
+                </li>
+            </ol>
+        </nav>
 
-            <!-- Product Details -->
-            <div class="product-details">
-                <div class="row">
-                    <!-- Product Images -->
-                    <div class="col-lg-6 mb-4 mb-lg-0">
-                        <div class="product-gallery">
-                            <div class="swiper product-gallery-main">
-                                <div class="swiper-wrapper">
-                                    <div class="swiper-slide">
-                                        <img src="<?php echo htmlspecialchars($product['display_image']); ?>" 
-                                             alt="<?php echo htmlspecialchars($product['name']); ?>"
-                                             class="img-fluid">
-                                    </div>
-                                    <?php if (!empty($product['gallery_images'])): 
-                                        $gallery = json_decode($product['gallery_images'], true);
-                                        foreach ($gallery as $image): ?>
-                                    <div class="swiper-slide">
-                                        <img src="<?php echo htmlspecialchars($image); ?>" 
-                                             alt="<?php echo htmlspecialchars($product['name']); ?>"
-                                             class="img-fluid">
-                                    </div>
-                                    <?php endforeach; endif; ?>
-                                </div>
-                                <div class="swiper-button-next"></div>
-                                <div class="swiper-button-prev"></div>
-                            </div>
-                            <div class="swiper product-gallery-thumbs mt-3">
-                                <div class="swiper-wrapper">
-                                    <div class="swiper-slide">
-                                        <img src="<?php echo htmlspecialchars($product['display_image']); ?>" 
-                                             alt="Thumbnail"
-                                             class="img-fluid">
-                                    </div>
-                                    <?php if (!empty($product['gallery_images'])): 
-                                        foreach ($gallery as $image): ?>
-                                    <div class="swiper-slide">
-                                        <img src="<?php echo htmlspecialchars($image); ?>" 
-                                             alt="Thumbnail"
-                                             class="img-fluid">
-                                    </div>
-                                    <?php endforeach; endif; ?>
-                                </div>
-                            </div>
+        <!-- Product Details -->
+        <div class="product-detail-card">
+            <div class="row g-0">
+                <!-- Product Image -->
+                <div class="col-lg-6">
+                    <div class="product-image-section">
+                        <?php if ($discountPercent > 0): ?>
+                        <div class="discount-badge">
+                            <i class="fas fa-fire"></i> -<?php echo $discountPercent; ?>%
                         </div>
-                    </div>
-
-                    <!-- Product Info -->
-                    <div class="col-lg-6">
-                        <div class="product-info">
-                            <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-                            
-                            <div class="product-meta">
-                                <div class="product-rating">
-                                    <div class="rating-stars">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <?php if ($i <= $avgRating): ?>
-                                                <i class="fas fa-star"></i>
-                                            <?php else: ?>
-                                                <i class="far fa-star"></i>
-                                            <?php endif; ?>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <span class="rating-count">(<?php echo $totalReviews; ?> đánh giá)</span>
-                                </div>
-                                
-                                <div class="product-stock <?php echo $product['stock'] > 0 ? 'in-stock' : 'out-of-stock'; ?>">
-                                    <?php if ($product['stock'] > 0): ?>
-                                        <i class="fas fa-check-circle"></i> Còn hàng
-                                    <?php else: ?>
-                                        <i class="fas fa-times-circle"></i> Hết hàng
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <div class="product-price">
-                                <?php if ($product['discount_price']): ?>
-                                    <span class="current-price">
-                                        <?php echo number_format($product['discount_price'], 0, ',', '.'); ?>đ
-                                    </span>
-                                    <span class="original-price">
-                                        <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
-                                    </span>
-                                    <span class="discount-badge">
-                                        -<?php echo $product['discount_percent']; ?>%
-                                    </span>
-                                <?php else: ?>
-                                    <span class="current-price">
-                                        <?php echo number_format($product['price'], 0, ',', '.'); ?>đ
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="product-description">
-                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
-                            </div>
-
-                            <?php if ($product['stock'] > 0): ?>
-                            <div class="product-actions">
-                                <div class="quantity-selector">
-                                    <button class="btn-quantity minus">-</button>
-                                    <input type="number" value="1" min="1" max="<?php echo $product['stock']; ?>" 
-                                           class="quantity-input">
-                                    <button class="btn-quantity plus">+</button>
-                                </div>
-                                
-                                <button class="btn btn-primary add-to-cart" 
-                                        data-id="<?php echo $product['product_id']; ?>">
-                                    <i class="fas fa-cart-plus"></i>
-                                    Thêm vào giỏ hàng
-                                </button>
-                                
-                                <button class="btn btn-outline-primary add-to-wishlist"
-                                        data-id="<?php echo $product['product_id']; ?>">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <?php endif; ?>
-
-                            <?php if (!empty($product['active_ingredient'])): ?>
-                            <div class="product-specs">
-                                <h3>Thông tin sản phẩm</h3>
-                                <table class="specs-table">
-                                    <tr>
-                                        <td>Hoạt chất:</td>
-                                        <td><?php echo htmlspecialchars($product['active_ingredient']); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dạng bào chế:</td>
-                                        <td><?php echo htmlspecialchars($product['dosage_form']); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Đơn vị:</td>
-                                        <td><?php echo htmlspecialchars($product['unit']); ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Hướng dẫn sử dụng:</td>
-                                        <td><?php echo nl2br(htmlspecialchars($product['usage_instructions'])); ?></td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <?php endif; ?>
+                        <?php endif; ?>
+                        
+                        <div class="text-center">
+                            <img src="<?php echo htmlspecialchars($product['display_image'] ?? $product['image_url'] ?? '/assets/images/default-product.jpg'); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                 class="main-product-image">
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Product Reviews -->
-            <div class="product-reviews mt-5">
-                <h3>Đánh giá sản phẩm</h3>
-                
-                <?php if ($totalReviews > 0): ?>
-                <div class="reviews-summary">
-                    <div class="overall-rating">
-                        <div class="rating-number"><?php echo $avgRating; ?></div>
-                        <div class="rating-stars">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <?php if ($i <= $avgRating): ?>
-                                    <i class="fas fa-star"></i>
-                                <?php else: ?>
-                                    <i class="far fa-star"></i>
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                        </div>
-                        <div class="total-reviews"><?php echo $totalReviews; ?> đánh giá</div>
-                    </div>
-                </div>
-
-                <div class="reviews-list">
-                    <?php foreach ($reviews as $review): ?>
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <img src="<?php echo !empty($review['avatar']) ? 
-                                    htmlspecialchars($review['avatar']) : 
-                                    '/assets/images/default-avatar.png'; ?>" 
-                                     alt="Avatar" class="reviewer-avatar">
-                                <div class="reviewer-name">
-                                    <?php echo htmlspecialchars($review['reviewer_name']); ?>
-                                </div>
-                            </div>
-                            <div class="review-rating">
+                <!-- Product Info -->
+                <div class="col-lg-6">
+                    <div class="product-info-section">
+                        <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
+                        
+                        <!-- Rating -->
+                        <div class="product-rating">
+                            <div class="rating-stars">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <?php if ($i <= $review['rating']): ?>
+                                    <?php if ($i <= $avgRating): ?>
                                         <i class="fas fa-star"></i>
                                     <?php else: ?>
                                         <i class="far fa-star"></i>
                                     <?php endif; ?>
                                 <?php endfor; ?>
                             </div>
+                            <span class="rating-count">(<?php echo $totalReviews; ?> đánh giá)</span>
                         </div>
-                        <div class="review-content">
-                            <?php echo nl2br(htmlspecialchars($review['comment'])); ?>
+
+                        <!-- Price -->
+                        <div class="product-price-section">
+                            <span class="current-price"><?php echo number_format($displayPrice, 0, ',', '.'); ?>đ</span>
+                            <?php if ($discountPercent > 0): ?>
+                                <div>
+                                    <span class="original-price"><?php echo number_format($originalPrice, 0, ',', '.'); ?>đ</span>
+                                    <span class="price-save">Tiết kiệm <?php echo number_format($originalPrice - $displayPrice, 0, ',', '.'); ?>đ</span>
+                                </div>
+                            <?php endif; ?>
                         </div>
-                        <?php if (!empty($review['images'])): 
-                            $reviewImages = json_decode($review['images'], true); ?>
-                        <div class="review-images">
-                            <?php foreach ($reviewImages as $image): ?>
-                            <img src="<?php echo htmlspecialchars($image); ?>" 
-                                 alt="Review image" 
-                                 class="review-image">
-                            <?php endforeach; ?>
+
+                        <!-- Stock Status -->
+                        <div class="product-stock <?php echo $product['stock'] > 0 ? '' : 'out-of-stock'; ?>">
+                            <?php if ($product['stock'] > 0): ?>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Còn <strong><?php echo $product['stock']; ?></strong> sản phẩm</span>
+                            <?php else: ?>
+                                <i class="fas fa-times-circle"></i>
+                                <span>Tạm hết hàng</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($product['stock'] > 0): ?>
+                        <!-- Quantity -->
+                        <div class="quantity-section">
+                            <div class="quantity-label">Số lượng:</div>
+                            <div class="quantity-controls">
+                                <div class="quantity-wrapper">
+                                    <button class="quantity-btn minus" onclick="changeQuantity(-1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" value="1" min="1" max="<?php echo $product['stock']; ?>" 
+                                           class="quantity-input" id="quantityInput">
+                                    <button class="quantity-btn plus" onclick="changeQuantity(1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Tối đa <?php echo $product['stock']; ?> sản phẩm</small>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="btn-buy-now" onclick="buyNow(<?php echo $product['product_id']; ?>)">
+                                <i class="fas fa-lightning-bolt"></i>
+                                Mua ngay
+                            </button>
+                            
+                            <button class="btn-add-cart" onclick="addToCart(<?php echo $product['product_id']; ?>)">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            
+                            <button class="btn-wishlist" onclick="addToWishlist(<?php echo $product['product_id']; ?>)">
+                                <i class="far fa-heart"></i>
+                            </button>
                         </div>
                         <?php endif; ?>
-                        <div class="review-footer">
-                            <div class="review-date">
-                                <?php echo date('d/m/Y', strtotime($review['created_at'])); ?>
+
+                        <!-- Description -->
+                        <div class="product-description">
+                            <div class="description-title">Mô tả sản phẩm</div>
+                            <div class="description-text">
+                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
                             </div>
                         </div>
                     </div>
-                    <?php endforeach; ?>
                 </div>
-                <?php else: ?>
-                <div class="no-reviews">
-                    Chưa có đánh giá nào cho sản phẩm này
-                </div>
-                <?php endif; ?>
             </div>
+        </div>
 
-            <!-- Related Products -->
-            <?php if (!empty($relatedProducts)): ?>
-            <div class="related-products mt-5">
-                <h3 class="section-title">Sản phẩm liên quan</h3>
-                <div class="row g-4">
-                    <?php foreach ($relatedProducts as $relatedProduct): ?>
-                    <div class="col-lg-3 col-md-4 col-6">
-                        <a href="/shop/details.php?id=<?php echo $relatedProduct['product_id']; ?>" 
-                           class="product-card">
-                            <div class="product-image">
-                                <img src="<?php echo htmlspecialchars($relatedProduct['display_image']); ?>" 
-                                     alt="<?php echo htmlspecialchars($relatedProduct['name']); ?>"
-                                     class="img-fluid">
-                                
-                                <?php if ($relatedProduct['discount_percent'] > 0): ?>
-                                <div class="discount-badge">
-                                    -<?php echo $relatedProduct['discount_percent']; ?>%
-                                </div>
+        <!-- Product Specifications -->
+        <?php if (!empty($product['active_ingredient']) || !empty($product['dosage_form'])): ?>
+        <div class="product-specs">
+            <h3 class="specs-title">Thông tin chi tiết</h3>
+            <table class="specs-table">
+                <?php if (!empty($product['active_ingredient'])): ?>
+                <tr>
+                    <td>Hoạt chất:</td>
+                    <td><?php echo htmlspecialchars($product['active_ingredient']); ?></td>
+                </tr>
+                <?php endif; ?>
+                <?php if (!empty($product['dosage_form'])): ?>
+                <tr>
+                    <td>Dạng bào chế:</td>
+                    <td><?php echo htmlspecialchars($product['dosage_form']); ?></td>
+                </tr>
+                <?php endif; ?>
+                <?php if (!empty($product['unit'])): ?>
+                <tr>
+                    <td>Đơn vị:</td>
+                    <td><?php echo htmlspecialchars($product['unit']); ?></td>
+                </tr>
+                <?php endif; ?>
+                <?php if (!empty($product['usage_instructions'])): ?>
+                <tr>
+                    <td>Hướng dẫn sử dụng:</td>
+                    <td><?php echo nl2br(htmlspecialchars($product['usage_instructions'])); ?></td>
+                </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+        <?php endif; ?>
+
+        <!-- Related Products -->
+        <?php if (!empty($relatedProducts)): ?>
+        <div class="related-products">
+            <h3 class="section-title">Sản phẩm liên quan</h3>
+            <div class="row g-4">
+                <?php foreach ($relatedProducts as $relatedProduct): ?>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a href="/shop/details.php?id=<?php echo $relatedProduct['product_id']; ?>" 
+                       class="related-product-card">
+                        <div class="related-product-image">
+                            <img src="<?php echo htmlspecialchars($relatedProduct['display_image'] ?? $relatedProduct['image_url'] ?? '/assets/images/default-product.jpg'); ?>" 
+                                 alt="<?php echo htmlspecialchars($relatedProduct['name']); ?>">
+                            
+                            <?php if (isset($relatedProduct['discount_percent']) && $relatedProduct['discount_percent'] > 0): ?>
+                            <div class="discount-badge">
+                                -<?php echo $relatedProduct['discount_percent']; ?>%
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="related-product-info">
+                            <h4 class="related-product-name">
+                                <?php echo htmlspecialchars($relatedProduct['name']); ?>
+                            </h4>
+                            
+                            <div class="related-product-price">
+                                <?php if (isset($relatedProduct['discount_price']) && $relatedProduct['discount_price']): ?>
+                                    <?php echo number_format($relatedProduct['discount_price'], 0, ',', '.'); ?>đ
+                                    <small style="text-decoration: line-through; color: #999; margin-left: 8px;">
+                                        <?php echo number_format($relatedProduct['price'], 0, ',', '.'); ?>đ
+                                    </small>
+                                <?php else: ?>
+                                    <?php echo number_format($relatedProduct['price'], 0, ',', '.'); ?>đ
                                 <?php endif; ?>
                             </div>
 
-                            <div class="product-info">
-                                <h4 class="product-name">
-                                    <?php echo htmlspecialchars($relatedProduct['name']); ?>
-                                </h4>
-                                
-                                <div class="product-price">
-                                    <?php if ($relatedProduct['discount_price']): ?>
-                                    <div class="price-group">
-                                        <span class="current-price">
-                                            <?php echo number_format($relatedProduct['discount_price'], 0, ',', '.'); ?>đ
-                                        </span>
-                                        <span class="original-price">
-                                            <?php echo number_format($relatedProduct['price'], 0, ',', '.'); ?>đ
-                                        </span>
-                                    </div>
-                                    <?php else: ?>
-                                    <div class="price-group">
-                                        <span class="current-price">
-                                            <?php echo number_format($relatedProduct['price'], 0, ',', '.'); ?>đ
-                                        </span>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="product-status">
-                                    <?php if ($relatedProduct['stock'] > 0): ?>
-                                    <span class="status in-stock">Còn hàng</span>
-                                    <?php else: ?>
-                                    <span class="status out-of-stock">Hết hàng</span>
-                                    <?php endif; ?>
-                                </div>
+                            <div class="product-status">
+                                <?php if ($relatedProduct['stock'] > 0): ?>
+                                <span class="badge bg-success">Còn hàng</span>
+                                <?php else: ?>
+                                <span class="badge bg-danger">Hết hàng</span>
+                                <?php endif; ?>
                             </div>
-                        </a>
-                    </div>
-                    <?php endforeach; ?>
+                        </div>
+                    </a>
                 </div>
+                <?php endforeach; ?>
             </div>
-            <?php endif; ?>
         </div>
-    </main>
+        <?php endif; ?>
+    </div>
 
     <?php include __DIR__ . '/../includes/footer.php'; ?>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <script src="/assets/js/cart-new.js"></script>
     <script>
-        // Initialize Swiper
-        const galleryThumbs = new Swiper('.product-gallery-thumbs', {
-            spaceBetween: 10,
-            slidesPerView: 4,
-            freeMode: true,
-            watchSlidesVisibility: true,
-            watchSlidesProgress: true,
-        });
-
-        const galleryMain = new Swiper('.product-gallery-main', {
-            spaceBetween: 10,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            thumbs: {
-                swiper: galleryThumbs
+        // Quantity Controls
+        function changeQuantity(delta) {
+            const input = document.getElementById('quantityInput');
+            const current = parseInt(input.value);
+            const max = parseInt(input.getAttribute('max'));
+            const min = parseInt(input.getAttribute('min'));
+            
+            const newValue = current + delta;
+            
+            if (newValue >= min && newValue <= max) {
+                input.value = newValue;
+                updateButtons();
             }
+        }
+        
+        function updateButtons() {
+            const input = document.getElementById('quantityInput');
+            const minusBtn = document.querySelector('.quantity-btn.minus');
+            const plusBtn = document.querySelector('.quantity-btn.plus');
+            const current = parseInt(input.value);
+            const max = parseInt(input.getAttribute('max'));
+            const min = parseInt(input.getAttribute('min'));
+            
+            minusBtn.disabled = current <= min;
+            plusBtn.disabled = current >= max;
+        }
+        
+        // Event listeners
+        document.getElementById('quantityInput').addEventListener('input', function() {
+            const max = parseInt(this.getAttribute('max'));
+            const min = parseInt(this.getAttribute('min'));
+            let value = parseInt(this.value);
+            
+            if (value > max) this.value = max;
+            if (value < min) this.value = min;
+            
+            updateButtons();
         });
-
-        // Quantity Selector
-        document.querySelectorAll('.btn-quantity').forEach(button => {
-            button.addEventListener('click', function() {
-                const input = this.parentElement.querySelector('.quantity-input');
-                const currentValue = parseInt(input.value);
-                const maxValue = parseInt(input.getAttribute('max'));
-                
-                if (this.classList.contains('plus') && currentValue < maxValue) {
-                    input.value = currentValue + 1;
-                } else if (this.classList.contains('minus') && currentValue > 1) {
-                    input.value = currentValue - 1;
+        
+        // Add to Cart
+        function addToCart(productId) {
+            const quantity = document.getElementById('quantityInput').value;
+            const btn = document.querySelector('.btn-add-cart');
+            
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            fetch('/api/cart/add.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: parseInt(quantity)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess('Đã thêm sản phẩm vào giỏ hàng!');
+                    updateCartCount();
+                } else {
+                    showError(data.message || 'Có lỗi xảy ra');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Có lỗi xảy ra khi thêm vào giỏ hàng');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-cart-plus"></i>';
             });
-        });
-
-        // Add to Cart - Sử dụng CartManager từ cart-new.js
-        // Code này sẽ được xử lý bởi CartManager tự động
-
-        // Add to Wishlist - Sử dụng CartManager từ cart-new.js
-        // Code này sẽ được xử lý bởi CartManager tự động
-
-        // Xử lý các nút trong product actions
-        document.querySelectorAll('.btn-quickview').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.dataset.id;
-                // Thêm code xử lý xem nhanh sản phẩm ở đây
-                window.location.href = '/shop/details.php?id=' + productId;
+        }
+        
+        // Buy Now
+        function buyNow(productId) {
+            const quantity = document.getElementById('quantityInput').value;
+            const btn = document.querySelector('.btn-buy-now');
+            
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            fetch('/api/cart/add.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: parseInt(quantity),
+                    buy_now: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/checkout.php';
+                } else {
+                    showError(data.message || 'Có lỗi xảy ra');
+                    btn.classList.remove('loading');
+                    btn.innerHTML = '<i class="fas fa-lightning-bolt"></i> Mua ngay';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Có lỗi xảy ra');
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-lightning-bolt"></i> Mua ngay';
             });
+        }
+        
+        // Add to Wishlist
+        function addToWishlist(productId) {
+            const btn = document.querySelector('.btn-wishlist');
+            const icon = btn.querySelector('i');
+            
+            btn.classList.add('loading');
+            
+            fetch('/api/wishlist/add.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    showSuccess('Đã thêm vào danh sách yêu thích!');
+                } else {
+                    showError(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Có lỗi xảy ra');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+            });
+        }
+        
+        // Utility functions
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success position-fixed';
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i>${message}`;
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+        
+        function showError(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger position-fixed';
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alert.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+        
+        function updateCartCount() {
+            // Update cart count in header if available
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                fetch('/api/cart/count.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        cartCount.textContent = data.count;
+                    }
+                });
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtons();
+            
+            // Check if user is logged in
+            const userInfo = localStorage.getItem('userInfo');
+            if (!userInfo) {
+                document.querySelectorAll('.btn-buy-now, .btn-add-cart, .btn-wishlist').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showError('Vui lòng đăng nhập để mua hàng');
+                        setTimeout(() => {
+                            window.location.href = '/login.php';
+                        }, 1500);
+                    });
+                });
+            }
         });
-
-        // Related products - Cart buttons sẽ được xử lý bởi CartManager từ cart-new.js
-        // Không cần code riêng vì sử dụng class 'add-to-cart' và 'add-to-wishlist'
     </script>
-
-    <style>
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            color: #2c3e50;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .product-card {
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .product-image {
-            position: relative;
-            padding-top: 100%;
-            background: #f8f9fa;
-            overflow: hidden;
-        }
-
-        .product-image img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover .product-image img {
-            transform: scale(1.05);
-        }
-
-        .discount-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ff4757;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .product-info {
-            padding: 1rem;
-        }
-
-        .product-name {
-            font-size: 0.95rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #2d3436;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            height: 2.8em;
-        }
-
-        .product-price {
-            margin-bottom: 0.5rem;
-        }
-
-        .price-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .current-price {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d3436;
-        }
-
-        .original-price {
-            font-size: 0.9rem;
-            color: #b2bec3;
-            text-decoration: line-through;
-        }
-
-        .product-status {
-            font-size: 0.85rem;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        .status.in-stock {
-            background: #e3fcef;
-            color: #00b894;
-        }
-
-        .status.out-of-stock {
-            background: #ffeaea;
-            color: #ff4757;
-        }
-
-        @media (max-width: 768px) {
-            .product-name {
-                font-size: 0.9rem;
-            }
-            
-            .current-price {
-                font-size: 1rem;
-            }
-            
-            .original-price {
-                font-size: 0.85rem;
-            }
-        }
-    </style>
 </body>
 </html> 

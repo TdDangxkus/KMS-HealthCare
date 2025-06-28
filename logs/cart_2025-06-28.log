@@ -1,0 +1,6 @@
+[2025-06-28 08:47:54] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-06-28 08:47:54] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-06-28 08:47:56] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-06-28 08:47:56] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 1
+[2025-06-28 08:48:03] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-06-28 08:48:03] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2

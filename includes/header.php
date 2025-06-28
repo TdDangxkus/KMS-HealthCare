@@ -1747,7 +1747,7 @@ body {
 </header>
 
 <?php if (isset($_SESSION['user_id'])): ?>
-    <?php include 'includes/logout_modal.php'; ?>
+    <?php include __DIR__ . '/logout_modal.php'; ?>
     <script src="/assets/js/logout.js"></script>
 <?php endif; ?>
 

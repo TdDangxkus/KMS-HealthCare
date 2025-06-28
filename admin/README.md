@@ -315,7 +315,7 @@ Tất cả components đều modular và có thể extend:
 
 ---
 
-**Phát triển bởi**: QickMed Development Team  
+**Phát triển bởi**: Dalziel Development  
 **Phiên bản**: 1.0.0  
 **Cập nhật**: 2024  
 **License**: Proprietary

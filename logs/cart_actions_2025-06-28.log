@@ -1,0 +1,6 @@
+[2025-06-28 08:46:13] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 2 | Quantity: 1
+[2025-06-28 08:46:13] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 2 | Quantity: 1 | Details: Name: Omega 3 Fish Oil, Price: 580000, Stock: 40
+[2025-06-28 08:46:13] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 2 | Quantity: 1 | Details: Cart ID: 15, Cart Count: 2
+[2025-06-28 08:48:01] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 2 | Quantity: 1
+[2025-06-28 08:48:01] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 2 | Quantity: 1 | Details: Name: Omega 3 Fish Oil, Price: 580000, Stock: 40
+[2025-06-28 08:48:01] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 2 | Quantity: 1 | Details: Cart ID: 15, Cart Count: 2
