@@ -40,10 +40,10 @@ try {
         
         // Lấy thông tin địa chỉ để lưu snapshot
         $stmt = $conn->prepare("
-            SELECT ua.*, u.username, u.phone_number, ui.full_name 
+            SELECT ua.*, u.username, ui.phone, ui.full_name 
             FROM user_addresses ua 
-            JOIN users u ON ua.user_id = u.user_id 
-            LEFT JOIN users_info ui ON u.user_id = ui.user_id 
+            LEFT JOIN users u ON ua.user_id = u.user_id
+            LEFT JOIN users_info ui ON u.user_id = ui.user_id
             WHERE ua.id = ? AND ua.user_id = ?
         ");
         $stmt->bind_param('ii', $address_id, $user_id);
@@ -56,7 +56,7 @@ try {
         
         $shipping_address = json_encode([
             'name' => $address['full_name'] ?: $address['username'],
-            'phone' => $address['phone_number'],
+            'phone' => $address['phone'],
             'address_line' => $address['address_line'],
             'ward' => $address['ward'],
             'district' => $address['district'],
@@ -121,9 +121,9 @@ try {
     $stmt->bind_param('isssii', $address_id, $shipping_address, $payment_method, $order_note, $order_id, $user_id);
     $stmt->execute();
     
-    // Cập nhật stock các sản phẩm
+    // Kiểm tra tồn kho các sản phẩm (nhưng không trừ, chỉ trừ khi admin xác nhận)
     $stmt = $conn->prepare("
-        SELECT oi.product_id, oi.quantity, p.stock 
+        SELECT oi.product_id, oi.quantity, p.stock, p.name as product_name
         FROM order_items oi 
         JOIN products p ON oi.product_id = p.product_id 
         WHERE oi.order_id = ?
@@ -134,13 +134,11 @@ try {
     
     foreach ($items as $item) {
         if ($item['stock'] < $item['quantity']) {
-            throw new Exception("Sản phẩm ID {$item['product_id']} không đủ hàng trong kho");
+            throw new Exception("Sản phẩm '{$item['product_name']}' không đủ hàng trong kho (còn {$item['stock']}, cần {$item['quantity']})");
         }
         
-        // Giảm stock
-        $stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE product_id = ?");
-        $stmt->bind_param('ii', $item['quantity'], $item['product_id']);
-        $stmt->execute();
+        // NOTE: Không trừ stock ở đây, chỉ trừ khi admin xác nhận đơn hàng
+        // Stock sẽ được trừ trong admin/orders.php khi status chuyển thành 'completed'
     }
     
     // Tạo payment record

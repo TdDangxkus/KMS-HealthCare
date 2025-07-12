@@ -177,12 +177,10 @@ foreach ($default_settings as $key => $value) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/admin.css" rel="stylesheet">
-    <link href="assets/css/sidebar.css" rel="stylesheet">
-    <link href="assets/css/header.css" rel="stylesheet">
 </head>
 <body>
-    <?php include 'includes/headeradmin.php'; ?>
-    <?php include 'includes/sidebaradmin.php'; ?>
+    <?php include 'includes/header.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <main class="main-content">
         <div class="container-fluid">

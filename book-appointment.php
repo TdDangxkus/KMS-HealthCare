@@ -106,22 +106,6 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 15% 85%, rgba(102, 126, 234, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 85% 15%, rgba(245, 101, 101, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.08) 0%, transparent 50%),
-                linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
         .page-container {
             min-height: calc(100vh - 120px);
             padding: 3rem 0;
@@ -135,13 +119,9 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
 
         .booking-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(40px);
-            border-radius: 32px;
+            border-radius: 24px;
             padding: 0;
-            box-shadow: 
-                0 40px 80px rgba(0, 0, 0, 0.08),
-                0 0 0 1px var(--glass-border),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 3rem;
             position: relative;
             overflow: hidden;
@@ -156,17 +136,15 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             right: 0;
             height: 4px;
             background: var(--primary-gradient);
-            border-radius: 32px 32px 0 0;
+            border-radius: 24px 24px 0 0;
         }
 
         .page-header {
             text-align: center;
-            padding: 4rem 3rem;
-            background: 
-                linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03)),
-                linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.8));
-            border-radius: 32px 32px 0 0;
-            margin: 0 0 3rem 0;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+            border-radius: 24px 24px 0 0;
+            margin: 0 0 2rem 0;
             position: relative;
         }
 
@@ -176,27 +154,26 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
+            width: 60px;
             height: 2px;
             background: var(--primary-gradient);
             border-radius: 2px;
         }
 
         .page-title {
-            font-size: 3.5rem;
-            font-weight: 900;
+            font-size: 2.5rem;
+            font-weight: 700;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1rem;
-            letter-spacing: -0.03em;
             line-height: 1.2;
         }
 
         .page-subtitle {
             color: var(--text-muted);
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 500;
             opacity: 0.9;
             max-width: 600px;
@@ -205,7 +182,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
         }
 
         .content-inner {
-            padding: 3rem;
+            padding: 2rem;
         }
 
         .form-section {
@@ -216,7 +193,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             font-size: 1.25rem;
             font-weight: 600;
             color: #2d3748;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -236,17 +213,17 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
 
         .form-control {
             border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 0.75rem 1rem;
             font-size: 0.95rem;
-            transition: all 0.3s ease;
+            transition: border-color 0.2s ease;
             background: white;
         }
 
         .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
+            outline: none;
         }
 
         .form-row {
@@ -255,7 +232,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             gap: 1.5rem;
         }
 
-        /* Doctor Selection - Compact Style */
+        /* Doctor Selection */
         .doctor-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -264,35 +241,34 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
         }
 
         .doctor-card {
-            border: 2px solid rgba(226, 232, 240, 0.6);
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
             padding: 1.5rem;
             cursor: pointer;
             transition: all 0.2s ease;
             background: white;
             position: relative;
-            overflow: hidden;
         }
 
         .doctor-card:hover {
             border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
         }
 
         .doctor-card.selected {
             border-color: #667eea;
-            background: rgba(102, 126, 234, 0.06);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+            background: rgba(102, 126, 234, 0.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
         }
 
         .doctor-card.selected::after {
             content: '✓';
             position: absolute;
-            top: 10px;
+            top: 12px;
             right: 15px;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             background: #667eea;
             color: white;
             border-radius: 50%;
@@ -306,13 +282,13 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
         .doctor-info {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .doctor-avatar {
             width: 50px;
             height: 50px;
-            border-radius: 10px;
+            border-radius: 8px;
             object-fit: cover;
         }
 
@@ -325,35 +301,35 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
 
         .doctor-specialization {
             color: #667eea;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
         .doctor-clinic {
             color: #718096;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             margin-top: 0.25rem;
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
 
-        /* Time Slots - Compact */
+        /* Time Slots */
         .time-slots {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 0.5rem;
             margin-top: 1rem;
             max-height: 200px;
             overflow-y: auto;
-            padding: 0.5rem;
+            padding: 1rem;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             background: #f8fafc;
         }
 
         .time-slot {
-            padding: 0.5rem 0.25rem;
+            padding: 0.5rem 0.75rem;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             text-align: center;
@@ -361,7 +337,7 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             transition: all 0.2s ease;
             background: white;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .time-slot:hover {
@@ -379,7 +355,13 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             background: #f1f5f9;
             color: #94a3b8;
             cursor: not-allowed;
-            opacity: 0.6;
+            opacity: 0.7;
+        }
+
+        .time-slot.loading {
+            background: #f8fafc;
+            color: #94a3b8;
+            cursor: default;
         }
 
         /* Buttons */
@@ -387,17 +369,17 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             display: flex;
             gap: 1rem;
             justify-content: center;
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
 
         .btn {
             padding: 0.75rem 2rem;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 0.95rem;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -406,12 +388,18 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
         .btn-primary {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
@@ -421,67 +409,45 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
 
         .btn-secondary:hover {
             background: #cbd5e0;
-            transform: translateY(-1px);
-        }
-
-        /* Select2 Custom Styling */
-        .select2-container--default .select2-selection--single {
-            height: 45px !important;
-            border: 2px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 1rem !important;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 27px !important;
-            color: #4a5568 !important;
-        }
-
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
         }
 
         /* Alerts */
         .alert {
-            border-radius: 12px;
+            border-radius: 8px;
             border: none;
             padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
         .alert-success {
-            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(72, 187, 120, 0.05));
+            background: rgba(72, 187, 120, 0.1);
             color: #2f855a;
         }
 
         .alert-danger {
-            background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(245, 101, 101, 0.05));
+            background: rgba(245, 101, 101, 0.1);
             color: #c53030;
         }
 
-        /* Responsive */
-        @media (max-width: 992px) {
-            .booking-container {
-                padding: 0 1.5rem;
-            }
-            
-            .page-header {
-                padding: 3rem 2rem;
-            }
-            
-            .content-inner {
-                padding: 2rem;
-            }
-            
-            .doctor-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             body {
                 padding-top: 100px;
@@ -489,79 +455,35 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             
             .page-container {
                 padding: 2rem 0;
-                min-height: calc(100vh - 100px);
             }
             
-            .booking-card { 
-                border-radius: 24px;
-                margin-bottom: 2rem;
-            }
-            
-            .page-title { 
-                font-size: 2.5rem; 
-            }
-            
-            .page-subtitle {
-                font-size: 1.1rem;
+            .booking-container {
+                padding: 0 1rem;
             }
             
             .page-header {
-                padding: 2.5rem 1.5rem;
+                padding: 2rem 1.5rem;
             }
             
-            .content-inner {
-                padding: 1.5rem;
-            }
-            
-            .doctor-grid { 
-                grid-template-columns: 1fr; 
-            }
-            
-            .time-slots { 
-                grid-template-columns: repeat(4, 1fr);
-                max-height: 150px;
-            }
-            
-            .btn-group { 
-                flex-direction: column; 
-            }
-        }
-
-        @media (max-width: 480px) {
             .page-title {
                 font-size: 2rem;
             }
             
-            .page-header {
-                padding: 2rem 1rem;
+            .content-inner {
+                padding: 1.5rem;
             }
             
-            .content-inner {
-                padding: 1rem;
+            .doctor-grid {
+                grid-template-columns: 1fr;
             }
             
             .time-slots {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             
-            .doctor-card {
-                padding: 1.5rem;
+            .btn-group {
+                flex-direction: column;
             }
-        }
-
-        /* Loading Animation */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50%;
-            border-top-color: #667eea;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -612,32 +534,15 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
                             <div class="form-group mb-3">
                                 <select id="doctorDropdown" class="form-control">
                                     <option value="">-- Chọn nhanh bác sĩ --</option>
-                                    <?php foreach ($doctors as $doctor): ?>
-                                        <option value="<?= $doctor['doctor_id'] ?>" data-clinic="<?= $doctor['clinic_id'] ?>">
-                                            <?= htmlspecialchars($doctor['full_name']) ?> - <?= htmlspecialchars($doctor['specialization']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             
                             <!-- Doctor Cards Grid -->
-                            <div class="doctor-grid">
-                                <?php foreach ($doctors as $doctor): ?>
-                                    <div class="doctor-card" onclick="selectDoctor(<?= $doctor['doctor_id'] ?>)">
-                                        <div class="doctor-info">
-                                            <img src="<?= $doctor['profile_picture'] ?: '/assets/images/default-doctor.jpg' ?>" 
-                                                 alt="Doctor" class="doctor-avatar">
-                                            <div class="doctor-details">
-                                                <h5><?= htmlspecialchars($doctor['full_name']) ?></h5>
-                                                <div class="doctor-specialization"><?= htmlspecialchars($doctor['specialization']) ?></div>
-                                                <div class="doctor-clinic">
-                                                    <i class="fas fa-hospital"></i>
-                                                    <?= htmlspecialchars($doctor['clinic_name']) ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                            <div class="doctor-grid" id="doctorGrid">
+                                <div class="doctor-card loading">
+                                    <div class="loading-spinner"></div>
+                                    Đang tải danh sách bác sĩ...
+                                </div>
                             </div>
                             
                             <input type="hidden" name="doctor_id" id="selectedDoctor" required>
@@ -716,120 +621,204 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Cache và state management
+        let doctorsCache = null;
+        let timeSlotsCache = {};
         let selectedDoctorId = null;
         let selectedClinicId = null;
         let selectedTime = null;
 
-        // Doctor dropdown change handler
-        document.getElementById('doctorDropdown').addEventListener('change', function() {
-            const doctorId = this.value;
+        // Load trang
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDoctors();
+            
+            // Event listeners
+            document.getElementById('doctorDropdown').addEventListener('change', handleDoctorDropdownChange);
+            document.getElementById('appointmentDate').addEventListener('change', handleDateChange);
+            document.getElementById('bookingForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        // Load danh sách bác sĩ
+        function loadDoctors() {
+            if (doctorsCache) {
+                populateDoctors(doctorsCache);
+                return;
+            }
+
+            fetch('/api/get-doctors.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        doctorsCache = data.doctors;
+                        populateDoctors(data.doctors);
+                    } else {
+                        showError('Không thể tải danh sách bác sĩ');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading doctors:', error);
+                    showError('Lỗi kết nối. Vui lòng thử lại!');
+                });
+        }
+
+        // Hiển thị danh sách bác sĩ
+        function populateDoctors(doctors) {
+            const dropdown = document.getElementById('doctorDropdown');
+            const grid = document.getElementById('doctorGrid');
+            
+            // Cập nhật dropdown
+            dropdown.innerHTML = '<option value="">-- Chọn nhanh bác sĩ --</option>';
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.doctor_id;
+                option.textContent = `${doctor.full_name} - ${doctor.specialization}`;
+                option.dataset.clinicId = doctor.clinic_id;
+                dropdown.appendChild(option);
+            });
+            
+            // Cập nhật grid
+            grid.innerHTML = '';
+            doctors.forEach(doctor => {
+                const card = document.createElement('div');
+                card.className = 'doctor-card';
+                card.onclick = () => selectDoctor(doctor.doctor_id);
+                card.innerHTML = `
+                    <div class="doctor-info">
+                        <img src="${doctor.profile_picture || '/assets/images/default-doctor.jpg'}" 
+                             alt="Doctor" class="doctor-avatar">
+                        <div class="doctor-details">
+                            <h5>${doctor.full_name}</h5>
+                            <div class="doctor-specialization">${doctor.specialization}</div>
+                            <div class="doctor-clinic">
+                                <i class="fas fa-hospital"></i>
+                                ${doctor.clinic_name}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Xử lý thay đổi dropdown bác sĩ
+        function handleDoctorDropdownChange(event) {
+            const doctorId = event.target.value;
             if (doctorId) {
                 selectDoctor(parseInt(doctorId), true);
             }
-        });
+        }
 
-        // Doctor selection
+        // Chọn bác sĩ
         function selectDoctor(doctorId, fromDropdown = false) {
-            // Remove previous selection
+            // Xóa selection cũ
             document.querySelectorAll('.doctor-card').forEach(card => {
                 card.classList.remove('selected');
             });
             
-            // Add selection to clicked card
-            if (!fromDropdown) {
-                event.currentTarget.classList.add('selected');
-            } else {
-                // Find and select the correct card
-                const targetCard = document.querySelector(`.doctor-card[onclick="selectDoctor(${doctorId})"]`);
-                if (targetCard) {
-                    targetCard.classList.add('selected');
+            // Tìm và select card
+            const cards = document.querySelectorAll('.doctor-card');
+            cards.forEach(card => {
+                if (card.onclick.toString().includes(doctorId)) {
+                    card.classList.add('selected');
                 }
-                // Update dropdown
+            });
+            
+            // Cập nhật dropdown nếu click từ card
+            if (!fromDropdown) {
                 document.getElementById('doctorDropdown').value = doctorId;
             }
             
-            // Store selected doctor
+            // Lưu thông tin đã chọn
             selectedDoctorId = doctorId;
             document.getElementById('selectedDoctor').value = doctorId;
             
-            // Find clinic for this doctor
-            const doctors = <?= json_encode($doctors) ?>;
-            const doctor = doctors.find(d => d.doctor_id == doctorId);
-            if (doctor && doctor.clinic_id) {
+            // Tìm clinic_id
+            const doctor = doctorsCache.find(d => d.doctor_id == doctorId);
+            if (doctor) {
                 selectedClinicId = doctor.clinic_id;
                 document.getElementById('selectedClinic').value = doctor.clinic_id;
             }
             
-            // Reset time selection
+            // Reset time slots
             resetTimeSlots();
         }
 
-        // Date change handler
-        document.getElementById('appointmentDate').addEventListener('change', function() {
-            if (selectedDoctorId && this.value) {
-                loadTimeSlots(this.value);
+        // Xử lý thay đổi ngày
+        function handleDateChange(event) {
+            const date = event.target.value;
+            if (selectedDoctorId && date) {
+                loadTimeSlots(selectedDoctorId, date);
             } else if (!selectedDoctorId) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Chưa chọn bác sĩ',
                     text: 'Vui lòng chọn bác sĩ trước khi chọn ngày khám!'
                 });
-                this.value = '';
+                event.target.value = '';
             }
-        });
-
-        // Load available time slots
-        function loadTimeSlots(date) {
-            const timeSlotsContainer = document.getElementById('timeSlots');
-            timeSlotsContainer.innerHTML = '<div class="loading-spinner"></div> Đang tải...';
-            
-            // Generate time slots (8:00 - 17:00, every 30 minutes)
-            const timeSlots = [];
-            for (let hour = 8; hour <= 17; hour++) {
-                for (let minute = 0; minute < 60; minute += 30) {
-                    if (hour === 17 && minute > 0) break; // Stop at 17:00
-                    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    timeSlots.push(timeStr);
-                }
-            }
-            
-            // Simulate checking availability (in real app, this would be an API call)
-            setTimeout(() => {
-                timeSlotsContainer.innerHTML = '';
-                timeSlots.forEach(time => {
-                    const slot = document.createElement('div');
-                    slot.className = 'time-slot';
-                    slot.textContent = time;
-                    slot.onclick = () => selectTime(time);
-                    
-                    // Randomly disable some slots to simulate booked times
-                    if (Math.random() > 0.8) {
-                        slot.classList.add('disabled');
-                        slot.onclick = null;
-                        slot.title = 'Đã có lịch hẹn';
-                    }
-                    
-                    timeSlotsContainer.appendChild(slot);
-                });
-            }, 500);
         }
 
-        // Time selection
+        // Load time slots từ API
+        function loadTimeSlots(doctorId, date) {
+            const container = document.getElementById('timeSlots');
+            const cacheKey = `${doctorId}-${date}`;
+            
+            // Kiểm tra cache
+            if (timeSlotsCache[cacheKey]) {
+                populateTimeSlots(timeSlotsCache[cacheKey]);
+                return;
+            }
+            
+            // Hiển thị loading
+            container.innerHTML = '<div class="time-slot loading"><div class="loading-spinner"></div> Đang tải...</div>';
+            
+            fetch(`/api/get-time-slots.php?doctor_id=${doctorId}&date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        timeSlotsCache[cacheKey] = data.slots;
+                        populateTimeSlots(data.slots);
+                    } else {
+                        container.innerHTML = '<div class="time-slot disabled">Không có lịch trống</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading time slots:', error);
+                    container.innerHTML = '<div class="time-slot disabled">Lỗi tải dữ liệu</div>';
+                });
+        }
+
+        // Hiển thị time slots
+        function populateTimeSlots(slots) {
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot.time;
+                
+                if (slot.booked) {
+                    slotElement.classList.add('disabled');
+                    slotElement.title = 'Đã có lịch hẹn';
+                } else {
+                    slotElement.onclick = () => selectTime(slot.time);
+                }
+                
+                container.appendChild(slotElement);
+            });
+        }
+
+        // Chọn giờ
         function selectTime(time) {
-            // Remove previous selection
             document.querySelectorAll('.time-slot').forEach(slot => {
                 slot.classList.remove('selected');
             });
             
-            // Add selection to clicked slot
             event.currentTarget.classList.add('selected');
-            
-            // Store selected time
             selectedTime = time;
             document.getElementById('selectedTime').value = time;
         }
@@ -842,51 +831,86 @@ $clinics = $conn->query($clinics_sql)->fetch_all(MYSQLI_ASSOC);
             selectedTime = null;
         }
 
-        // Form validation
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        // Xử lý submit form
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            // Validation
             if (!selectedDoctorId) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Chưa chọn bác sĩ',
-                    text: 'Vui lòng chọn bác sĩ!'
-                });
+                showError('Vui lòng chọn bác sĩ!');
                 return;
             }
             
             if (!document.getElementById('appointmentDate').value) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Chưa chọn ngày',
-                    text: 'Vui lòng chọn ngày khám!'
-                });
+                showError('Vui lòng chọn ngày khám!');
                 return;
             }
             
             if (!selectedTime) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Chưa chọn giờ',
-                    text: 'Vui lòng chọn giờ khám!'
-                });
+                showError('Vui lòng chọn giờ khám!');
                 return;
             }
             
-            // Show loading
+            // Submit qua API
+            const formData = new FormData(event.target);
+            submitBooking(formData);
+        }
+
+        // Submit booking qua API
+        function submitBooking(formData) {
             const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading
             submitBtn.innerHTML = '<div class="loading-spinner me-2"></div>Đang đặt lịch...';
             submitBtn.disabled = true;
-        });
+            
+            fetch('/api/book-appointment.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đặt lịch thành công!',
+                        text: 'Lịch hẹn của bạn đang chờ xác nhận từ phòng khám.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = 'appointments.php';
+                    });
+                } else {
+                    showError(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Có lỗi xảy ra. Vui lòng thử lại!');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Hiển thị lỗi
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message
+            });
+        }
 
         // Auto-hide alerts
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.3s ease';
                     alert.style.opacity = '0';
-                    alert.style.transform = 'translateY(-20px)';
                     setTimeout(() => alert.remove(), 300);
                 });
             }, 5000);

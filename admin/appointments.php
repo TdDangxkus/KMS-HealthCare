@@ -113,7 +113,7 @@ $total_pages = ceil($total_records / $limit);
 // Get appointments
 $sql = "SELECT a.*, 
                COALESCE(ui_patient.full_name, u_patient.username, gu.full_name) as patient_name,
-               COALESCE(u_patient.phone_number, gu.phone) as patient_phone,
+               COALESCE(ui_patient.phone, gu.phone) as patient_phone,
                COALESCE(ui_doctor.full_name, u_doctor.username, u_doctor.email) as doctor_name,
                c.name as clinic_name
         FROM appointments a

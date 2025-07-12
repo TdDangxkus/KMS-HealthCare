@@ -1,4 +1,9 @@
 <?php
+// Start session trước khi có bất kỳ output nào
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions/product_functions.php';
 
@@ -10,8 +15,8 @@ $product = getProductDetails($product_id);
 
 // Nếu không tìm thấy sản phẩm, chuyển hướng về trang shop
 if (!$product) {
-    header('Location: /shop.php');
-    exit;
+    header('Location: /shop.php');  
+    exit;   
 }
 
 // Lấy sản phẩm liên quan
@@ -48,72 +53,53 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/product-details.css">
+    
     <style>
-        body {
-            background: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
+        /* Notification Override CSS - Same as shop.php */
+        .cart-notification {
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 100px !important;
+            right: 20px !important;
+            min-width: 300px !important;
+            max-width: 400px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
-        .product-container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+        .cart-notification.alert {
+            position: fixed !important;
+            z-index: 999999 !important;
+            margin: 0 !important;
         }
         
-        .product-detail-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 2rem;
+        @media (max-width: 768px) {
+            .cart-notification {
+                top: 80px !important;
+                left: 10px !important;
+                right: 10px !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
         }
         
-        .product-image-section {
-            position: relative;
-            background: #f8f9fa;
-            padding: 2rem;
+        /* Force notification to be on top of everything */
+        .cart-notification,
+        .cart-notification.position-fixed,
+        .cart-notification.alert,
+        .cart-notification.alert.position-fixed {
+            position: fixed !important;
+            z-index: 999999 !important;
         }
         
-        .main-product-image {
-            width: 100%;
-            max-width: 500px;
-            height: 500px;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .main-product-image:hover {
-            transform: scale(1.02);
-        }
-        
-        .discount-badge {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
-            background: linear-gradient(135deg, #ff416c 0%, #ff4757 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            z-index: 10;
-        }
-        
-        .product-info-section {
-            padding: 3rem;
-        }
-        
-        .product-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            line-height: 1.3;
-        }
-        
+        /* Minimal inline styles - main styles are in product-details.css */
         .product-rating {
             display: flex;
             align-items: center;
@@ -146,7 +132,7 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
             display: block;
         }
         
-        .original-price {
+        .original-price {   
             font-size: 1.2rem;
             opacity: 0.8;
             text-decoration: line-through;
@@ -494,7 +480,7 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
             transform: translate(-50%, -50%);
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);    
             border-top: 2px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -608,16 +594,16 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
 
                         <!-- Action Buttons -->
                         <div class="action-buttons">
-                            <button class="btn-buy-now" onclick="buyNow(<?php echo $product['product_id']; ?>)">
+                            <button class="btn-buy-now" data-id="<?php echo $product['product_id']; ?>">
                                 <i class="fas fa-lightning-bolt"></i>
                                 Mua ngay
                             </button>
                             
-                            <button class="btn-add-cart" onclick="addToCart(<?php echo $product['product_id']; ?>)">
+                            <button class="btn-add-cart add-to-cart" data-id="<?php echo $product['product_id']; ?>">
                                 <i class="fas fa-cart-plus"></i>
                             </button>
                             
-                            <button class="btn-wishlist" onclick="addToWishlist(<?php echo $product['product_id']; ?>)">
+                            <button class="btn-wishlist add-to-wishlist" data-id="<?php echo $product['product_id']; ?>">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
@@ -724,6 +710,7 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/cart-new.js"></script>
     <script>
         // Quantity Controls
         function changeQuantity(delta) {
@@ -764,173 +751,83 @@ $discountPercent = $product['discount_price'] ? round((($originalPrice - $displa
             updateButtons();
         });
         
-        // Add to Cart
-        function addToCart(productId) {
-            const quantity = document.getElementById('quantityInput').value;
-            const btn = document.querySelector('.btn-add-cart');
-            
-            btn.classList.add('loading');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            fetch('/api/cart/add.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: parseInt(quantity)
+        // Buy Now functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-buy-now')) {
+                e.preventDefault();
+                const buyBtn = e.target.closest('.btn-buy-now');
+                const productId = buyBtn.dataset.id;
+                
+                if (!productId) return;
+                
+                // Get quantity
+                const quantityInput = document.querySelector('.quantity-input');
+                const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                
+                // Add loading state
+                const originalHtml = buyBtn.innerHTML;
+                buyBtn.disabled = true;
+                buyBtn.classList.add('loading');
+                buyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                
+                // Add to cart first, then redirect to checkout
+                fetch('/api/cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: parseInt(productId),
+                        quantity: quantity
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showSuccess('Đã thêm sản phẩm vào giỏ hàng!');
-                    updateCartCount();
-                } else {
-                    showError(data.message || 'Có lỗi xảy ra');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Có lỗi xảy ra khi thêm vào giỏ hàng');
-            })
-            .finally(() => {
-                btn.classList.remove('loading');
-                btn.innerHTML = '<i class="fas fa-cart-plus"></i>';
-            });
-        }
-        
-        // Buy Now
-        function buyNow(productId) {
-            const quantity = document.getElementById('quantityInput').value;
-            const btn = document.querySelector('.btn-buy-now');
-            
-            btn.classList.add('loading');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            
-            fetch('/api/cart/add.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: parseInt(quantity),
-                    buy_now: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/checkout.php';
-                } else {
-                    showError(data.message || 'Có lỗi xảy ra');
-                    btn.classList.remove('loading');
-                    btn.innerHTML = '<i class="fas fa-lightning-bolt"></i> Mua ngay';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Có lỗi xảy ra');
-                btn.classList.remove('loading');
-                btn.innerHTML = '<i class="fas fa-lightning-bolt"></i> Mua ngay';
-            });
-        }
-        
-        // Add to Wishlist
-        function addToWishlist(productId) {
-            const btn = document.querySelector('.btn-wishlist');
-            const icon = btn.querySelector('i');
-            
-            btn.classList.add('loading');
-            
-            fetch('/api/wishlist/add.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    product_id: productId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    showSuccess('Đã thêm vào danh sách yêu thích!');
-                } else {
-                    showError(data.message || 'Có lỗi xảy ra');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Có lỗi xảy ra');
-            })
-            .finally(() => {
-                btn.classList.remove('loading');
-            });
-        }
-        
-        // Utility functions
-        function showSuccess(message) {
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success position-fixed';
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i>${message}`;
-            
-            document.body.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.remove();
-            }, 3000);
-        }
-        
-        function showError(message) {
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-danger position-fixed';
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alert.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
-            
-            document.body.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.remove();
-            }, 3000);
-        }
-        
-        function updateCartCount() {
-            // Update cart count in header if available
-            const cartCount = document.querySelector('.cart-count');
-            if (cartCount) {
-                fetch('/api/cart/count.php')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        cartCount.textContent = data.count;
+                        // Update cart count if cartManager exists
+                        if (window.cartManager) {
+                            window.cartManager.updateCartCount(data.cart_count);
+                        }
+                        
+                        // Redirect to checkout
+                        window.location.href = '/checkout.php';
+                    } else {
+                        // Show error notification
+                        if (window.cartManager) {
+                            window.cartManager.showNotification(data.message || 'Có lỗi xảy ra', 'error');
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                        
+                        // Restore button
+                        buyBtn.disabled = false;
+                        buyBtn.classList.remove('loading');
+                        buyBtn.innerHTML = originalHtml;
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Show error notification
+                    if (window.cartManager) {
+                        window.cartManager.showNotification('Có lỗi xảy ra khi thêm sản phẩm', 'error');
+                    } else {
+                        alert('Có lỗi xảy ra');
+                    }
+                    
+                    // Restore button
+                    buyBtn.disabled = false;
+                    buyBtn.classList.remove('loading');
+                    buyBtn.innerHTML = originalHtml;
                 });
             }
-        }
+        });
+        
+        // Cart functionality is handled by cart-new.js
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateButtons();
-            
-            // Check if user is logged in
-            const userInfo = localStorage.getItem('userInfo');
-            if (!userInfo) {
-                document.querySelectorAll('.btn-buy-now, .btn-add-cart, .btn-wishlist').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        showError('Vui lòng đăng nhập để mua hàng');
-                        setTimeout(() => {
-                            window.location.href = '/login.php';
-                        }, 1500);
-                    });
-                });
-            }
         });
     </script>
 </body>

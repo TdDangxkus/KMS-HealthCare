@@ -200,11 +200,11 @@ $popular_products = getPopularProducts(3);
                                             <i class="fas fa-heart"></i>
                                             <span class="tooltip">Yêu thích</span>
                                         </button>
-                                        <button class="action-btn quick-view"
-                                                data-id="<?php echo $product['product_id']; ?>">
-                                            <i class="fas fa-eye"></i>
-                                            <span class="tooltip">Xem nhanh</span>
-                                        </button>
+                                            <button class="action-btn quick-view"
+                                                    onclick="window.location.href='/shop/details.php?id=<?php echo $product['product_id']; ?>'">
+                                                    <i class="fas fa-eye"></i>
+                                                    <span class="tooltip">Xem nhanh</span>
+                                            </button>
                                     </div>
                                 </div>
 

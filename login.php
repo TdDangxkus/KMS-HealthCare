@@ -33,14 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-            $query = "
-        SELECT u.user_id, u.username, u.email, u.password, u.phone_number, u.role_id, r.role_name, ui.full_name 
-        FROM users u
-        JOIN roles r ON u.role_id = r.role_id
-        LEFT JOIN users_info ui ON u.user_id = ui.user_id
-        WHERE u.username = ? OR u.email = ? OR u.phone_number = ?
-        LIMIT 1
-    ";
+                $query = "
+            SELECT u.user_id, u.username, u.email, u.password, ui.phone, u.role_id, r.role_name, ui.full_name 
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            LEFT JOIN users_info ui ON u.user_id = ui.user_id
+            WHERE u.username = ? OR u.email = ? OR ui.phone = ?
+            LIMIT 1
+        ";
 
         $stmt = $conn->prepare($query);
         if ($stmt === false) {

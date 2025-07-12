@@ -62,12 +62,12 @@ if (!empty($search)) {
     // Lấy kết quả
     $result = $stmt->get_result();
     $products = [];
+    require_once __DIR__ . '/includes/functions/format_helpers.php';
     while ($row = $result->fetch_assoc()) {
-        // Tính giá khuyến mãi (giảm 10% cho sản phẩm có rating cao)
-        $row['discount_percent'] = $row['avg_rating'] >= 4.5 ? 10 : 0;
-        $row['discount_price'] = $row['discount_percent'] > 0 
-            ? $row['price'] * (1 - $row['discount_percent']/100) 
-            : null;
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($row['price'], $row['avg_rating']);
+        $row['discount_percent'] = $discount_info['discount_percent'];
+        $row['discount_price'] = $discount_info['discount_price'];
         
         // Format lại rating
         $row['avg_rating'] = number_format($row['avg_rating'], 1);
@@ -861,7 +861,7 @@ $totalPages = ceil($totalProducts / $perPage);
                                  alt="<?php echo htmlspecialchars($product['name']); ?>">
                             
                             <?php if ($product['discount_percent'] > 0): ?>
-                            <div class="product-badge">
+                            <div class="product-badge discount">
                                 -<?php echo $product['discount_percent']; ?>%
                             </div>
                             <?php endif; ?>

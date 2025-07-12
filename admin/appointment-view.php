@@ -14,113 +14,104 @@ if (!$appointment_id) {
     exit();
 }
 
-// Lấy thông tin lịch hẹn với simple queries
+// Lấy thông tin lịch hẹn chi tiết
 $appointment = null;
 $patient_info = null;
 $guest_info = null;
 $doctor_info = null;
 $clinic_info = null;
 
-// Query 1: Basic appointment info
+// Query tổng hợp để lấy tất cả thông tin
 try {
-    $result = $conn->query("SELECT * FROM appointments WHERE appointment_id = $appointment_id");
+    $sql = "SELECT a.*, 
+                   u_patient.username as patient_username,
+                   u_patient.email as patient_email,
+                   ui_patient.full_name as patient_fullname,
+                   ui_patient.date_of_birth as patient_dob,
+                   ui_patient.phone as patient_phone,
+                   ua_patient.address_line as patient_address,
+                   gu.full_name as guest_fullname,
+                   gu.email as guest_email,
+                   gu.phone as guest_phone,
+                   u_doctor.username as doctor_username,
+                   u_doctor.email as doctor_email,
+                   ui_doctor.full_name as doctor_fullname,
+                   ui_doctor.phone as doctor_phone,
+                   s.name as doctor_specialization,
+                   c.name as clinic_name,
+                   c.address as clinic_address,
+                   c.phone as clinic_phone
+            FROM appointments a
+            LEFT JOIN users u_patient ON a.user_id = u_patient.user_id
+            LEFT JOIN users_info ui_patient ON a.user_id = ui_patient.user_id
+            LEFT JOIN user_addresses ua_patient ON a.user_id = ua_patient.user_id AND ua_patient.is_default = 1
+            LEFT JOIN guest_users gu ON a.guest_id = gu.guest_id
+            LEFT JOIN doctors d ON a.doctor_id = d.doctor_id
+            LEFT JOIN specialties s ON d.specialty_id = s.specialty_id
+            LEFT JOIN users u_doctor ON d.user_id = u_doctor.user_id
+            LEFT JOIN users_info ui_doctor ON d.user_id = ui_doctor.user_id
+            LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
+            WHERE a.appointment_id = ?";
+    
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("SQL Error in appointment-view.php: " . $conn->error);
+        header('Location: appointments.php?error=database_error');
+        exit();
+    }
+    
+    $stmt->bind_param("i", $appointment_id);
+    if (!$stmt->execute()) {
+        error_log("Query execution failed in appointment-view.php: " . $stmt->error);
+        header('Location: appointments.php?error=database_error');
+        exit();
+    }
+    
+    $result = $stmt->get_result();
     if ($result && $result->num_rows > 0) {
-        $appointment = $result->fetch_assoc();
+        $data = $result->fetch_assoc();
+        $appointment = $data;
     } else {
         header('Location: appointments.php?error=not_found');
         exit();
     }
+    $stmt->close();
 } catch (Exception $e) {
+    error_log("Exception in appointment-view.php: " . $e->getMessage());
     header('Location: appointments.php?error=database_error');
     exit();
 }
 
-// Query 2: Patient info (if user_id exists)
-if ($appointment['user_id']) {
-    try {
-        $result = $conn->query("SELECT u.*, ui.full_name, ui.date_of_birth, ui.address 
-                               FROM users u 
-                               LEFT JOIN users_info ui ON u.user_id = ui.user_id 
-                               WHERE u.user_id = " . $appointment['user_id']);
-        if ($result && $result->num_rows > 0) {
-            $patient_info = $result->fetch_assoc();
-        }
-    } catch (Exception $e) {
-        // Ignore error
-    }
-}
-
-// Query 3: Guest info (if guest_id exists)
-if ($appointment['guest_id']) {
-    try {
-        $result = $conn->query("SELECT * FROM guest_users WHERE guest_id = " . $appointment['guest_id']);
-        if ($result && $result->num_rows > 0) {
-            $guest_info = $result->fetch_assoc();
-        }
-    } catch (Exception $e) {
-        // Ignore error
-    }
-}
-
-// Query 4: Doctor info
-try {
-    $result = $conn->query("SELECT u.*, ui.full_name 
-                           FROM users u 
-                           LEFT JOIN users_info ui ON u.user_id = ui.user_id 
-                           WHERE u.user_id = " . $appointment['doctor_id']);
-    if ($result && $result->num_rows > 0) {
-        $doctor_info = $result->fetch_assoc();
-    }
-} catch (Exception $e) {
-    // Ignore error
-}
-
-// Query 5: Clinic info (if clinic_id exists)
-if ($appointment['clinic_id']) {
-    try {
-        $result = $conn->query("SELECT * FROM clinics WHERE clinic_id = " . $appointment['clinic_id']);
-        if ($result && $result->num_rows > 0) {
-            $clinic_info = $result->fetch_assoc();
-        }
-    } catch (Exception $e) {
-        // Ignore error
-    }
-}
-
-// Prepare display data
+// Prepare display data from the combined query result
 $patient_name = '';
 $patient_email = '';
 $patient_phone = '';
 $patient_dob = '';
 $patient_address = '';
 
-if ($patient_info) {
-    $patient_name = ($patient_info['full_name'] ?? null) ?: $patient_info['username'];
-    $patient_email = $patient_info['email'];
-    $patient_phone = $patient_info['phone_number'];
-    $patient_dob = $patient_info['date_of_birth'] ?? null;
-    $patient_address = $patient_info['address'] ?? null;
-} elseif ($guest_info) {
-    $patient_name = $guest_info['full_name'];
-    $patient_email = $guest_info['email'];
-    $patient_phone = $guest_info['phone'];
-    $patient_dob = $guest_info['date_of_birth'] ?? null;
-    $patient_address = $guest_info['address'] ?? null;
+// Prioritize registered user info over guest info
+if ($appointment['patient_fullname'] || $appointment['patient_username']) {
+    $patient_name = $appointment['patient_fullname'] ?: $appointment['patient_username'];
+    $patient_email = $appointment['patient_email'];
+    $patient_phone = $appointment['patient_phone'];
+    $patient_dob = $appointment['patient_dob'];
+    $patient_address = $appointment['patient_address'];
+} elseif ($appointment['guest_fullname']) {
+    $patient_name = $appointment['guest_fullname'];
+    $patient_email = $appointment['guest_email'];
+    $patient_phone = $appointment['guest_phone'];
+    $patient_dob = null; // Guest users don't have date_of_birth in this table
+    $patient_address = null; // Guest users don't have address in this table
 }
 
-$doctor_name = '';
-$doctor_email = '';
-$doctor_phone = '';
+$doctor_name = $appointment['doctor_fullname'] ?: $appointment['doctor_username'];
+$doctor_email = $appointment['doctor_email'];
+$doctor_phone = $appointment['doctor_phone'];
+$doctor_specialization = $appointment['doctor_specialization'];
 
-if ($doctor_info) {
-    $doctor_name = ($doctor_info['full_name'] ?? null) ?: $doctor_info['username'];
-    $doctor_email = $doctor_info['email'];
-    $doctor_phone = $doctor_info['phone_number'];
-}
-
-$clinic_name = $clinic_info['name'] ?? null;
-$clinic_address = $clinic_info['address'] ?? null;
-$clinic_phone = $clinic_info['phone'] ?? null;
+$clinic_name = $appointment['clinic_name'];
+$clinic_address = $appointment['clinic_address'];
+$clinic_phone = $appointment['clinic_phone'];
 
 // Xử lý cập nhật trạng thái
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
@@ -164,6 +155,7 @@ $current_status = $status_configs[$appointment['status']] ?? ['class' => 'second
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="assets/css/admin.css" rel="stylesheet">
     <link href="assets/css/admin.css" rel="stylesheet">
     <link href="assets/css/sidebar.css" rel="stylesheet">
     <link href="assets/css/header.css" rel="stylesheet">
@@ -211,8 +203,8 @@ $current_status = $status_configs[$appointment['status']] ?? ['class' => 'second
     </style>
 </head>
 <body>
-    <?php include 'includes/headeradmin.php'; ?>
-    <?php include 'includes/sidebaradmin.php'; ?>
+<?php include 'includes/headeradmin.php'; ?>
+<?php include 'includes/sidebaradmin.php'; ?>
 
     <main class="main-content">
         <div class="container-fluid">
@@ -393,6 +385,16 @@ $current_status = $status_configs[$appointment['status']] ?? ['class' => 'second
                                         <label class="form-label text-muted">Họ tên</label>
                                         <div class="h6"><?= htmlspecialchars($doctor_name ?: 'Chưa có') ?></div>
                                     </div>
+                                    <?php if ($doctor_phone): ?>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Số điện thoại</label>
+                                            <div>
+                                                <a href="tel:<?= htmlspecialchars($doctor_phone) ?>">
+                                                    <?= htmlspecialchars($doctor_phone) ?>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -407,19 +409,16 @@ $current_status = $status_configs[$appointment['status']] ?? ['class' => 'second
                                             <?php endif; ?>
                                         </div>
                                     </div>
+                                    <?php if ($doctor_specialization): ?>
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Chuyên khoa</label>
+                                            <div>
+                                                <span class="badge bg-info"><?= htmlspecialchars($doctor_specialization) ?></span>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            
-                            <?php if ($doctor_phone): ?>
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Số điện thoại</label>
-                                    <div>
-                                        <a href="tel:<?= htmlspecialchars($doctor_phone) ?>">
-                                            <?= htmlspecialchars($doctor_phone) ?>
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
                         </div>
                     </div>
 

@@ -299,6 +299,28 @@ require_once 'includes/db.php';
     include 'includes/footer.php'; 
     ?>
 
+    <!-- Maintenance Modal -->
+    <div class="maintenance-modal" id="maintenanceModal">
+        <div class="maintenance-modal-content">
+            <div class="maintenance-modal-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <h2 class="maintenance-modal-title">Tính năng đang bảo trì</h2>
+            <p class="maintenance-modal-description">
+                Xin lỗi quý khách! Tính năng đặt lịch hẹn trực tuyến hiện đang được bảo trì và nâng cấp. 
+                Vui lòng liên hệ trực tiếp với chúng tôi qua hotline để đặt lịch hẹn.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="tel:0123456789" class="maintenance-modal-close" style="text-decoration: none;">
+                    <i class="fas fa-phone me-2"></i>Gọi ngay: 0123 456 789
+                </a>
+                <button class="maintenance-modal-close" onclick="closeMaintenance()">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AOS Animation -->

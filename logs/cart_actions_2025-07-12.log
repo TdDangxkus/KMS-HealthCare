@@ -1,0 +1,3 @@
+[2025-07-12 06:11:44] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 6 | Quantity: 1
+[2025-07-12 06:11:44] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 6 | Quantity: 1 | Details: Name: Dalziel, Price: 23, Stock: 22
+[2025-07-12 06:11:44] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 6 | Quantity: 1 | Details: Cart ID: 9, Cart Count: 1

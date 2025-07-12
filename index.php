@@ -570,31 +570,31 @@ $categories = get_blog_categories();
             Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn!
           </p>
 
-          <!-- <div class="booking-button-group">
-            <a href="/booking.php" class="btn btn-primary btn-booking">
-              <span class="btn-icon">
-                <i class="fas fa-calendar-plus"></i>
-              </span>
-              <span class="btn-text">
-                <strong>Đặt Lịch Ngay</strong>
-                <small>Chỉ mất 2 phút của bạn</small>
-              </span>
-            </a>
+            <div class="booking-button-group">
+              <a href="/booking.php" class="btn btn-primary btn-booking">
+                <span class="btn-icon">
+                  <i class="fas fa-calendar-plus"></i>
+                </span>
+                <span class="btn-text">
+                  <strong>Đặt Lịch Ngay</strong>
+                  <small>Chỉ mất 2 phút của bạn</small>
+                </span>
+              </a>
 
-            <div class="divider">
-              <span>hoặc</span>
+              <div class="divider">
+                <span>hoặc</span>
+              </div>
+
+              <a href="tel:0123456789" class="btn btn-outline-primary btn-hotline">
+                <span class="btn-icon">
+                  <i class="fas fa-phone-alt"></i>
+                </span>
+                <span class="btn-text">
+                  <strong>Gọi Hotline 24/7</strong>
+                  <small>0123 456 789</small>
+                </span>
+              </a>
             </div>
-
-            <a href="tel:0123456789" class="btn btn-outline-primary btn-hotline">
-              <span class="btn-icon">
-                <i class="fas fa-phone-alt"></i>
-              </span>
-              <span class="btn-text">
-                <strong>Gọi Hotline 24/7</strong>
-                <small>0123 456 789</small>
-              </span>
-            </a>
-          </div> -->
 
           <div class="booking-note mt-4">
             <i class="fas fa-clock text-primary me-2"></i>
@@ -840,10 +840,10 @@ $categories = get_blog_categories();
 
         <!-- AI Chat Section -->
         <div class="ai-chat-section text-center mt-5">
-          <div class="chat-bubble">
+          <!-- <div class="chat-bubble">
             <i class="fas fa-robot"></i>
             <span>Bạn cần hỗ trợ thêm?</span>
-          </div>
+          </div> -->
           <button class="btn btn-primary btn-lg rounded-pill shadow-lg px-5 py-3 ai-chat-btn" id="open-ai-chat">
             <i class="fas fa-comments me-2"></i>
             Tư vấn với AI

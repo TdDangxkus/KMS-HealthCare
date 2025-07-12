@@ -33,7 +33,7 @@ $cart_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 if (empty($cart_items)) {
     header('Location: cart.php');
     exit();
-}
+}   
 
 $cart_total = $cart_items[0]['total'];
 $final_total = $cart_total + $shipping_fee;
@@ -50,7 +50,7 @@ unset($item);
 
 // Lấy thông tin user và địa chỉ đã lưu
 $stmt = $conn->prepare("
-    SELECT u.username, u.email, u.phone_number, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture 
+    SELECT u.username, u.email, ui.phone, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture 
     FROM users u 
     LEFT JOIN users_info ui ON u.user_id = ui.user_id 
     WHERE u.user_id = ?
@@ -88,22 +88,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Xử lý đặt hàng
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
-    // Validate phone number for saved address
-    $address_type = $_POST['address_type'] ?? 'new';
-    if ($address_type === 'saved' && empty($user_info['phone_number'])) {
-        $error_message = "Vui lòng cập nhật số điện thoại trong hồ sơ trước khi đặt hàng.";
-    } else {
-        try {
-            $conn->begin_transaction();
-            
-            $payment_method = $_POST['payment_method'] ?? 'cod';
-            $order_note = $_POST['order_note'] ?? '';
-            
-            // Xử lý địa chỉ giao hàng
+    try {
+        $conn->begin_transaction();
+        
+        $payment_method = $_POST['payment_method'] ?? 'cod';
+        $order_note = $_POST['order_note'] ?? '';
+        
+        // Xử lý địa chỉ giao hàng
+        $address_type = $_POST['address_type'] ?? 'new';
         
         if ($address_type === 'saved' && !empty($saved_address)) {
             $shipping_address = ($user_info['full_name'] ?: $user_info['username']) . "\n" . 
-                            ($user_info['phone_number'] ?: '') . "\n" . 
+                            ($user_info['phone'] ?: '') . "\n" . 
                             $saved_address;
         } else {
             $recipient_name = $_POST['recipient_name'] ?? '';
@@ -140,11 +136,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             throw new Exception("Không thể cập nhật đơn hàng: " . $stmt->error);
         }
         
-        // Cập nhật tồn kho
+        // NOTE: Không trừ tồn kho ở đây, chỉ trừ khi admin xác nhận đơn hàng
+        // Tồn kho sẽ được trừ trong admin/orders.php khi status chuyển thành 'completed'
+        
+        // Chỉ kiểm tra tồn kho để đảm bảo đủ hàng
         foreach ($cart_items as $item) {
-            $stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE product_id = ?");
-            $stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+            $stmt = $conn->prepare("SELECT stock, name FROM products WHERE product_id = ?");
+            $stmt->bind_param("i", $item['product_id']);
             $stmt->execute();
+            $product = $stmt->get_result()->fetch_assoc();
+            
+            if (!$product || $product['stock'] < $item['quantity']) {
+                throw new Exception("Sản phẩm '{$product['name']}' không đủ hàng trong kho");
+            }
         }
         
         $conn->commit();
@@ -153,10 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         header("Location: order-success.php?order_id=" . $cart_order_id);
         exit();
         
-        } catch (Exception $e) {
-            $conn->rollback();
-            $error_message = "Có lỗi xảy ra khi đặt hàng: " . $e->getMessage();
-        }
+    } catch (Exception $e) {
+        $conn->rollback();
+        $error_message = "Có lỗi xảy ra khi đặt hàng: " . $e->getMessage();
     }
 }
 ?>
@@ -422,39 +425,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border: 2px solid var(--border-color);
             border-radius: 15px;
-            padding: 2rem;
+            padding: 1.5rem;
             margin-top: 1.5rem;
+            white-space: pre-line;
             color: var(--text-secondary);
             font-weight: 500;
             box-shadow: var(--shadow-sm);
-        }
-
-        .saved-address-display .address-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .saved-address-display .recipient-info {
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .saved-address-display .phone-info {
-            font-size: 1rem;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .saved-address-display .address-details {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .saved-address-display i {
-            color: #667eea;
-            width: 18px;
         }
 
         .new-address-form {
@@ -820,26 +796,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                         <strong><i class="fas fa-user me-2"></i><?php echo htmlspecialchars($user_info['full_name'] ?: $user_info['username']); ?></strong>
                                     </div>
                                     <div class="phone-info">
-                                        <i class="fas fa-phone me-2"></i><?php echo htmlspecialchars($user_info['phone_number'] ?? 'Chưa có số điện thoại'); ?>
+                                        <i class="fas fa-phone me-2"></i><?php echo htmlspecialchars($user_info['phone'] ?? 'Chưa có số điện thoại'); ?>
                                     </div>
                                     <div class="address-details">
                                         <i class="fas fa-map-marker-alt me-2"></i><?php echo htmlspecialchars($saved_address); ?>
                                     </div>
-                                    
-                                    <?php if (empty($user_info['phone_number'])): ?>
-                                    <div class="phone-warning">
-                                        <div class="alert alert-warning d-flex align-items-center mt-3">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <div>
-                                                <strong>Thiếu số điện thoại!</strong><br>
-                                                <small>Vui lòng cập nhật số điện thoại trong hồ sơ để có thể đặt hàng.</small>
-                                            </div>
-                                        </div>
-                                        <a href="profile.php" class="btn btn-warning btn-sm mt-2">
-                                            <i class="fas fa-edit me-1"></i>Cập nhật hồ sơ
-                                        </a>
-                                    </div>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                             <?php endif; ?>
@@ -864,7 +825,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                                                 Số điện thoại *
                                             </label>
                                             <input type="tel" class="form-control" name="recipient_phone" 
-                                                value="<?php echo htmlspecialchars($user_info['phone_number'] ?? ''); ?>">
+                                                value="<?php echo htmlspecialchars($user_info['phone'] ?? ''); ?>">
 
                                         </div>
                                     </div>
@@ -1082,9 +1043,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     $('#newAddressForm input[name="recipient_name"], #newAddressForm input[name="recipient_phone"], #newAddressForm input[name="address_line"]').attr('required', true);
                     $('#newAddressForm select[name="city"], #newAddressForm select[name="district"], #newAddressForm select[name="ward"]').attr('required', true);
                 }
-                
-                // Update order button state
-                updateOrderButton();
             });
 
             // Load provinces from Vietnam API
@@ -1194,56 +1152,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                 $(this).find('input[type="radio"]').prop('checked', true);
             });
 
-            // Phone number validation function
-            function validatePhoneNumber() {
-                const addressType = $('input[name="address_type"]:checked').val();
-                const hasPhoneNumber = <?php echo !empty($user_info['phone_number']) ? 'true' : 'false'; ?>;
-                
-                if (addressType === 'saved' && !hasPhoneNumber) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Thiếu số điện thoại',
-                        text: 'Vui lòng cập nhật số điện thoại trong hồ sơ trước khi đặt hàng',
-                        showCancelButton: true,
-                        confirmButtonText: 'Cập nhật hồ sơ',
-                        cancelButtonText: 'Hủy'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = 'profile.php';
-                        }
-                    });
-                    return false;
-                }
-                return true;
-            }
-            
-            // Update place order button state
-            function updateOrderButton() {
-                const addressType = $('input[name="address_type"]:checked').val();
-                const hasPhoneNumber = <?php echo !empty($user_info['phone_number']) ? 'true' : 'false'; ?>;
-                const $orderBtn = $('button[name="place_order"]');
-                
-                if (addressType === 'saved' && !hasPhoneNumber) {
-                    $orderBtn.prop('disabled', true)
-                            .removeClass('btn-place-order')
-                            .addClass('btn-secondary')
-                            .html('<i class="fas fa-exclamation-triangle me-2"></i>Cần cập nhật số điện thoại');
-                } else {
-                    $orderBtn.prop('disabled', false)
-                            .removeClass('btn-secondary')
-                            .addClass('btn-place-order')
-                            .html('<i class="fas fa-shopping-cart me-2"></i>Đặt hàng ngay');
-                }
-            }
-
             // Form submission
             $('#checkoutForm').submit(function(e) {
-                // Check phone number first
-                if (!validatePhoneNumber()) {
-                    e.preventDefault();
-                    return false;
-                }
-                
                 // Validation for new address
                 const addressType = $('input[name="address_type"]:checked').val();
                 if (addressType === 'new') {
@@ -1288,9 +1198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
             // Load provinces on page load
             loadProvinces();
-            
-            // Initialize order button state
-            updateOrderButton();
         });
     </script>
 </body>

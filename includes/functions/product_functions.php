@@ -1,5 +1,34 @@
 <?php
 require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/format_helpers.php';
+
+/**
+ * Get product image URL with proper fallback
+ * @param string $image_url Image URL from database
+ * @return string Final image URL to use
+ */
+function getProductImageUrl($image_url) {
+    // Check if image_url is empty or null
+    if (empty($image_url)) {
+        return '/assets/images/default-product.jpg';
+    }
+    
+    // If it's a local path, check if file exists
+    if (strpos($image_url, '/assets/') === 0) {
+        $full_path = __DIR__ . '/../../' . $image_url;
+        if (file_exists($full_path)) {
+            return $image_url;
+        }
+    }
+    
+    // If it's an external URL, return as is (but could add more validation)
+    if (strpos($image_url, 'http') === 0) {
+        return $image_url;
+    }
+    
+    // Default fallback
+    return '/assets/images/default-product.jpg';
+}
 
 /**
  * Lấy danh sách danh mục sản phẩm
@@ -53,17 +82,19 @@ function getFeaturedProducts($limit = 8) {
     
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        // Tính giá khuyến mãi (giả sử giảm 10% cho sản phẩm có rating cao)
-        $row['discount_percent'] = $row['avg_rating'] >= 4.5 ? 10 : 0;
-        $row['discount_price'] = $row['discount_percent'] > 0 
-            ? $row['price'] * (1 - $row['discount_percent']/100) 
-            : null;
-            
-        // Format lại rating
-        $row['avg_rating'] = number_format($row['avg_rating'], 1);
+        // Ensure rating is numeric before calculating discount
+        $numeric_rating = (float)$row['avg_rating'];
         
-        // Xử lý ảnh sản phẩm
-        $row['display_image'] = $row['image_url'] ?: '/assets/images/product-placeholder.jpg';
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($row['price'], $numeric_rating);
+        $row['discount_percent'] = $discount_info['discount_percent'];
+        $row['discount_price'] = $discount_info['discount_price'];
+            
+        // Format lại rating (AFTER discount calculation)
+        $row['avg_rating'] = number_format($numeric_rating, 1);
+        
+        // Xử lý ảnh sản phẩm - sử dụng logic giống shop.php
+        $row['display_image'] = !empty($row['image_url']) ? $row['image_url'] : '/assets/images/default-product.jpg';
         
         $products[] = $row;
     }
@@ -149,17 +180,19 @@ function getFilteredProducts($min_price = 0, $max_price = PHP_FLOAT_MAX, $sort =
     
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        // Tính giá khuyến mãi
-        $row['discount_percent'] = $row['avg_rating'] >= 4.5 ? 10 : 0;
-        $row['discount_price'] = $row['discount_percent'] > 0 
-            ? $row['price'] * (1 - $row['discount_percent']/100) 
-            : null;
-            
-        // Format lại rating
-        $row['avg_rating'] = number_format($row['avg_rating'], 1);
+        // Ensure rating is numeric before calculating discount
+        $numeric_rating = (float)$row['avg_rating'];
         
-        // Xử lý ảnh sản phẩm
-        $row['display_image'] = $row['image_url'] ?: '/assets/images/product-placeholder.jpg';
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($row['price'], $numeric_rating);
+        $row['discount_percent'] = $discount_info['discount_percent'];
+        $row['discount_price'] = $discount_info['discount_price'];
+            
+        // Format lại rating (AFTER discount calculation)
+        $row['avg_rating'] = number_format($numeric_rating, 1);
+        
+        // Xử lý ảnh sản phẩm - sử dụng logic giống shop.php
+        $row['display_image'] = !empty($row['image_url']) ? $row['image_url'] : '/assets/images/default-product.jpg';
         
         $products[] = $row;
     }
@@ -238,7 +271,7 @@ function getPopularProducts($limit = 3) {
     
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        $row['display_image'] = $row['image_url'] ?: '/assets/images/product-placeholder.jpg';
+        $row['display_image'] = !empty($row['image_url']) ? $row['image_url'] : '/assets/images/default-product.jpg';
         $row['avg_rating'] = number_format($row['avg_rating'], 1);
         $products[] = $row;
     }
@@ -298,17 +331,19 @@ function getProductDetails($product_id) {
     $result = $stmt->get_result();
     
     if ($row = $result->fetch_assoc()) {
-        // Tính giá khuyến mãi
-        $row['discount_percent'] = $row['avg_rating'] >= 4.5 ? 10 : 0;
-        $row['discount_price'] = $row['discount_percent'] > 0 
-            ? $row['price'] * (1 - $row['discount_percent']/100) 
-            : null;
-            
-        // Format lại rating
-        $row['avg_rating'] = number_format($row['avg_rating'], 1);
+        // Ensure rating is numeric before calculating discount
+        $numeric_rating = (float)$row['avg_rating'];
         
-        // Xử lý ảnh sản phẩm
-        $row['display_image'] = $row['image_url'] ?: '/assets/images/product-placeholder.jpg';
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($row['price'], $numeric_rating);
+        $row['discount_percent'] = $discount_info['discount_percent'];
+        $row['discount_price'] = $discount_info['discount_price'];
+            
+        // Format lại rating (AFTER discount calculation)
+        $row['avg_rating'] = number_format($numeric_rating, 1);
+        
+        // Xử lý ảnh sản phẩm - sử dụng logic giống shop.php
+        $row['display_image'] = !empty($row['image_url']) ? $row['image_url'] : '/assets/images/default-product.jpg';
         
         return $row;
     }
@@ -390,17 +425,16 @@ function getRelatedProducts($category_id, $current_product_id, $limit = 4) {
     
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        // Tính giá khuyến mãi
-        $row['discount_percent'] = $row['avg_rating'] >= 4.5 ? 10 : 0;
-        $row['discount_price'] = $row['discount_percent'] > 0 
-            ? $row['price'] * (1 - $row['discount_percent']/100) 
-            : null;
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($row['price'], $row['avg_rating']);
+        $row['discount_percent'] = $discount_info['discount_percent'];
+        $row['discount_price'] = $discount_info['discount_price'];
             
         // Format lại rating
         $row['avg_rating'] = number_format($row['avg_rating'], 1);
         
-        // Xử lý ảnh sản phẩm
-        $row['display_image'] = $row['image_url'] ?: '/assets/images/product-placeholder.jpg';
+        // Xử lý ảnh sản phẩm - sử dụng logic giống shop.php
+        $row['display_image'] = !empty($row['image_url']) ? $row['image_url'] : '/assets/images/default-product.jpg';
         
         $products[] = $row;
     }

@@ -1,0 +1,73 @@
+[2025-07-09 06:39:56] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-09 06:39:56] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 06:40:25] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-09 06:40:25] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 06:41:33] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-09 06:41:33] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 06:44:52] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 2 cart items for user 1
+[2025-07-09 06:44:52] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 06:44:52] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 06:44:59] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 3 cart items for user 1
+[2025-07-09 06:44:59] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 06:44:59] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 06:44:59] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 06:45:10] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 4 cart items for user 1
+[2025-07-09 06:45:10] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 65, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 06:45:10] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 06:45:10] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 06:45:10] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 3 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 2
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 5 cart items for user 1
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 65, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 3 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 07:18:23] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 4 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 5 cart items for user 1
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 65, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 3 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 07:18:30] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 4 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 5 cart items for user 1
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 65, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 3 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 07:30:12] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 4 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:30:15] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 4 cart items for user 1
+[2025-07-09 07:30:15] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:30:15] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 64, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 07:30:15] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 07:30:15] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 3 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:30:17] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 3 cart items for user 1
+[2025-07-09 07:30:17] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:30:17] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 63, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 07:30:17] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:30:18] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 2 cart items for user 1
+[2025-07-09 07:30:18] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:30:18] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 57, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 3
+[2025-07-09 07:30:20] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-09 07:30:20] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 66, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 07:41:28] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 1 cart items for user 12
+[2025-07-09 07:41:28] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 67, ProductID: 2, Name: 'Omega 3 Fish Oil', Price: 580000, UnitPrice: 522000, Qty: 1
+[2025-07-09 07:51:45] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1
+[2025-07-09 08:04:37] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-09 08:04:37] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 68, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:05:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 2 cart items for user 1
+[2025-07-09 08:05:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 69, ProductID: 9, Name: 'Băng gạc y tế', Price: 35000, UnitPrice: 31500, Qty: 1
+[2025-07-09 08:05:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 68, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:23:32] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 1 cart items for user 12
+[2025-07-09 08:23:32] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 70, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:30:21] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 2 cart items for user 12
+[2025-07-09 08:30:21] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 71, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 08:30:21] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 70, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:32:12] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 3 cart items for user 12
+[2025-07-09 08:32:12] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 72, ProductID: 3, Name: 'Calcium D3', Price: 250000, UnitPrice: 250000, Qty: 1
+[2025-07-09 08:32:12] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 71, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 08:32:12] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 2 - ItemID: 70, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:32:13] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 2 cart items for user 12
+[2025-07-09 08:32:13] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 71, ProductID: 1, Name: 'Vitamin C 1000mg', Price: 320000, UnitPrice: 288000, Qty: 1
+[2025-07-09 08:32:13] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 70, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:32:16] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 1 cart items for user 12
+[2025-07-09 08:32:16] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 70, ProductID: 4, Name: 'Paracetamol 500mg', Price: 25000, UnitPrice: 22500, Qty: 1
+[2025-07-09 08:32:18] [INFO] [User: 12] [IP: ::1] CART_DEBUG: Found 0 cart items for user 12

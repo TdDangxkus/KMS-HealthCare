@@ -1,0 +1,39 @@
+[2025-07-10 15:49:10] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 15:49:10] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 15
+[2025-07-10 15:49:10] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 1, Cart Count: 1
+[2025-07-10 16:02:20] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 16:02:20] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 14
+[2025-07-10 16:02:20] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 2, Cart Count: 1
+[2025-07-10 16:02:29] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 6 | Quantity: 1
+[2025-07-10 16:02:29] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 6 | Quantity: 1 | Details: Name: Dalziel, Price: 23, Stock: 23
+[2025-07-10 16:02:29] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 6 | Quantity: 1 | Details: Cart ID: 2, Cart Count: 2
+[2025-07-10 16:03:33] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 16:03:33] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 14
+[2025-07-10 16:03:33] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 2, Cart Count: 3
+[2025-07-10 19:28:21] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 19:28:21] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 12
+[2025-07-10 19:28:21] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 3, Cart Count: 1
+[2025-07-10 20:02:19] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:02:19] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 11
+[2025-07-10 20:02:19] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 4, Cart Count: 1
+[2025-07-10 20:03:00] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:03:00] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 9
+[2025-07-10 20:03:00] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 5, Cart Count: 1
+[2025-07-10 20:03:02] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:03:02] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 9
+[2025-07-10 20:03:02] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 5, Cart Count: 2
+[2025-07-10 20:07:41] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:07:41] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:07:41] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 6, Cart Count: 1
+[2025-07-10 20:07:53] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:07:53] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:07:56] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:07:56] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:07:56] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:07:56] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:09:18] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:09:18] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:09:18] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 7, Cart Count: 1
+[2025-07-10 20:13:51] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_START | Product: 4 | Quantity: 1
+[2025-07-10 20:13:51] [CART] [User: 1] [IP: ::1] CART_ACTION: PRODUCT_FOUND | Product: 4 | Quantity: 1 | Details: Name: Máy đo huyết áp điện tử, Price: 650000, Stock: 1
+[2025-07-10 20:13:51] [CART] [User: 1] [IP: ::1] CART_ACTION: ADD_TO_CART_SUCCESS | Product: 4 | Quantity: 1 | Details: Cart ID: 8, Cart Count: 1

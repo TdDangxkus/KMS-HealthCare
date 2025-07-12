@@ -3,9 +3,9 @@
 $host = 'localhost';
 $username = 'root';
 $password = '';
-$database = 'qickmed';
+$database = 'kms_website';                                               
 
-// Create connection
+// Create connection    
 $conn = new mysqli($host, $username, $password, $database);
 
 // Check connection

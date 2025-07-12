@@ -1,0 +1,31 @@
+[2025-07-10 15:49:11] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 15:49:11] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 1, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 585000, Qty: 1
+[2025-07-10 15:49:16] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 15:49:16] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 1, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 585000, Qty: 1
+[2025-07-10 15:49:37] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1
+[2025-07-10 15:49:40] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1
+[2025-07-10 16:03:35] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 2 cart items for user 1
+[2025-07-10 16:03:35] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 3, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1
+[2025-07-10 16:03:35] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 2, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 585000, Qty: 2
+[2025-07-10 16:10:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 2 cart items for user 1
+[2025-07-10 16:10:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 3, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1
+[2025-07-10 16:10:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 1 - ItemID: 2, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 585000, Qty: 2
+[2025-07-10 19:07:03] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1
+[2025-07-10 19:28:17] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1
+[2025-07-10 19:28:22] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 19:28:22] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 4, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 19:30:45] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 19:30:45] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 4, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 19:31:21] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 19:31:21] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 4, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 20:03:04] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 20:03:04] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 6, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 2
+[2025-07-10 20:03:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 20:03:06] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 6, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 20:07:44] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 20:07:44] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 7, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 20:07:57] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 20:07:57] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 7, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 20:08:01] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-10 20:08:01] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 7, ProductID: 4, Name: 'Máy đo huyết áp điện tử', Price: 650000, UnitPrice: 650000, Qty: 1
+[2025-07-10 20:09:01] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 0 cart items for user 1

@@ -19,7 +19,7 @@ require_once 'includes/db.php';
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/about.css">
+    <link rel="stylesheet" href="assets/css/about.css"> 
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -30,7 +30,7 @@ require_once 'includes/db.php';
             <div class="hero-background">
             <div class="hero-overlay"></div>
                 <div class="floating-shapes">
-                    <div class="shape shape-1"></div>
+                    <div class="shape shape-1"></div>           
                     <div class="shape shape-2"></div>
                     <div class="shape shape-3"></div>
                 </div>
@@ -266,7 +266,7 @@ require_once 'includes/db.php';
                     <div class="col-lg-6" data-aos="fade-left">
                         <div class="values-visual">
                         <div class="values-image">
-                                <img src="assets/images/values.jpg" alt="Giá trị cốt lõi Qickmed" class="img-fluid">
+                                <img src="assets/images/des_hpt.jpg" alt="Giá trị cốt lõi Qickmed" class="img-fluid">
                                 <div class="values-overlay">
                                     <div class="values-badge">
                                         <i class="fas fa-certificate"></i>
@@ -313,7 +313,7 @@ require_once 'includes/db.php';
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <div class="team-card">
                             <div class="team-image">
-                                <img src="assets/images/doctor-1.jpg" alt="BS. CKI Nguyễn Văn A" class="img-fluid">
+                                <img src="assets/images/default-avatar.png" alt="BS. CKI Nguyễn Văn A" class="img-fluid">
                                 <div class="team-overlay">
                                     <div class="team-social">
                                         <a href="#" class="social-link">
@@ -345,7 +345,7 @@ require_once 'includes/db.php';
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="team-card">
                             <div class="team-image">
-                                <img src="assets/images/doctor-2.jpg" alt="BS. CKII Trần Thị B" class="img-fluid">
+                                <img src="assets/images/default-avatar.png" alt="BS. CKII Trần Thị B" class="img-fluid">
                                 <div class="team-overlay">
                                     <div class="team-social">
                                         <a href="#" class="social-link">
@@ -377,7 +377,7 @@ require_once 'includes/db.php';
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                         <div class="team-card">
                             <div class="team-image">
-                                <img src="assets/images/doctor-3.jpg" alt="ThS. BS Lê Văn C" class="img-fluid">
+                                <img src="assets/images/default-avatar.png" alt="ThS. BS Lê Văn C" class="img-fluid">
                                 <div class="team-overlay">
                                     <div class="team-social">
                                         <a href="#" class="social-link">

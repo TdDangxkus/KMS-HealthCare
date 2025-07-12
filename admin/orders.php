@@ -15,17 +15,82 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $order_id = (int)$_POST['order_id'];
     $status = $_POST['status'];
+    $old_status = $_POST['old_status'] ?? '';
+    
+
     
     try {
+        $conn->begin_transaction();
+        
+        // Cập nhật trạng thái đơn hàng
         $stmt = $conn->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE order_id = ?");
         $stmt->bind_param("si", $status, $order_id);
         
         if ($stmt->execute()) {
+            // Nếu đơn hàng chuyển từ trạng thái khác sang 'completed', trừ tồn kho
+            if ($status === 'completed' && $old_status !== 'completed') {
+                // Lấy danh sách sản phẩm trong đơn hàng
+                $items_stmt = $conn->prepare("
+                    SELECT oi.product_id, oi.quantity, p.name as product_name, p.stock 
+                    FROM order_items oi 
+                    JOIN products p ON oi.product_id = p.product_id 
+                    WHERE oi.order_id = ?
+                ");
+                $items_stmt->bind_param("i", $order_id);
+                $items_stmt->execute();
+                $items_result = $items_stmt->get_result();
+                
+                // Kiểm tra tồn kho trước khi trừ
+                $items = [];
+                while ($item = $items_result->fetch_assoc()) {
+                    if ($item['stock'] < $item['quantity']) {
+                        throw new Exception("Sản phẩm '{$item['product_name']}' không đủ hàng trong kho (còn {$item['stock']}, cần {$item['quantity']})");
+                    }
+                    $items[] = $item;
+                }
+                
+                // Nếu tất cả sản phẩm đều đủ hàng, tiến hành trừ tồn kho
+                foreach ($items as $item) {
+                    $update_stock_stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE product_id = ?");
+                    $update_stock_stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+                    
+                    if (!$update_stock_stmt->execute()) {
+                        throw new Exception("Không thể cập nhật tồn kho cho sản phẩm '{$item['product_name']}'");
+                    }
+                }
+            }
+            // Nếu đơn hàng chuyển từ 'completed' sang trạng thái khác, hoàn trả tồn kho
+            elseif ($old_status === 'completed' && $status !== 'completed') {
+                // Lấy danh sách sản phẩm trong đơn hàng
+                $items_stmt = $conn->prepare("
+                    SELECT oi.product_id, oi.quantity, p.name as product_name 
+                    FROM order_items oi 
+                    JOIN products p ON oi.product_id = p.product_id 
+                    WHERE oi.order_id = ?
+                ");
+                $items_stmt->bind_param("i", $order_id);
+                $items_stmt->execute();
+                $items_result = $items_stmt->get_result();
+                
+                while ($item = $items_result->fetch_assoc()) {
+                    // Hoàn trả tồn kho cho từng sản phẩm
+                    $update_stock_stmt = $conn->prepare("UPDATE products SET stock = stock + ? WHERE product_id = ?");
+                    $update_stock_stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+                    
+                    if (!$update_stock_stmt->execute()) {
+                        throw new Exception("Không thể hoàn trả tồn kho cho sản phẩm '{$item['product_name']}'");
+                    }
+                }
+            }
+            
+            $conn->commit();
             $message = 'Cập nhật trạng thái đơn hàng thành công!';
         } else {
+            $conn->rollback();
             $error = 'Không thể cập nhật trạng thái đơn hàng';
         }
     } catch (Exception $e) {
+        $conn->rollback();
         $error = 'Lỗi: ' . $e->getMessage();
     }
 }
@@ -36,11 +101,11 @@ if (isset($_GET['view']) && $_GET['view']) {
     $order_id = (int)$_GET['view'];
     
     // Lấy thông tin đơn hàng
-    $order_query = "SELECT o.*, ui.full_name as customer_name, u.phone_number as phone 
-                    FROM orders o 
-                    LEFT JOIN users_info ui ON o.user_id = ui.user_id 
-                    LEFT JOIN users u ON o.user_id = u.user_id
-                    WHERE o.order_id = ?";
+    $order_query = "SELECT o.*, ui.full_name as customer_name, ui.phone as phone
+                 FROM orders o
+                 LEFT JOIN users u ON o.user_id = u.user_id
+                 LEFT JOIN users_info ui ON u.user_id = ui.user_id
+                 WHERE o.order_id = ?";
     $stmt = $conn->prepare($order_query);
     if ($stmt) {
         $stmt->bind_param("i", $order_id);
@@ -76,7 +141,7 @@ $params = [];
 $types = '';
 
 if ($search) {
-    $where_conditions[] = "(o.order_id LIKE ? OR ui.full_name LIKE ? OR u.phone_number LIKE ?)";
+    $where_conditions[] = "(o.order_id LIKE ? OR ui.full_name LIKE ? OR ui.phone LIKE ?)";
     $search_param = "%$search%";
     $params[] = $search_param;
     $params[] = $search_param;
@@ -104,11 +169,11 @@ if ($date_to) {
 
 $where_clause = implode(' AND ', $where_conditions);
 
-$sql = "SELECT o.*, ui.full_name as customer_name, u.phone_number as phone,
+$sql = "SELECT o.*, ui.full_name as customer_name, ui.phone as phone,
                COUNT(oi.item_id) as item_count
         FROM orders o 
-        LEFT JOIN users_info ui ON o.user_id = ui.user_id 
         LEFT JOIN users u ON o.user_id = u.user_id
+        LEFT JOIN users_info ui ON u.user_id = ui.user_id 
         LEFT JOIN order_items oi ON o.order_id = oi.order_id
         WHERE $where_clause 
         GROUP BY o.order_id
@@ -158,6 +223,32 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
     <link href="assets/css/admin.css" rel="stylesheet">
     <link href="assets/css/sidebar.css" rel="stylesheet">
     <link href="assets/css/header.css" rel="stylesheet">
+    <style>
+        .product-image-placeholder {
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .product-image {
+            transition: all 0.3s ease;
+        }
+        
+        .product-image:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
     <?php include 'includes/headeradmin.php'; ?>
@@ -371,12 +462,12 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
                                                         </a>
                                                         <?php if ($order['status'] !== 'completed' && $order['status'] !== 'cancelled'): ?>
                                                             <button class="btn btn-outline-success" 
-                                                                    onclick="updateOrderStatus(<?= $order['order_id'] ?>, 'completed')" 
+                                                                    onclick="updateOrderStatus(<?= $order['order_id'] ?>, 'completed', '<?= $order['status'] ?>')" 
                                                                     title="Hoàn thành">
                                                                 <i class="fas fa-check"></i>
                                                             </button>
                                                             <button class="btn btn-outline-danger" 
-                                                                    onclick="updateOrderStatus(<?= $order['order_id'] ?>, 'cancelled')" 
+                                                                    onclick="updateOrderStatus(<?= $order['order_id'] ?>, 'cancelled', '<?= $order['status'] ?>')" 
                                                                     title="Hủy đơn">
                                                                 <i class="fas fa-times"></i>
                                                             </button>
@@ -428,9 +519,26 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
                                                         <tr>
                                                             <td>
                                                                 <div class="d-flex align-items-center">
-                                                                    <img src="<?= htmlspecialchars($item['image'] ?: 'assets/images/default-product.jpg') ?>" 
+                                                                    <?php 
+                                                                    $image_src = $item['image'];
+                                                                    if (empty($image_src)) {
+                                                                        $image_src = '../assets/images/thuoc_icon.jpg';
+                                                                    } else {
+                                                                        // Nếu image_url không bắt đầu bằng http/https, thêm ../ 
+                                                                        if (!filter_var($image_src, FILTER_VALIDATE_URL) && substr($image_src, 0, 3) !== '../') {
+                                                                            $image_src = '../' . $image_src;
+                                                                        }
+                                                                    }
+                                                                    ?>
+                                                                    <img src="<?= htmlspecialchars($image_src) ?>" 
                                                                          alt="<?= htmlspecialchars($item['product_name']) ?>" 
-                                                                         class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                         class="rounded me-3 product-image" 
+                                                                         style="width: 50px; height: 50px; object-fit: cover;"
+                                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                                                         onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                                                                    <div class="product-image-placeholder rounded me-3" style="display: none; width: 50px; height: 50px;">
+                                                                        <i class="fas fa-image"></i>
+                                                                    </div>
                                                                     <span><?= htmlspecialchars($item['product_name']) ?></span>
                                                                 </div>
                                                             </td>
@@ -497,6 +605,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
                                     <?php if ($order_detail['status'] !== 'completed' && $order_detail['status'] !== 'cancelled'): ?>
                                         <form method="POST" class="mt-3">
                                             <input type="hidden" name="order_id" value="<?= $order_detail['order_id'] ?>">
+                                            <input type="hidden" name="old_status" value="<?= $order_detail['status'] ?>">
                                             <div class="mb-3">
                                                 <label class="form-label">Cập nhật trạng thái:</label>
                                                 <select name="status" class="form-select">
@@ -560,7 +669,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
     <script src="assets/js/notifications.js"></script>
     <script src="assets/js/admin.js"></script>
     <script>
-        function updateOrderStatus(orderId, status) {
+        function updateOrderStatus(orderId, status, oldStatus = '') {
             const statusText = status === 'completed' ? 'hoàn thành' : 'hủy';
             if (confirm(`Bạn có chắc chắn muốn ${statusText} đơn hàng này?`)) {
                 const form = document.createElement('form');
@@ -568,6 +677,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : [
                 form.innerHTML = `
                     <input type="hidden" name="order_id" value="${orderId}">
                     <input type="hidden" name="status" value="${status}">
+                    <input type="hidden" name="old_status" value="${oldStatus}">
                     <input type="hidden" name="update_status" value="1">
                 `;
                 document.body.appendChild(form);

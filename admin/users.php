@@ -60,7 +60,7 @@ if ($role_filter != 'all') {
 }
 
 if (!empty($search)) {
-    $where_conditions[] = "(u.username LIKE ? OR u.email LIKE ? OR ui.full_name LIKE ? OR u.phone_number LIKE ?)";
+    $where_conditions[] = "(u.username LIKE ? OR u.email LIKE ? OR ui.full_name LIKE ? OR ui.phone LIKE ?)";
     $search_param = "%$search%";
     $params = array_merge($params, [$search_param, $search_param, $search_param, $search_param]);
 }
@@ -98,7 +98,7 @@ try {
 $total_pages = ceil($total_records / $limit);
 
 // Get users data - Sử dụng CASE để xử lý role_name
-$sql = "SELECT u.*, ui.full_name, ui.date_of_birth,
+$sql = "SELECT u.*, ui.full_name, ui.phone, ui.date_of_birth,
                r.role_name
         FROM users u
         LEFT JOIN users_info ui ON u.user_id = ui.user_id
@@ -289,10 +289,10 @@ try {
                                                     <i class="fas fa-envelope me-2 text-muted"></i>
                                                     <?= htmlspecialchars($user['email']) ?>
                                                 </div>
-                                                <?php if ($user['phone_number']): ?>
+                                                <?php if ($user['phone']): ?>
                                                     <div class="mt-1">
                                                         <i class="fas fa-phone me-2 text-muted"></i>
-                                                        <?= htmlspecialchars($user['phone_number']) ?>
+                                                        <?= htmlspecialchars($user['phone']) ?>
                                                     </div>
                                                 <?php endif; ?>
                                             </td>

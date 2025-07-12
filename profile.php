@@ -8,7 +8,7 @@ $user_id = $_SESSION['user_id'];
 $err = $msg = '';
 
 // Lấy thông tin user đầy đủ
-$stmt = $conn->prepare("SELECT u.username, u.email, u.phone_number, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+$stmt = $conn->prepare("SELECT u.username, u.email, ui.phone, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -28,14 +28,14 @@ if (isset($_POST['update_info'])) {
     $date_of_birth = $_POST['date_of_birth'];
     
     if ($full_name && $email) {
-        // Cập nhật bảng users_info
-        $stmt1 = $conn->prepare("UPDATE users_info SET full_name=?, gender=?, date_of_birth=? WHERE user_id=?");
-        $stmt1->bind_param('sssi', $full_name, $gender, $date_of_birth, $user_id);
+        // Cập nhật bảng users_info (bao gồm phone)
+        $stmt1 = $conn->prepare("UPDATE users_info SET full_name=?, gender=?, date_of_birth=?, phone=? WHERE user_id=?");
+        $stmt1->bind_param('ssssi', $full_name, $gender, $date_of_birth, $phone_number, $user_id);
         $stmt1->execute();
         
-        // Cập nhật bảng users (bao gồm phone_number)
-        $stmt2 = $conn->prepare("UPDATE users SET email=?, phone_number=? WHERE user_id=?");
-        $stmt2->bind_param('ssi', $email, $phone_number, $user_id);
+        // Cập nhật bảng users (chỉ email)
+        $stmt2 = $conn->prepare("UPDATE users SET email=? WHERE user_id=?");
+        $stmt2->bind_param('si', $email, $user_id);
         $stmt2->execute();
         
         $msg = 'Cập nhật thông tin cá nhân thành công!';
@@ -135,7 +135,7 @@ if (isset($_POST['upload_avatar']) && isset($_FILES['avatar']['name']) && $_FILE
 }
 
 // Reload lại thông tin mới nhất
-$stmt = $conn->prepare("SELECT u.username, u.email, u.phone_number, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
+$stmt = $conn->prepare("SELECT u.username, u.email, ui.phone, ui.full_name, ui.gender, ui.date_of_birth, ui.profile_picture FROM users u JOIN users_info ui ON u.user_id=ui.user_id WHERE u.user_id=?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -809,7 +809,7 @@ $user_role = $role_names[$_SESSION['role_id']] ?? 'Người dùng';
                                 </label>
                                 <input type="tel" name="phone_number" class="form-input" 
                                        placeholder="Số điện thoại của bạn"
-                                       value="<?= htmlspecialchars($user['phone_number'] ?? '') ?>">
+                                       value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
                             </div>
                             
                             <div class="form-row">

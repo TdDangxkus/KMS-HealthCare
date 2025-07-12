@@ -64,12 +64,12 @@ foreach ($cart_items as $idx => $item) {
 }
 
 // Thêm thông tin giảm giá cho từng item
+require_once __DIR__ . '/includes/functions/format_helpers.php';
 foreach ($cart_items as $index => $item) {
-    // Tính giá giảm dựa trên rating
-    $cart_items[$index]['discount_percent'] = $item['avg_rating'] >= 4.5 ? 10 : 0;
-    $cart_items[$index]['discount_price'] = $cart_items[$index]['discount_percent'] > 0 
-        ? $item['price'] * (1 - $cart_items[$index]['discount_percent']/100) 
-        : null;
+    // Sử dụng hàm calculateDiscountPrice để check config
+    $discount_info = calculateDiscountPrice($item['price'], $item['avg_rating']);
+    $cart_items[$index]['discount_percent'] = $discount_info['discount_percent'];
+    $cart_items[$index]['discount_price'] = $discount_info['discount_price'];
     
     // Xử lý ảnh mặc định
     if (empty($item['image_url'])) {

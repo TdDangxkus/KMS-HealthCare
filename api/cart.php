@@ -1,8 +1,10 @@
 <?php
-header('Content-Type: application/json');
 require_once '../includes/db.php';
+require_once '../includes/functions/format_helpers.php';
 require_once '../includes/functions/logger.php';
 session_start();
+
+header('Content-Type: application/json');
 
 // Kiểm tra user đã đăng nhập
 if (!isset($_SESSION['user_id'])) {
@@ -112,11 +114,10 @@ function addToCart() {
     $stmt->execute();
     $existing_item = $stmt->get_result()->fetch_assoc();
     
-    // Tính giá sau giảm (giảm 10% nếu rating >= 4.5)
-    $discount_percent = $product['avg_rating'] >= 4.5 ? 10 : 0;
-    $unit_price = $discount_percent > 0 
-        ? $product['price'] * (1 - $discount_percent/100) 
-        : $product['price'];
+    // Sử dụng hàm calculateDiscountPrice để check config
+    $discount_info = calculateDiscountPrice($product['price'], $product['avg_rating']);
+    $discount_percent = $discount_info['discount_percent'];
+    $unit_price = $discount_info['discount_price'] ?: $product['price'];
     
     if ($existing_item) {
         // Cập nhật số lượng
@@ -252,11 +253,10 @@ function getCart() {
     // Tính tổng và thêm thông tin giảm giá
     $total = 0;
     foreach ($items as &$item) {
-        // Tính giá giảm
-        $item['discount_percent'] = $item['avg_rating'] >= 4.5 ? 10 : 0;
-        $item['discount_price'] = $item['discount_percent'] > 0 
-            ? $item['price'] * (1 - $item['discount_percent']/100) 
-            : null;
+        // Sử dụng hàm calculateDiscountPrice để check config
+        $discount_info = calculateDiscountPrice($item['price'], $item['avg_rating']);
+        $item['discount_percent'] = $discount_info['discount_percent'];
+        $item['discount_price'] = $discount_info['discount_price'];
         
         $item['subtotal'] = $item['quantity'] * $item['unit_price'];
         $total += $item['subtotal'];

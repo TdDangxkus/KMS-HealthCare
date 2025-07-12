@@ -1,0 +1,8 @@
+[2025-07-12 06:11:45] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-12 06:11:45] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 10, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1
+[2025-07-12 06:16:07] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-12 06:16:07] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 10, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1
+[2025-07-12 06:16:08] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-12 06:16:08] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 10, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1
+[2025-07-12 06:41:08] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Found 1 cart items for user 1
+[2025-07-12 06:41:08] [INFO] [User: 1] [IP: ::1] CART_DEBUG: Item 0 - ItemID: 10, ProductID: 6, Name: 'Dalziel', Price: 23, UnitPrice: 23, Qty: 1

@@ -31,10 +31,11 @@ if (!$product) {
 }
 
 // Tính giá khuyến mãi
-$product['discount_percent'] = $product['avg_rating'] >= 4.5 ? 10 : 0;
-$product['discount_price'] = $product['discount_percent'] > 0 
-    ? $product['price'] * (1 - $product['discount_percent']/100) 
-    : null;
+// Sử dụng hàm calculateDiscountPrice để check config
+require_once __DIR__ . '/../includes/functions/format_helpers.php';
+$discount_info = calculateDiscountPrice($product['price'], $product['avg_rating']);
+$product['discount_percent'] = $discount_info['discount_percent'];
+$product['discount_price'] = $discount_info['discount_price'];
 
 // Format lại rating
 $product['avg_rating'] = number_format($product['avg_rating'], 1);

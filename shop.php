@@ -8,6 +8,8 @@ $categories = getCategories();
 // Lấy sản phẩm nổi bật
 $featuredProducts = getFeaturedProducts(4);
 
+
+
 // Lấy từ khóa tìm kiếm phổ biến
 $popularSearches = [
     'Vitamin' => 'search.php?q=vitamin',
